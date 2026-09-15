@@ -33,4 +33,6 @@
     <string name="about_desc">Material Design 3とMIUIスタイルの切り替え、および多言語サポートを備えたデュアルテーマアーキテクチャのデモアプリです。</string>
     <string name="about_arch_title">アーキテクチャ</string>
     <string name="about_arch_desc">本アプリはUiMode列挙体とCompositionLocalを使用して、実行時にMaterial 3（カードベース）とMIUIスタイルのUIを切り替えます。KernelSUのデュアルテーマアーキテクチャにインスパイアされています。</string>
+    <string name="home_working">稼働中</string>
+    <string name="home_working_version">バージョン %1$s</string>
 </resources>

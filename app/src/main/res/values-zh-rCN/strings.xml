@@ -33,4 +33,6 @@
     <string name="about_desc">一个展示双主题架构的演示应用，支持 Material Design 3 与 MIUI 风格切换，以及多语言切换。</string>
     <string name="about_arch_title">架构说明</string>
     <string name="about_arch_desc">本应用使用 UiMode 枚举和 CompositionLocal 在运行时切换 Material 3（卡片式）和 MIUI 风格界面。灵感来自 KernelSU 的双主题架构。</string>
+    <string name="home_working">工作中</string>
+    <string name="home_working_version">版本 %1$s</string>
 </resources>

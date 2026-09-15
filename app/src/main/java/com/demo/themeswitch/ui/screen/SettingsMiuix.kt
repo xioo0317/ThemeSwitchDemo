@@ -30,6 +30,9 @@ import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.LocaleHelper
 import com.demo.themeswitch.data.SettingsRepository
 import com.demo.themeswitch.ui.UiMode
+import com.demo.themeswitch.ui.component.MiuixLanguageDialog
+import com.demo.themeswitch.ui.component.MiuixThemeModeDialog
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -114,9 +117,12 @@ fun SettingsMiuixScreen() {
                         onSelectedIndexChange = { index ->
                             val mode = if (index == 0) UiMode.Miuix.value else UiMode.Material.value
                             scope.launch {
+                                // 闪退修复：OverlayDropdownPreference 选中项时会先播放弹层
+                                // 收起动画，此刻立即 recreate 会与 Miuix 弹层窗口销毁竞争。
+                                // 先等弹层完全收起，再写入 UI 模式并重建 Activity，
+                                // Miuix→M3 切换不再闪退。
+                                delay(500)
                                 repository.setUiMode(mode)
-                                // recreate 而非树内切换：避免 NavHost 销毁重建与
-                                // Miuix 弹层销毁竞争导致的崩溃
                                 (context as? Activity)?.recreate()
                             }
                         },
@@ -193,28 +199,32 @@ fun SettingsMiuixScreen() {
         }
     }
 
-    if (showLanguageDialog) {
-        LanguageSelectionDialog(
-            currentLanguage = preferences.language,
-            onDismiss = { showLanguageDialog = false },
-            onSelect = { code ->
-                // Persist synchronously first so attachBaseContext picks it up on recreate.
-                LocaleHelper.persistLanguage(context, code)
-                scope.launch { repository.setLanguage(code) }
+    // 语言弹窗：Miuix 版（原先误用了 Material 侧的 M3 AlertDialog）
+    MiuixLanguageDialog(
+        show = showLanguageDialog,
+        currentLanguage = preferences.language,
+        onDismiss = { showLanguageDialog = false },
+        onSelect = { code ->
+            // Persist synchronously first so attachBaseContext picks it up on recreate.
+            LocaleHelper.persistLanguage(context, code)
+            scope.launch {
+                repository.setLanguage(code)
                 showLanguageDialog = false
+                // 等弹窗收起动画结束后再重建，避免窗口销毁竞争
+                delay(400)
                 (context as? Activity)?.recreate()
-            },
-        )
-    }
+            }
+        },
+    )
 
-    if (showThemeDialog) {
-        ThemeModeDialog(
-            currentMode = preferences.themeMode,
-            onDismiss = { showThemeDialog = false },
-            onSelect = { mode ->
-                scope.launch { repository.setThemeMode(mode) }
-                showThemeDialog = false
-            },
-        )
-    }
+    // 主题弹窗：Miuix 版
+    MiuixThemeModeDialog(
+        show = showThemeDialog,
+        currentMode = preferences.themeMode,
+        onDismiss = { showThemeDialog = false },
+        onSelect = { mode ->
+            showThemeDialog = false
+            scope.launch { repository.setThemeMode(mode) }
+        },
+    )
 }

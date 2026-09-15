@@ -33,4 +33,6 @@
     <string name="about_desc">Демо-приложение с архитектурой двойной темы, поддерживающее переключение между Material Design 3 и стилем MIUI, а также многоязычную поддержку.</string>
     <string name="about_arch_title">Архитектура</string>
     <string name="about_arch_desc">Приложение использует перечисление UiMode с CompositionLocal для переключения между Material 3 (на основе карточек) и интерфейсом MIUI в реальном времени. Вдохновлено архитектурой двойной темы KernelSU.</string>
+    <string name="home_working">Работает</string>
+    <string name="home_working_version">Версия %1$s</string>
 </resources>

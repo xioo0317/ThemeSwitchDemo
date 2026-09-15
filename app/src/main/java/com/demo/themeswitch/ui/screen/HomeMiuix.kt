@@ -1,11 +1,15 @@
 package com.demo.themeswitch.ui.screen
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -16,9 +20,9 @@ import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.DevicesOther
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.rounded.CheckCircleOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -38,6 +43,7 @@ import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.SettingsRepository
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -47,6 +53,9 @@ import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+
+private const val KERNEL_VERSION = "5.15.104-gki"
+private const val WORKING_MODE = "GKI"
 
 @Composable
 fun HomeMiuixScreen() {
@@ -77,36 +86,72 @@ fun HomeMiuixScreen() {
             ),
         ) {
             item {
+                // KernelSU 风格工作状态卡：绿色大卡 + 右下大对勾 + 左下模式 + 左上标题/版本
+                val isDark = when (preferences.themeMode) {
+                    1 -> false
+                    2 -> true
+                    else -> isSystemInDarkTheme()
+                }
+                val cardColor = if (isDark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
+                val onCardColor = if (isDark) Color(0xFFB8EFCB) else Color(0xFF0F3D1E)
+                val checkColor = Color(0xFF36D167)
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                        .padding(horizontal = 12.dp, vertical = 12.dp)
+                        .height(150.dp),
+                    colors = CardDefaults.defaultColors(color = cardColor, contentColor = onCardColor),
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.PhoneAndroid,
-                            contentDescription = null,
-                            tint = colorScheme.primary,
-                            modifier = Modifier.size(44.dp),
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column {
-                            Text(
-                                text = stringResource(R.string.home_status_title),
-                                color = colorScheme.onSurface,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        // 右下大对勾（半溢出卡片右缘，与 KernelSU 版一致）
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .offset(x = 27.dp, y = 31.dp),
+                            contentAlignment = Alignment.BottomEnd,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.CheckCircleOutline,
+                                contentDescription = null,
+                                tint = checkColor,
+                                modifier = Modifier.size(110.dp),
                             )
+                        }
+                        // 左下：工作模式
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(start = 16.dp, bottom = 10.dp),
+                            contentAlignment = Alignment.BottomStart,
+                        ) {
                             Text(
-                                text = stringResource(R.string.home_status_subtitle),
-                                color = colorScheme.onSurfaceVariantSummary,
-                                fontSize = 14.sp,
+                                text = WORKING_MODE,
+                                color = onCardColor,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
                             )
+                        }
+                        // 左上：标题 + 版本
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(start = 16.dp, top = 14.dp),
+                            contentAlignment = Alignment.TopStart,
+                        ) {
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.home_working),
+                                    color = onCardColor,
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                                Spacer(modifier = Modifier.height(1.dp))
+                                Text(
+                                    text = stringResource(R.string.home_working_version, KERNEL_VERSION),
+                                    color = onCardColor.copy(alpha = 0.8f),
+                                    fontSize = 15.sp,
+                                )
+                            }
                         }
                     }
                 }
@@ -155,7 +200,7 @@ fun HomeMiuixScreen() {
                 ) {
                     MiuixInfoItem(Icons.Filled.Security, R.string.card_security, stringResource(R.string.status_working))
                     MiuixInfoItem(Icons.Filled.DevicesOther, R.string.card_device, "Pixel 7 Pro")
-                    MiuixInfoItem(Icons.Filled.Memory, R.string.card_kernel, "5.15.104-gki")
+                    MiuixInfoItem(Icons.Filled.Memory, R.string.card_kernel, KERNEL_VERSION)
                     MiuixInfoItem(Icons.Filled.Android, R.string.card_android, "Android 14")
                     MiuixInfoItem(Icons.Filled.Storage, R.string.card_storage, "256 GB")
                     MiuixInfoItem(Icons.Filled.BatteryChargingFull, R.string.card_battery, "85%")

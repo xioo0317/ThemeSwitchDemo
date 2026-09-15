@@ -256,8 +256,10 @@ private fun SettingsToggleItem(
     }
 }
 
+// 以下三个 M3 弹窗仅限 Material 模式使用（private），
+// 防止再被 MIUI 模式借用；Miuix 版弹窗见 ui/component/MiuixDialogs.kt
 @Composable
-fun LanguageSelectionDialog(
+private fun LanguageSelectionDialog(
     currentLanguage: String,
     onDismiss: () -> Unit,
     onSelect: (String) -> Unit,
@@ -301,7 +303,7 @@ fun LanguageSelectionDialog(
 }
 
 @Composable
-fun ThemeModeDialog(
+private fun ThemeModeDialog(
     currentMode: Int,
     onDismiss: () -> Unit,
     onSelect: (Int) -> Unit,
@@ -344,7 +346,7 @@ fun ThemeModeDialog(
 }
 
 @Composable
-fun UiModeDialog(
+private fun UiModeDialog(
     currentMode: String,
     onDismiss: () -> Unit,
     onSelect: (String) -> Unit,

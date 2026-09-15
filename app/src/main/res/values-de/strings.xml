@@ -33,4 +33,6 @@
     <string name="about_desc">Eine Demo-App mit Dual-Theme-Architektur, die Material Design 3 und MIUI-Stil umschaltet, sowie mehrsprachige Unterstützung bietet.</string>
     <string name="about_arch_title">Architektur</string>
     <string name="about_arch_desc">Diese App verwendet das UiMode-Enum mit CompositionLocal, um zur Laufzeit zwischen Material 3 (kartenbasiert) und MIUI-UI zu wechseln. Inspiriert von der Dual-Theme-Architektur von KernelSU.</string>
+    <string name="home_working">Aktiv</string>
+    <string name="home_working_version">Version %1$s</string>
 </resources>
