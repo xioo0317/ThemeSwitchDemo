@@ -32,7 +32,7 @@ private val M3DarkColorScheme = darkColorScheme(
     primaryContainer = Color(0xFF00497D),
     onPrimaryContainer = Color(0xFFD1E4FF),
     secondary = Color(0xFFCCC2DC),
-    onSecondary = Color(0xFF332D41),
+    onSecondary = Color.White,
     secondaryContainer = Color(0xFF4A4458),
     tertiary = Color(0xFFEFB8C8),
     surface = Color(0xFF1C1B1F),
@@ -44,7 +44,6 @@ private val M3DarkColorScheme = darkColorScheme(
 @Composable
 fun MaterialAppTheme(
     isDark: Boolean = isSystemInDarkTheme(),
-    keyColor: Int,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current

@@ -131,7 +131,7 @@ fun HomeMaterialScreen() {
                     text = stringResource(R.string.section_info),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 8.dp),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
 

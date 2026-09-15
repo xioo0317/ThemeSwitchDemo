@@ -2,10 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- miuix-blur minSdk 33，本应用 minSdk 26：允许合并，运行时由
-         isRuntimeShaderSupported()（API 33+）守卫，低版本回退纯色底栏 -->
-    <uses-sdk tools:overrideLibrary="top.yukonga.miuix.kmp.blur" />
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"

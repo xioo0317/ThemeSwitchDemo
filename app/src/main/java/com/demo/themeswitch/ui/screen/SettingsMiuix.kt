@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,12 +14,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Colorize
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -36,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.demo.themeswitch.BuildConfig
 import com.demo.themeswitch.R
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.LocaleHelper
@@ -49,13 +53,12 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
-fun SettingsMiuixScreen() {
+fun SettingsMiuixScreen(onOpenAppearance: () -> Unit) {
     val context = LocalContext.current
     val repository = remember { SettingsRepository(context) }
     val preferences by repository.preferencesFlow.collectAsState(initial = AppPreferences())
@@ -65,7 +68,6 @@ fun SettingsMiuixScreen() {
     val languages = LocaleHelper.supportedLanguages
 
     var showUiModeDialog by rememberSaveable { mutableStateOf(false) }
-    var showThemeDialog by rememberSaveable { mutableStateOf(false) }
     var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
@@ -92,7 +94,7 @@ fun SettingsMiuixScreen() {
             item {
                 Text(
                     text = stringResource(R.string.settings_section_appearance),
-                    color = colorScheme.primary,
+                    color = colorScheme.onBackground,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 8.dp),
@@ -132,29 +134,14 @@ fun SettingsMiuixScreen() {
                         },
                         startAction = {
                             Icon(
-                                imageVector = Icons.Filled.Palette,
-                                contentDescription = null,
-                                tint = colorScheme.onBackground,
-                                modifier = Modifier.padding(end = 6.dp),
-                            )
-                        },
-                        onClick = { showThemeDialog = true },
-                    )
-                    SwitchPreference(
-                        title = stringResource(R.string.settings_monet),
-                        summary = stringResource(R.string.settings_monet_summary),
-                        startAction = {
-                            Icon(
                                 imageVector = Icons.Filled.Colorize,
                                 contentDescription = null,
                                 tint = colorScheme.onBackground,
                                 modifier = Modifier.padding(end = 6.dp),
                             )
                         },
-                        checked = preferences.isMiuixMonet,
-                        onCheckedChange = { enabled ->
-                            scope.launch { repository.setMiuixMonet(enabled) }
-                        },
+                        chevron = true,
+                        onClick = onOpenAppearance,
                     )
                 }
             }
@@ -162,7 +149,7 @@ fun SettingsMiuixScreen() {
             item {
                 Text(
                     text = stringResource(R.string.settings_section_general),
-                    color = colorScheme.primary,
+                    color = colorScheme.onBackground,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 8.dp),
@@ -193,12 +180,83 @@ fun SettingsMiuixScreen() {
                     )
                 }
             }
+
+            item {
+                Text(
+                    text = stringResource(R.string.nav_about),
+                    color = colorScheme.onBackground,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 8.dp),
+                )
+            }
+
+            // 关于（原底栏关于页并入设置卡片）
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Info,
+                            contentDescription = null,
+                            tint = colorScheme.primary,
+                            modifier = Modifier.size(24.dp),
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text(
+                                text = stringResource(R.string.app_name),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                            )
+                            Text(
+                                text = "v" + BuildConfig.VERSION_NAME,
+                                fontSize = 14.sp,
+                                color = colorScheme.onSurfaceVariantSummary,
+                            )
+                        }
+                    }
+                    AboutDivider()
+                    Text(
+                        text = stringResource(R.string.about_desc),
+                        fontSize = 14.sp,
+                        color = colorScheme.onSurfaceVariantSummary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 12.dp),
+                    )
+                    AboutDivider()
+                    Text(
+                        text = stringResource(R.string.about_arch_title),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 8.dp),
+                    )
+                    Text(
+                        text = stringResource(R.string.about_arch_desc),
+                        fontSize = 13.sp,
+                        color = colorScheme.onSurfaceVariantSummary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 8.dp),
+                    )
+                }
+            }
         }
     }
 
     // MIUI 弹窗（OverlayDialog，组合层渲染，无独立窗口）。
-    // UI 模式与语言均为树内切换：setUiMode 直接换 CompositionLocal，
-    // setLanguage 换 LocalContext，都停在当前页面，不再重启 Activity
+    // UI 模式与语言均为树内切换：停留在当前页面
     MiuixOptionDialog(
         show = showUiModeDialog,
         title = stringResource(R.string.settings_ui_mode),
@@ -213,20 +271,6 @@ fun SettingsMiuixScreen() {
             }
         },
         onDismiss = { showUiModeDialog = false },
-    )
-    MiuixOptionDialog(
-        show = showThemeDialog,
-        title = stringResource(R.string.settings_theme),
-        options = listOf(
-            stringResource(R.string.theme_system),
-            stringResource(R.string.theme_light),
-            stringResource(R.string.theme_dark),
-        ),
-        selectedIndex = preferences.themeMode.coerceIn(0, 2),
-        onSelect = { mode ->
-            scope.launch { repository.setThemeMode(mode) }
-        },
-        onDismiss = { showThemeDialog = false },
     )
     MiuixOptionDialog(
         show = showLanguageDialog,
@@ -246,9 +290,19 @@ fun SettingsMiuixScreen() {
     )
 }
 
+@Composable
+private fun AboutDivider() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp)
+            .height(0.5.dp)
+            .background(MiuixTheme.colorScheme.onSurfaceVariantSummary.copy(alpha = 0.25f)),
+    )
+}
+
 /**
- * 选择行：点击弹 MIUI 弹窗（OverlayDialog）。行本身不再内联展开，
- * 也不再有重启逻辑。
+ * 选择行：点击弹 MIUI 弹窗（OverlayDialog）或跳转子页面（chevron=true 时右箭头指示）。
  */
 @Composable
 private fun MiuixSelectRow(
@@ -257,6 +311,7 @@ private fun MiuixSelectRow(
     onClick: () -> Unit,
     startAction: (@Composable () -> Unit)? = null,
     showDivider: Boolean = false,
+    chevron: Boolean = false,
 ) {
     val colorScheme = MiuixTheme.colorScheme
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -280,7 +335,11 @@ private fun MiuixSelectRow(
                 color = colorScheme.onSurfaceVariantSummary,
             )
             Icon(
-                imageVector = Icons.Filled.ArrowDropDown,
+                imageVector = if (chevron) {
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight
+                } else {
+                    Icons.Filled.ArrowDropDown
+                },
                 contentDescription = null,
                 tint = colorScheme.onSurfaceVariantSummary,
                 modifier = Modifier.size(24.dp),

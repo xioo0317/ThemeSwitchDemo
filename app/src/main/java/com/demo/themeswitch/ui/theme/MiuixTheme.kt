@@ -1,17 +1,14 @@
 package com.demo.themeswitch.ui.theme
 
 import android.app.Activity
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowInsetsControllerCompat
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.ThemeColorSpec
 import top.yukonga.miuix.kmp.theme.ThemeController
+import top.yukonga.miuix.kmp.theme.ThemeColorSpec
 import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
 
 /**
@@ -21,24 +18,13 @@ import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
 @Composable
 fun MiuixAppTheme(
     isDark: Boolean,
-    keyColor: Int,
-    isMonet: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
 
-    val resolvedKeyColor: Color? = when {
-        keyColor != 0 -> Color(keyColor)
-        isMonet ->
-            if (isDark) dynamicDarkColorScheme(context).primary
-            else dynamicLightColorScheme(context).primary
-
-        else -> null
-    }
-
     val controller = ThemeController(
         if (isDark) ColorSchemeMode.Dark else ColorSchemeMode.Light,
-        keyColor = resolvedKeyColor,
+        keyColor = null,
         isDark = isDark,
         paletteStyle = ThemePaletteStyle.TonalSpot,
         colorSpec = ThemeColorSpec.Spec2021,

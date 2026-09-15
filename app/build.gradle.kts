@@ -18,8 +18,8 @@ android {
         applicationId = "com.demo.themeswitch"
         minSdk = 26
         targetSdk = 37
-        versionCode = 3
-        versionName = "1.1.1"
+        versionCode = 4
+        versionName = "1.2.0"
     }
 
     buildTypes {
@@ -74,8 +74,6 @@ dependencies {
     // Miuix: MIUI style Compose Multiplatform UI library
     implementation("top.yukonga.miuix.kmp:miuix-ui-android:0.9.3")
     implementation("top.yukonga.miuix.kmp:miuix-preference-android:0.9.3")
-    // 液态玻璃模糊（textureBlur / layerBackdrop），minSdk 33，低版本由代码守卫回退
-    implementation("top.yukonga.miuix.kmp:miuix-blur-android:0.9.3")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

@@ -36,17 +36,11 @@ fun AppTheme(
 
     CompositionLocalProvider(
         LocalColorMode provides colorMode.value,
-        LocalKeyColor provides appPreferences.keyColor,
     ) {
         // 双主题嵌套：外层 miuix 主题让 miuix 组件（OverlayDialog 弹窗/MIUI 顶栏/底栏）
-        // 在任何 UI 模式下都可用；内层 M3 主题继续供 Material 页面使用。
-        // 动态取色只在 MIUI 模式下作用于 miuix 主题，M3 保持自己的 Material You 逻辑
-        MiuixAppTheme(
-            isDark = isDark,
-            keyColor = appPreferences.keyColor,
-            isMonet = appPreferences.isMiuixMonet && uiMode == UiMode.Miuix,
-        ) {
-            MaterialAppTheme(isDark = isDark, keyColor = appPreferences.keyColor) {
+        // 在任何 UI 模式下都可用；内层 M3 主题继续供 Material 页面使用
+        MiuixAppTheme(isDark = isDark) {
+            MaterialAppTheme(isDark = isDark) {
                 content()
             }
         }
@@ -64,4 +58,3 @@ fun isInDarkTheme(): Boolean {
 }
 
 val LocalColorMode = staticCompositionLocalOf { 0 }
-val LocalKeyColor = staticCompositionLocalOf { 0xFF1976D2.toInt() }

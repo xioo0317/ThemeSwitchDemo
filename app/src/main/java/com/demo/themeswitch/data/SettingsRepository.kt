@@ -3,7 +3,6 @@ package com.demo.themeswitch.data
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -19,8 +18,6 @@ class SettingsRepository(private val context: Context) {
         val THEME_MODE = intPreferencesKey("theme_mode")
         val UI_MODE = stringPreferencesKey("ui_mode")
         val LANGUAGE = stringPreferencesKey("language")
-        val KEY_COLOR = intPreferencesKey("key_color")
-        val MIUIX_MONET = booleanPreferencesKey("miuix_monet")
     }
 
     val preferencesFlow: Flow<AppPreferences> = context.dataStore.data.map { prefs ->
@@ -28,8 +25,6 @@ class SettingsRepository(private val context: Context) {
             themeMode = prefs[PreferencesKeys.THEME_MODE] ?: 0,
             uiMode = prefs[PreferencesKeys.UI_MODE] ?: SettingsRepository.UI_MODE_MATERIAL,
             language = prefs[PreferencesKeys.LANGUAGE] ?: "system",
-            keyColor = prefs[PreferencesKeys.KEY_COLOR] ?: 0,
-            isMiuixMonet = prefs[PreferencesKeys.MIUIX_MONET] ?: false,
         )
     }
 
@@ -39,14 +34,6 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setUiMode(mode: String) {
         context.dataStore.edit { it[PreferencesKeys.UI_MODE] = mode }
-    }
-
-    suspend fun setKeyColor(color: Int) {
-        context.dataStore.edit { it[PreferencesKeys.KEY_COLOR] = color }
-    }
-
-    suspend fun setMiuixMonet(enabled: Boolean) {
-        context.dataStore.edit { it[PreferencesKeys.MIUIX_MONET] = enabled }
     }
 
     suspend fun setLanguage(language: String) {
