@@ -8,8 +8,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.core.view.WindowInsetsControllerCompat
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.LocaleHelper
@@ -31,9 +31,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val repository = SettingsRepository(applicationContext)
         setContent {
-            val appPreferences by repository.preferencesFlow.collectAsState(initial = AppPreferences())
-            val uiMode = UiMode.fromValue(appPreferences.uiMode)
-            val colorMode = ColorMode.fromValue(appPreferences.themeMode)
+            // 等 DataStore 首个真实值到达再渲染，避免初始默认值与真实 UI 模式之间
+            // 在组合树内发生一次 when 分支切换（NavHost 销毁重建，易崩溃）
+            val appPreferences: AppPreferences? by produceState<AppPreferences?>(initialValue = null) {
+                repository.preferencesFlow.collect { value = it }
+            }
+            val prefs = appPreferences ?: return@setContent
+            val uiMode = UiMode.fromValue(prefs.uiMode)
+            val colorMode = ColorMode.fromValue(prefs.themeMode)
             val systemDark = isSystemInDarkTheme()
             val isDark = when {
                 colorMode.isDark -> true
@@ -47,7 +52,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             CompositionLocalProvider(LocalUiMode provides uiMode) {
-                AppTheme(appPreferences = appPreferences) {
+                AppTheme(appPreferences = prefs) {
                     MainScreen()
                 }
             }

@@ -177,6 +177,8 @@ fun SettingsMaterialScreen() {
                 scope.launch {
                     repository.setUiMode(mode)
                     showUiModeDialog = false
+                    // recreate 而非树内切换：避免 NavHost 销毁重建导致的崩溃
+                    (context as? Activity)?.recreate()
                 }
             },
         )

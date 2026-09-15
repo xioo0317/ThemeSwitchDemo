@@ -113,7 +113,12 @@ fun SettingsMiuixScreen() {
                         selectedIndex = if (preferences.uiMode == UiMode.Miuix.value) 0 else 1,
                         onSelectedIndexChange = { index ->
                             val mode = if (index == 0) UiMode.Miuix.value else UiMode.Material.value
-                            scope.launch { repository.setUiMode(mode) }
+                            scope.launch {
+                                repository.setUiMode(mode)
+                                // recreate 而非树内切换：避免 NavHost 销毁重建与
+                                // Miuix 弹层销毁竞争导致的崩溃
+                                (context as? Activity)?.recreate()
+                            }
                         },
                     )
                     ArrowPreference(
