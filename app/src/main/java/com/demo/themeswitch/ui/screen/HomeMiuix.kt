@@ -1,6 +1,5 @@
 package com.demo.themeswitch.ui.screen
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -41,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.demo.themeswitch.R
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.SettingsRepository
+import com.demo.themeswitch.ui.theme.isInDarkTheme
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -86,24 +86,16 @@ fun HomeMiuixScreen() {
             ),
         ) {
             item {
-                // KernelSU 风格工作状态卡：绿色大卡 + 右下大对勾 + 左下模式 + 左上标题/版本
-                val isDark = when (preferences.themeMode) {
-                    1 -> false
-                    2 -> true
-                    else -> isSystemInDarkTheme()
-                }
-                val cardColor = if (isDark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
-                val onCardColor = if (isDark) Color(0xFFB8EFCB) else Color(0xFF0F3D1E)
-                val checkColor = Color(0xFF36D167)
+                // KernelSU 风格工作状态卡：无固定高度，高度由 110dp 对勾内容决定；
+                // 右下大对勾（offset 后被卡片圆角裁切）、左下模式、左上标题/版本
+                val cardColor = if (isInDarkTheme()) Color(0xFF1A3825) else Color(0xFFDFFAE4)
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 12.dp)
-                        .height(150.dp),
-                    colors = CardDefaults.defaultColors(color = cardColor, contentColor = onCardColor),
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                    colors = CardDefaults.defaultColors(color = cardColor),
                 ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        // 右下大对勾（半溢出卡片右缘，与 KernelSU 版一致）
+                    Box {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -113,42 +105,37 @@ fun HomeMiuixScreen() {
                             Icon(
                                 imageVector = Icons.Rounded.CheckCircleOutline,
                                 contentDescription = null,
-                                tint = checkColor,
+                                tint = Color(0xFF36D167),
                                 modifier = Modifier.size(110.dp),
                             )
                         }
-                        // 左下：工作模式
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(start = 16.dp, bottom = 10.dp),
+                                .padding(16.dp, 10.dp),
                             contentAlignment = Alignment.BottomStart,
                         ) {
                             Text(
                                 text = WORKING_MODE,
-                                color = onCardColor,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium,
                             )
                         }
-                        // 左上：标题 + 版本
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(start = 16.dp, top = 14.dp),
+                                .padding(16.dp, 14.dp),
                             contentAlignment = Alignment.TopStart,
                         ) {
                             Column {
                                 Text(
                                     text = stringResource(R.string.home_working),
-                                    color = onCardColor,
                                     fontSize = 22.sp,
                                     fontWeight = FontWeight.SemiBold,
                                 )
                                 Spacer(modifier = Modifier.height(1.dp))
                                 Text(
                                     text = stringResource(R.string.home_working_version, KERNEL_VERSION),
-                                    color = onCardColor.copy(alpha = 0.8f),
                                     fontSize = 15.sp,
                                 )
                             }

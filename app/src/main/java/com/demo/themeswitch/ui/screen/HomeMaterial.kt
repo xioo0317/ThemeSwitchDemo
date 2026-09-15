@@ -1,5 +1,7 @@
 package com.demo.themeswitch.ui.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -88,7 +90,6 @@ fun HomeMaterialScreen() {
                         Icon(
                             imageVector = Icons.Rounded.CheckCircle,
                             contentDescription = null,
-                            modifier = Modifier.size(28.dp),
                         )
                     },
                     headlineContent = {
@@ -181,16 +182,21 @@ private fun InfoRow(row: InfoRowData) {
 
 @Composable
 private fun StatusTag(label: String) {
-    Surface(
-        color = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary,
-        shape = RoundedCornerShape(8.dp),
+    // KernelSU 式小徽章：4dp 圆角、紧凑 padding、labelSmall 文字
+    Box(
+        modifier = Modifier
+            .padding(end = 4.dp)
+            .background(
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(4.dp),
+            ),
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onPrimary,
         )
     }
 }

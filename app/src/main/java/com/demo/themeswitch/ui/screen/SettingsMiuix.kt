@@ -1,6 +1,9 @@
 package com.demo.themeswitch.ui.screen
 
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,10 +17,8 @@ import androidx.compose.material.icons.filled.Style
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -25,13 +26,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.demo.themeswitch.MainActivity
 import com.demo.themeswitch.R
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.LocaleHelper
 import com.demo.themeswitch.data.SettingsRepository
 import com.demo.themeswitch.ui.UiMode
-import com.demo.themeswitch.ui.component.MiuixLanguageDialog
-import com.demo.themeswitch.ui.component.MiuixThemeModeDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Card
@@ -40,12 +40,39 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+
+// 等下拉弹层收起动画完全结束后再重启，避免窗口销毁竞争导致闪退
+private const val RESTART_DELAY_MS = 600L
+
+private tailrec fun Context.findActivity(): Activity? {
+    var current: Context = this
+    while (current is ContextWrapper) {
+        if (current is Activity) return current
+        current = current.baseContext
+    }
+    return null
+}
+
+// 用 finish + startActivity 完全重建 Activity：
+// recreate() 在 Miuix UI 上会与弹层/窗口销毁竞争导致闪退，
+// 重启方式走两个独立事务，旧窗口随 finish 正常销毁，稳定得多
+private fun restartActivity(context: Context) {
+    val intent = Intent(context, MainActivity::class.java)
+    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    val activity = context.findActivity()
+    if (activity != null) {
+        activity.startActivity(intent)
+        activity.finish()
+    } else {
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    }
+}
 
 @Composable
 fun SettingsMiuixScreen() {
@@ -55,9 +82,7 @@ fun SettingsMiuixScreen() {
     val scope = rememberCoroutineScope()
     val scrollBehavior = MiuixScrollBehavior()
     val colorScheme = MiuixTheme.colorScheme
-
-    var showLanguageDialog by remember { mutableStateOf(false) }
-    var showThemeDialog by remember { mutableStateOf(false) }
+    val languages = LocaleHelper.supportedLanguages
 
     Scaffold(
         topBar = {
@@ -96,11 +121,6 @@ fun SettingsMiuixScreen() {
                 ) {
                     OverlayDropdownPreference(
                         title = stringResource(R.string.settings_ui_mode),
-                        summary = if (preferences.uiMode == UiMode.Miuix.value) {
-                            stringResource(R.string.mode_miuix)
-                        } else {
-                            stringResource(R.string.mode_material)
-                        },
                         startAction = {
                             Icon(
                                 imageVector = Icons.Filled.Style,
@@ -117,23 +137,16 @@ fun SettingsMiuixScreen() {
                         onSelectedIndexChange = { index ->
                             val mode = if (index == 0) UiMode.Miuix.value else UiMode.Material.value
                             scope.launch {
-                                // 闪退修复：OverlayDropdownPreference 选中项时会先播放弹层
-                                // 收起动画，此刻立即 recreate 会与 Miuix 弹层窗口销毁竞争。
-                                // 先等弹层完全收起，再写入 UI 模式并重建 Activity，
-                                // Miuix→M3 切换不再闪退。
-                                delay(500)
+                                // 先等下拉弹层收起动画完全结束，再写入并重启，
+                                // 避免 Miuix→Material 切换闪退
+                                delay(RESTART_DELAY_MS)
                                 repository.setUiMode(mode)
-                                (context as? Activity)?.recreate()
+                                restartActivity(context)
                             }
                         },
                     )
-                    ArrowPreference(
+                    OverlayDropdownPreference(
                         title = stringResource(R.string.settings_theme),
-                        summary = when (preferences.themeMode) {
-                            1 -> stringResource(R.string.theme_light)
-                            2 -> stringResource(R.string.theme_dark)
-                            else -> stringResource(R.string.theme_system)
-                        },
                         startAction = {
                             Icon(
                                 imageVector = Icons.Filled.Palette,
@@ -142,7 +155,16 @@ fun SettingsMiuixScreen() {
                                 modifier = Modifier.padding(end = 6.dp),
                             )
                         },
-                        onClick = { showThemeDialog = true },
+                        items = listOf(
+                            stringResource(R.string.theme_system),
+                            stringResource(R.string.theme_light),
+                            stringResource(R.string.theme_dark),
+                        ),
+                        selectedIndex = preferences.themeMode.coerceIn(0, 2),
+                        onSelectedIndexChange = { mode ->
+                            // 主题模式由 AppTheme 响应式更新，无需重建
+                            scope.launch { repository.setThemeMode(mode) }
+                        },
                     )
                     SwitchPreference(
                         title = stringResource(R.string.settings_monet),
@@ -179,11 +201,8 @@ fun SettingsMiuixScreen() {
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp),
                 ) {
-                    ArrowPreference(
+                    OverlayDropdownPreference(
                         title = stringResource(R.string.settings_language),
-                        summary = LocaleHelper.supportedLanguages
-                            .find { it.code == preferences.language }?.nativeName
-                            ?: stringResource(R.string.lang_system),
                         startAction = {
                             Icon(
                                 imageVector = Icons.Filled.Language,
@@ -192,39 +211,26 @@ fun SettingsMiuixScreen() {
                                 modifier = Modifier.padding(end = 6.dp),
                             )
                         },
-                        onClick = { showLanguageDialog = true },
+                        items = languages.map { it.nativeName },
+                        selectedIndex = languages
+                            .indexOfFirst { it.code == preferences.language }
+                            .coerceIn(0, languages.lastIndex),
+                        maxHeight = 420.dp,
+                        onSelectedIndexChange = { index ->
+                            val lang = languages.getOrNull(index)
+                            if (lang != null) {
+                                // 先同步写 SharedPreferences，保证重启后 attachBaseContext 能读到新语言
+                                LocaleHelper.persistLanguage(context, lang.code)
+                                scope.launch {
+                                    delay(RESTART_DELAY_MS)
+                                    repository.setLanguage(lang.code)
+                                    restartActivity(context)
+                                }
+                            }
+                        },
                     )
                 }
             }
         }
     }
-
-    // 语言弹窗：Miuix 版（原先误用了 Material 侧的 M3 AlertDialog）
-    MiuixLanguageDialog(
-        show = showLanguageDialog,
-        currentLanguage = preferences.language,
-        onDismiss = { showLanguageDialog = false },
-        onSelect = { code ->
-            // Persist synchronously first so attachBaseContext picks it up on recreate.
-            LocaleHelper.persistLanguage(context, code)
-            scope.launch {
-                repository.setLanguage(code)
-                showLanguageDialog = false
-                // 等弹窗收起动画结束后再重建，避免窗口销毁竞争
-                delay(400)
-                (context as? Activity)?.recreate()
-            }
-        },
-    )
-
-    // 主题弹窗：Miuix 版
-    MiuixThemeModeDialog(
-        show = showThemeDialog,
-        currentMode = preferences.themeMode,
-        onDismiss = { showThemeDialog = false },
-        onSelect = { mode ->
-            showThemeDialog = false
-            scope.launch { repository.setThemeMode(mode) }
-        },
-    )
 }
