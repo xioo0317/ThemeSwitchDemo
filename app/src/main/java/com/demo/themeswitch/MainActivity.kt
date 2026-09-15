@@ -10,6 +10,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowInsetsControllerCompat
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.LocaleHelper
@@ -45,13 +48,22 @@ class MainActivity : ComponentActivity() {
                 colorMode.isSystem -> systemDark
                 else -> false
             }
+            // 组合期本地化上下文：语言切换只换 context，UI 原地刷新，无需重启 Activity。
+            // attachBaseContext + persistLanguage 仍保留，负责下次冷启动
+            val localizedContext = remember(prefs.language) {
+                LocaleHelper.localizedContext(this@MainActivity, prefs.language)
+            }
             LaunchedEffect(isDark) {
                 WindowInsetsControllerCompat(window, window.decorView).apply {
                     isAppearanceLightStatusBars = !isDark
                     isAppearanceLightNavigationBars = !isDark
                 }
             }
-            CompositionLocalProvider(LocalUiMode provides uiMode) {
+            CompositionLocalProvider(
+                LocalUiMode provides uiMode,
+                LocalContext provides localizedContext,
+                LocalConfiguration provides localizedContext.resources.configuration,
+            ) {
                 AppTheme(appPreferences = prefs) {
                     MainScreen()
                 }

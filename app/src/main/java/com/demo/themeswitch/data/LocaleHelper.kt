@@ -59,4 +59,24 @@ object LocaleHelper {
             context
         }
     }
+
+    /**
+     * Build a localized context for composition-time string resolution.
+     * Called from MainActivity.setContent via remember(prefs.language), so switching
+     * language refreshes the UI in place without recreating the Activity.
+     * Unlike [wrapContext], it does NOT call Locale.setDefault to avoid touching
+     * the process default locale.
+     */
+    fun localizedContext(context: Context, language: String): Context {
+        if (language == "system") return context
+        return try {
+            val locale = Locale.forLanguageTag(language)
+            val config = Configuration(context.resources.configuration)
+            config.setLocale(locale)
+            config.setLocales(LocaleList(locale))
+            context.createConfigurationContext(config)
+        } catch (_: Exception) {
+            context
+        }
+    }
 }

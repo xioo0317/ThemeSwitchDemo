@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -67,6 +68,8 @@ fun HomeMiuixScreen() {
     val colorScheme = MiuixTheme.colorScheme
 
     Scaffold(
+        // 外层 MainScreen Scaffold 统一处理窗口 insets，页面只管顶栏
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = stringResource(R.string.nav_home),
@@ -82,7 +85,7 @@ fun HomeMiuixScreen() {
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
             contentPadding = PaddingValues(
                 top = innerPadding.calculateTopPadding(),
-                bottom = innerPadding.calculateBottomPadding() + 16.dp,
+                bottom = LocalScaffoldBottomPadding.current + 16.dp,
             ),
         ) {
             item {

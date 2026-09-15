@@ -2,8 +2,10 @@ package com.demo.themeswitch.ui.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,7 +23,6 @@ import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -29,17 +30,19 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.demo.themeswitch.R
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.TopAppBar
 
 private const val KERNEL_VERSION = "5.15.104-gki"
 private const val WORKING_MODE = "GKI"
@@ -50,9 +53,9 @@ private data class InfoRowData(
     val value: String,
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeMaterialScreen() {
+    val scrollBehavior = MiuixScrollBehavior()
     val infoRows = listOf(
         InfoRowData(Icons.Filled.Security, R.string.card_security, stringResource(R.string.status_working)),
         InfoRowData(Icons.Filled.DevicesOther, R.string.card_device, "Pixel 7 Pro"),
@@ -62,87 +65,97 @@ fun HomeMaterialScreen() {
         InfoRowData(Icons.Filled.BatteryChargingFull, R.string.card_battery, "85%"),
     )
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        item {
+    // M3 模式也用 MIUI 大标题顶栏（颜色跟 M3 主题协调）
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.nav_home)) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
+                title = stringResource(R.string.nav_home),
+                color = MaterialTheme.colorScheme.surface,
+                scrollBehavior = scrollBehavior,
             )
-        }
+        },
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            contentPadding = PaddingValues(
+                top = innerPadding.calculateTopPadding(),
+                bottom = LocalScaffoldBottomPadding.current + 16.dp,
+            ),
+        ) {
+            item {
+                // KernelSU 风格的工作状态卡：
+                // secondaryContainer Surface + ListItem，左对勾、右 GKI 徽章
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    shape = MaterialTheme.shapes.large,
+                ) {
+                    ListItem(
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.Rounded.CheckCircle,
+                                contentDescription = null,
+                            )
+                        },
+                        headlineContent = {
+                            Text(
+                                text = stringResource(R.string.home_working),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        },
+                        supportingContent = {
+                            Text(
+                                text = stringResource(R.string.home_working_version, KERNEL_VERSION),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                            )
+                        },
+                        trailingContent = {
+                            StatusTag(label = WORKING_MODE)
+                        },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    )
+                }
+            }
 
-        item {
-            // KernelSU 风格的工作状态卡：
-            // secondaryContainer Surface + ListItem，左对勾、右 GKI 徽章
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                shape = MaterialTheme.shapes.large,
-            ) {
-                ListItem(
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.CheckCircle,
-                            contentDescription = null,
-                        )
-                    },
-                    headlineContent = {
-                        Text(
-                            text = stringResource(R.string.home_working),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                    },
-                    supportingContent = {
-                        Text(
-                            text = stringResource(R.string.home_working_version, KERNEL_VERSION),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
-                        )
-                    },
-                    trailingContent = {
-                        StatusTag(label = WORKING_MODE)
-                    },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            item {
+                Text(
+                    text = stringResource(R.string.section_info),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 8.dp),
+                    color = MaterialTheme.colorScheme.primary,
                 )
             }
-        }
 
-        item {
-            Text(
-                text = stringResource(R.string.section_info),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 8.dp),
-                color = MaterialTheme.colorScheme.primary,
-            )
-        }
-
-        item {
-            // M3 保留 MIUI 设计风格：信息区改为单卡分组行列表（与 Miuix 版布局呼应），
-            // 不再使用 2 列网格
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                ),
-                shape = MaterialTheme.shapes.large,
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-            ) {
-                infoRows.forEachIndexed { index, row ->
-                    InfoRow(row = row)
-                    if (index != infoRows.lastIndex) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                        )
+            item {
+                // M3 保留 MIUI 设计风格：信息区改为单卡分组行列表（与 Miuix 版布局呼应），
+                // 不再使用 2 列网格
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    ),
+                    shape = MaterialTheme.shapes.large,
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                ) {
+                    infoRows.forEachIndexed { index, row ->
+                        InfoRow(row = row)
+                        if (index != infoRows.lastIndex) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                            )
+                        }
                     }
                 }
             }
