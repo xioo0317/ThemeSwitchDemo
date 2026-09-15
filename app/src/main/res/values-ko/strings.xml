@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">테마 전환</string>
+    <string name="nav_home">홈</string>
+    <string name="nav_settings">설정</string>
+    <string name="nav_about">정보</string>
+    <string name="card_security">보안</string>
+    <string name="card_device">기기</string>
+    <string name="card_kernel">커널</string>
+    <string name="card_android">안드로이드</string>
+    <string name="card_storage">저장소</string>
+    <string name="card_battery">배터리</string>
+    <string name="status_working">정상 작동</string>
+    <string name="home_status_title">기기 준비 완료</string>
+    <string name="home_status_subtitle">모든 것이 정상적으로 작동하고 있습니다</string>
+    <string name="section_info">기기 정보</string>
+    <string name="miui_header_desc">시스템 정보를 한눈에 확인</string>
+    <string name="settings_section_appearance">외관</string>
+    <string name="settings_section_general">일반</string>
+    <string name="settings_ui_mode">UI 모드</string>
+    <string name="settings_theme">테마</string>
+    <string name="settings_language">언어</string>
+    <string name="settings_monet">Material You</string>
+    <string name="settings_monet_summary">시스템 동적 색상 사용</string>
+    <string name="theme_system">시스템 기본값</string>
+    <string name="theme_light">라이트</string>
+    <string name="theme_dark">다크</string>
+    <string name="mode_material">Material Design 3</string>
+    <string name="mode_miuix">MIUI 스타일</string>
+    <string name="lang_system">시스템 기본값</string>
+    <string name="dialog_cancel">취소</string>
+    <string name="dialog_confirm">확인</string>
+    <string name="about_desc">Material Design 3와 MIUI 스타일 전환 및 다국어 지원을 갖춘 듀얼 테마 아키텍처 데모 앱입니다.</string>
+    <string name="about_arch_title">아키텍처</string>
+    <string name="about_arch_desc">이 앱은 UiMode 열거형과 CompositionLocal을 사용하여 런타임에 Material 3(카드 기반)와 MIUI 스타일 UI를 전환합니다. KernelSU의 듀얼 테마 아키텍처에서 영감을 받았습니다.</string>
+</resources>

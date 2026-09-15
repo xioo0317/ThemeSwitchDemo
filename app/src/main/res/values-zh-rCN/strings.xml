@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">主题切换</string>
+    <string name="nav_home">首页</string>
+    <string name="nav_settings">设置</string>
+    <string name="nav_about">关于</string>
+    <string name="card_security">安全性</string>
+    <string name="card_device">设备</string>
+    <string name="card_kernel">内核</string>
+    <string name="card_android">安卓</string>
+    <string name="card_storage">存储</string>
+    <string name="card_battery">电量</string>
+    <string name="status_working">正常运行</string>
+    <string name="home_status_title">设备就绪</string>
+    <string name="home_status_subtitle">一切运行正常</string>
+    <string name="section_info">设备信息</string>
+    <string name="miui_header_desc">系统信息一目了然</string>
+    <string name="settings_section_appearance">外观</string>
+    <string name="settings_section_general">常规</string>
+    <string name="settings_ui_mode">界面风格</string>
+    <string name="settings_theme">主题</string>
+    <string name="settings_language">语言</string>
+    <string name="settings_monet">Material You</string>
+    <string name="settings_monet_summary">使用系统动态取色</string>
+    <string name="theme_system">跟随系统</string>
+    <string name="theme_light">浅色</string>
+    <string name="theme_dark">深色</string>
+    <string name="mode_material">Material Design 3</string>
+    <string name="mode_miuix">MIUI 风格</string>
+    <string name="lang_system">系统默认</string>
+    <string name="dialog_cancel">取消</string>
+    <string name="dialog_confirm">确定</string>
+    <string name="about_desc">一个展示双主题架构的演示应用，支持 Material Design 3 与 MIUI 风格切换，以及多语言切换。</string>
+    <string name="about_arch_title">架构说明</string>
+    <string name="about_arch_desc">本应用使用 UiMode 枚举和 CompositionLocal 在运行时切换 Material 3（卡片式）和 MIUI 风格界面。灵感来自 KernelSU 的双主题架构。</string>
+</resources>

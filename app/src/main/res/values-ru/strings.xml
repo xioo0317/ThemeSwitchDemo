@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Смена Темы</string>
+    <string name="nav_home">Главная</string>
+    <string name="nav_settings">Настройки</string>
+    <string name="nav_about">О приложении</string>
+    <string name="card_security">Безопасность</string>
+    <string name="card_device">Устройство</string>
+    <string name="card_kernel">Ядро</string>
+    <string name="card_android">Андроид</string>
+    <string name="card_storage">Память</string>
+    <string name="card_battery">Батарея</string>
+    <string name="status_working">Работает</string>
+    <string name="home_status_title">Устройство готово</string>
+    <string name="home_status_subtitle">Всё работает нормально</string>
+    <string name="section_info">Информация об устройстве</string>
+    <string name="miui_header_desc">Системная информация в одном взгляде</string>
+    <string name="settings_section_appearance">Внешний вид</string>
+    <string name="settings_section_general">Общие</string>
+    <string name="settings_ui_mode">Режим интерфейса</string>
+    <string name="settings_theme">Тема</string>
+    <string name="settings_language">Язык</string>
+    <string name="settings_monet">Material You</string>
+    <string name="settings_monet_summary">Использовать динамические цвета системы</string>
+    <string name="theme_system">По умолчанию системы</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="mode_material">Material Design 3</string>
+    <string name="mode_miuix">Стиль MIUI</string>
+    <string name="lang_system">По умолчанию системы</string>
+    <string name="dialog_cancel">Отмена</string>
+    <string name="dialog_confirm">Подтвердить</string>
+    <string name="about_desc">Демо-приложение с архитектурой двойной темы, поддерживающее переключение между Material Design 3 и стилем MIUI, а также многоязычную поддержку.</string>
+    <string name="about_arch_title">Архитектура</string>
+    <string name="about_arch_desc">Приложение использует перечисление UiMode с CompositionLocal для переключения между Material 3 (на основе карточек) и интерфейсом MIUI в реальном времени. Вдохновлено архитектурой двойной темы KernelSU.</string>
+</resources>

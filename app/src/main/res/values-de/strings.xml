@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Thema wechseln</string>
+    <string name="nav_home">Startseite</string>
+    <string name="nav_settings">Einstellungen</string>
+    <string name="nav_about">Über</string>
+    <string name="card_security">Sicherheit</string>
+    <string name="card_device">Gerät</string>
+    <string name="card_kernel">Kernel</string>
+    <string name="card_android">Android</string>
+    <string name="card_storage">Speicher</string>
+    <string name="card_battery">Akku</string>
+    <string name="status_working">Funktionsfähig</string>
+    <string name="home_status_title">Gerät bereit</string>
+    <string name="home_status_subtitle">Alles funktioniert einwandfrei</string>
+    <string name="section_info">Geräteinformationen</string>
+    <string name="miui_header_desc">Systeminformationen auf einen Blick</string>
+    <string name="settings_section_appearance">Erscheinungsbild</string>
+    <string name="settings_section_general">Allgemein</string>
+    <string name="settings_ui_mode">UI-Modus</string>
+    <string name="settings_theme">Thema</string>
+    <string name="settings_language">Sprache</string>
+    <string name="settings_monet">Material You</string>
+    <string name="settings_monet_summary">Dynamische Systemfarben verwenden</string>
+    <string name="theme_system">Systemstandard</string>
+    <string name="theme_light">Hell</string>
+    <string name="theme_dark">Dunkel</string>
+    <string name="mode_material">Material Design 3</string>
+    <string name="mode_miuix">MIUI-Stil</string>
+    <string name="lang_system">Systemstandard</string>
+    <string name="dialog_cancel">Abbrechen</string>
+    <string name="dialog_confirm">Bestätigen</string>
+    <string name="about_desc">Eine Demo-App mit Dual-Theme-Architektur, die Material Design 3 und MIUI-Stil umschaltet, sowie mehrsprachige Unterstützung bietet.</string>
+    <string name="about_arch_title">Architektur</string>
+    <string name="about_arch_desc">Diese App verwendet das UiMode-Enum mit CompositionLocal, um zur Laufzeit zwischen Material 3 (kartenbasiert) und MIUI-UI zu wechseln. Inspiriert von der Dual-Theme-Architektur von KernelSU.</string>
+</resources>

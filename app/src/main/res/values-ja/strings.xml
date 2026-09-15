@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">テーマ切替</string>
+    <string name="nav_home">ホーム</string>
+    <string name="nav_settings">設定</string>
+    <string name="nav_about">について</string>
+    <string name="card_security">セキュリティ</string>
+    <string name="card_device">デバイス</string>
+    <string name="card_kernel">カーネル</string>
+    <string name="card_android">Android</string>
+    <string name="card_storage">ストレージ</string>
+    <string name="card_battery">バッテリー</string>
+    <string name="status_working">正常稼働</string>
+    <string name="home_status_title">デバイス準備完了</string>
+    <string name="home_status_subtitle">すべて正常に動作しています</string>
+    <string name="section_info">デバイス情報</string>
+    <string name="miui_header_desc">システム情報を一目で確認</string>
+    <string name="settings_section_appearance">外観</string>
+    <string name="settings_section_general">一般</string>
+    <string name="settings_ui_mode">UIモード</string>
+    <string name="settings_theme">テーマ</string>
+    <string name="settings_language">言語</string>
+    <string name="settings_monet">Material You</string>
+    <string name="settings_monet_summary">システムのダイナミックカラーを使用</string>
+    <string name="theme_system">システムデフォルト</string>
+    <string name="theme_light">ライト</string>
+    <string name="theme_dark">ダーク</string>
+    <string name="mode_material">Material Design 3</string>
+    <string name="mode_miuix">MIUIスタイル</string>
+    <string name="lang_system">システムデフォルト</string>
+    <string name="dialog_cancel">キャンセル</string>
+    <string name="dialog_confirm">確認</string>
+    <string name="about_desc">Material Design 3とMIUIスタイルの切り替え、および多言語サポートを備えたデュアルテーマアーキテクチャのデモアプリです。</string>
+    <string name="about_arch_title">アーキテクチャ</string>
+    <string name="about_arch_desc">本アプリはUiMode列挙体とCompositionLocalを使用して、実行時にMaterial 3（カードベース）とMIUIスタイルのUIを切り替えます。KernelSUのデュアルテーマアーキテクチャにインスパイアされています。</string>
+</resources>
