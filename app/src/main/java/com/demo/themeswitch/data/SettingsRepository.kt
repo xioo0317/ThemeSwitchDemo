@@ -3,7 +3,9 @@ package com.demo.themeswitch.data
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -18,6 +20,14 @@ class SettingsRepository(private val context: Context) {
         val THEME_MODE = intPreferencesKey("theme_mode")
         val UI_MODE = stringPreferencesKey("ui_mode")
         val LANGUAGE = stringPreferencesKey("language")
+        val ENABLE_MONET = booleanPreferencesKey("enable_monet")
+        val KEY_COLOR = intPreferencesKey("key_color")
+        val COLOR_STYLE = stringPreferencesKey("color_style")
+        val COLOR_SPEC = stringPreferencesKey("color_spec")
+        val ENABLE_BLUR = booleanPreferencesKey("enable_blur")
+        val ENABLE_FLOATING_BOTTOM_BAR = booleanPreferencesKey("enable_floating_bottom_bar")
+        val ENABLE_FLOATING_BOTTOM_BAR_BLUR = booleanPreferencesKey("enable_floating_bottom_bar_blur")
+        val PAGE_SCALE = floatPreferencesKey("page_scale")
     }
 
     val preferencesFlow: Flow<AppPreferences> = context.dataStore.data.map { prefs ->
@@ -25,6 +35,14 @@ class SettingsRepository(private val context: Context) {
             themeMode = prefs[PreferencesKeys.THEME_MODE] ?: 0,
             uiMode = prefs[PreferencesKeys.UI_MODE] ?: SettingsRepository.UI_MODE_MATERIAL,
             language = prefs[PreferencesKeys.LANGUAGE] ?: "system",
+            enableMonet = prefs[PreferencesKeys.ENABLE_MONET] ?: true,
+            keyColor = prefs[PreferencesKeys.KEY_COLOR] ?: 0,
+            colorStyle = prefs[PreferencesKeys.COLOR_STYLE] ?: "TonalSpot",
+            colorSpec = prefs[PreferencesKeys.COLOR_SPEC] ?: "SPEC_2021",
+            enableBlur = prefs[PreferencesKeys.ENABLE_BLUR] ?: true,
+            enableFloatingBottomBar = prefs[PreferencesKeys.ENABLE_FLOATING_BOTTOM_BAR] ?: false,
+            enableFloatingBottomBarBlur = prefs[PreferencesKeys.ENABLE_FLOATING_BOTTOM_BAR_BLUR] ?: false,
+            pageScale = prefs[PreferencesKeys.PAGE_SCALE] ?: 1.0f,
         )
     }
 
@@ -39,6 +57,38 @@ class SettingsRepository(private val context: Context) {
     suspend fun setLanguage(language: String) {
         LocaleHelper.persistLanguage(context, language)
         context.dataStore.edit { it[PreferencesKeys.LANGUAGE] = language }
+    }
+
+    suspend fun setEnableMonet(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.ENABLE_MONET] = enabled }
+    }
+
+    suspend fun setKeyColor(color: Int) {
+        context.dataStore.edit { it[PreferencesKeys.KEY_COLOR] = color }
+    }
+
+    suspend fun setColorStyle(style: String) {
+        context.dataStore.edit { it[PreferencesKeys.COLOR_STYLE] = style }
+    }
+
+    suspend fun setColorSpec(spec: String) {
+        context.dataStore.edit { it[PreferencesKeys.COLOR_SPEC] = spec }
+    }
+
+    suspend fun setEnableBlur(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.ENABLE_BLUR] = enabled }
+    }
+
+    suspend fun setEnableFloatingBottomBar(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.ENABLE_FLOATING_BOTTOM_BAR] = enabled }
+    }
+
+    suspend fun setEnableFloatingBottomBarBlur(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.ENABLE_FLOATING_BOTTOM_BAR_BLUR] = enabled }
+    }
+
+    suspend fun setPageScale(scale: Float) {
+        context.dataStore.edit { it[PreferencesKeys.PAGE_SCALE] = scale }
     }
 
     companion object {

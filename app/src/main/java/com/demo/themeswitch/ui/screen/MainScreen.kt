@@ -7,11 +7,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
@@ -38,16 +36,24 @@ import androidx.navigation.compose.rememberNavController
 import com.demo.themeswitch.R
 import com.demo.themeswitch.ui.LocalUiMode
 import com.demo.themeswitch.ui.UiMode
+import com.demo.themeswitch.ui.component.FloatingCapsuleBar
+import com.demo.themeswitch.ui.component.FloatingTab
+import com.demo.themeswitch.ui.theme.LocalEnableFloatingBottomBar
+import com.demo.themeswitch.ui.theme.LocalEnableFloatingBottomBarBlur
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 sealed class Screen(val route: String, val titleResId: Int) {
     data object Home : Screen("home", R.string.nav_home)
     data object Settings : Screen("settings", R.string.nav_settings)
-    // 子页面：从设置页进入，不进底栏
+    // 子页面：从设置页进入，不显示底栏
     data object Appearance : Screen("appearance", R.string.settings_section_appearance)
+    data object About : Screen("about", R.string.nav_about)
 }
 
 /**
@@ -62,7 +68,7 @@ fun MainScreen() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
 
-    // 底栏两项：主页 / 设置（关于已并入设置页卡片）
+    // 底栏两项：主页 / 设置（外观与关于从设置页进入）
     val items = listOf(
         Screen.Home to (Icons.Filled.Home to Icons.Outlined.Home),
         Screen.Settings to (Icons.Filled.Settings to Icons.Outlined.Settings),
@@ -70,29 +76,56 @@ fun MainScreen() {
 
     val uiMode = LocalUiMode.current
     val isMaterial = uiMode == UiMode.Material
+    val enableFloating = LocalEnableFloatingBottomBar.current
+    val enableFloatingBlur = LocalEnableFloatingBottomBarBlur.current
+
+    // 子页（外观/关于）隐藏底栏，只在首页/设置页显示
+    val showBottomBar = currentRoute == Screen.Home.route || currentRoute == Screen.Settings.route
+
+    // 悬浮底栏液态玻璃的取景层：记录内容区（含背景色），底栏用它做背景模糊
+    val containerColor = if (isMaterial) {
+        MaterialTheme.colorScheme.surface
+    } else {
+        MiuixTheme.colorScheme.background
+    }
+    val blurBackdrop: LayerBackdrop? = if (enableFloating && enableFloatingBlur) {
+        rememberLayerBackdrop {
+            drawRect(containerColor)
+            drawContent()
+        }
+    } else {
+        null
+    }
 
     // 单一 Scaffold：UI 模式只影响颜色与底栏内容，NavHost 永远保持同一调用位置，
     // 树内切换 UI 模式/语言时导航状态不丢，停留在当前页面
     Scaffold(
-        containerColor = if (isMaterial) {
-            MaterialTheme.colorScheme.surface
-        } else {
-            MiuixTheme.colorScheme.background
-        },
+        containerColor = containerColor,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
-            MainBottomBar(
-                isMaterial = isMaterial,
-                currentRoute = currentRoute,
-                items = items,
-                onSelect = { navigateTo(navController, it) },
-            )
+            if (showBottomBar) {
+                MainBottomBar(
+                    isMaterial = isMaterial,
+                    enableFloating = enableFloating,
+                    blurEnabled = blurBackdrop != null,
+                    backdrop = blurBackdrop,
+                    currentRoute = currentRoute,
+                    items = items,
+                    onSelect = { navigateTo(navController, it) },
+                )
+            }
         },
     ) { innerPadding ->
         CompositionLocalProvider(
             LocalScaffoldBottomPadding provides innerPadding.calculateBottomPadding(),
         ) {
-            MainNavHost(navController, Modifier.fillMaxSize())
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(if (blurBackdrop != null) Modifier.layerBackdrop(blurBackdrop) else Modifier),
+            ) {
+                MainNavHost(navController, Modifier.fillMaxSize())
+            }
         }
     }
 }
@@ -100,16 +133,51 @@ fun MainScreen() {
 @Composable
 private fun MainBottomBar(
     isMaterial: Boolean,
+    enableFloating: Boolean,
+    blurEnabled: Boolean,
+    backdrop: LayerBackdrop?,
     currentRoute: String,
     items: List<Pair<Screen, Pair<ImageVector, ImageVector>>>,
     onSelect: (String) -> Unit,
 ) {
-    val surfaceColor = if (isMaterial) {
-        MaterialTheme.colorScheme.surface
-    } else {
-        MiuixTheme.colorScheme.surface
-    }
-    if (isMaterial) {
+    if (enableFloating) {
+        // KSU 风格悬浮胶囊底栏
+        val accentColor = if (isMaterial) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MiuixTheme.colorScheme.primary
+        }
+        val contentColor = if (isMaterial) {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        } else {
+            MiuixTheme.colorScheme.onBackground
+        }
+        val containerColor = if (isMaterial) {
+            MaterialTheme.colorScheme.surfaceContainer
+        } else {
+            MiuixTheme.colorScheme.surface
+        }
+        val floatingTabs = items.map { (screen, icons) ->
+            FloatingTab(
+                filledIcon = icons.first,
+                outlinedIcon = icons.second,
+                label = stringResource(screen.titleResId),
+            )
+        }
+        FloatingCapsuleBar(
+            items = floatingTabs,
+            selectedIndex = items.indexOfFirst { it.first.route == currentRoute }.coerceAtLeast(0),
+            onSelected = { index ->
+                items.getOrNull(index)?.let { onSelect(it.first.route) }
+            },
+            accentColor = accentColor,
+            contentColor = contentColor,
+            containerColor = containerColor,
+            blurEnabled = blurEnabled,
+            backdrop = backdrop,
+        )
+    } else if (isMaterial) {
+        val surfaceColor = MaterialTheme.colorScheme.surface
         MaterialNavigationBar(containerColor = surfaceColor) {
             items.forEach { screen ->
                 val (filledIcon, outlinedIcon) = screen.second
@@ -128,6 +196,7 @@ private fun MainBottomBar(
             }
         }
     } else {
+        val surfaceColor = MiuixTheme.colorScheme.surface
         NavigationBar(color = surfaceColor) {
             items.forEach { screen ->
                 val (filledIcon, outlinedIcon) = screen.second
@@ -172,9 +241,11 @@ private fun MainNavHost(navController: NavHostController, modifier: Modifier = M
             when (LocalUiMode.current) {
                 UiMode.Material -> SettingsMaterialScreen(
                     onOpenAppearance = { navController.navigate(Screen.Appearance.route) },
+                    onOpenAbout = { navController.navigate(Screen.About.route) },
                 )
                 UiMode.Miuix -> SettingsMiuixScreen(
                     onOpenAppearance = { navController.navigate(Screen.Appearance.route) },
+                    onOpenAbout = { navController.navigate(Screen.About.route) },
                 )
             }
         }
@@ -182,6 +253,12 @@ private fun MainNavHost(navController: NavHostController, modifier: Modifier = M
             when (LocalUiMode.current) {
                 UiMode.Material -> AppearanceMaterialScreen(onBack = { navController.popBackStack() })
                 UiMode.Miuix -> AppearanceMiuixScreen(onBack = { navController.popBackStack() })
+            }
+        }
+        composable(Screen.About.route) {
+            when (LocalUiMode.current) {
+                UiMode.Material -> AboutMaterialScreen(onBack = { navController.popBackStack() })
+                UiMode.Miuix -> AboutMiuixScreen(onBack = { navController.popBackStack() })
             }
         }
     }

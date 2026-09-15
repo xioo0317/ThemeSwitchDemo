@@ -1,77 +1,66 @@
 package com.demo.themeswitch.ui.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Colorize
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Style
+import androidx.compose.material.icons.rounded.DisplaySettings
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.demo.themeswitch.BuildConfig
 import com.demo.themeswitch.R
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.LocaleHelper
 import com.demo.themeswitch.data.SettingsRepository
 import com.demo.themeswitch.ui.UiMode
-import com.demo.themeswitch.ui.component.MiuixOptionDialog
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
+/** 设置页（MIUI 风格，KSU 同款卡片行样式） */
 @Composable
-fun SettingsMiuixScreen(onOpenAppearance: () -> Unit) {
+fun SettingsMiuixScreen(
+    onOpenAppearance: () -> Unit,
+    onOpenAbout: () -> Unit,
+) {
     val context = LocalContext.current
     val repository = remember { SettingsRepository(context) }
     val preferences by repository.preferencesFlow.collectAsState(initial = AppPreferences())
     val scope = rememberCoroutineScope()
     val scrollBehavior = MiuixScrollBehavior()
     val colorScheme = MiuixTheme.colorScheme
-    val languages = LocaleHelper.supportedLanguages
 
-    var showUiModeDialog by rememberSaveable { mutableStateOf(false) }
-    var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
+    val uiModeItems = listOf(
+        stringResource(R.string.mode_miuix),
+        stringResource(R.string.mode_material),
+    )
+    val languageItems = LocaleHelper.supportedLanguages.map { it.nativeName }
+    val languageIndex = LocaleHelper.supportedLanguages
+        .indexOfFirst { it.code == preferences.language }
+        .coerceIn(0, LocaleHelper.supportedLanguages.lastIndex)
 
     Scaffold(
-        // 外层 MainScreen Scaffold 统一处理窗口 insets，页面只管顶栏
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
@@ -85,274 +74,98 @@ fun SettingsMiuixScreen(onOpenAppearance: () -> Unit) {
                 .fillMaxSize()
                 .scrollEndHaptic()
                 .overScrollVertical()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .padding(horizontal = 12.dp),
             contentPadding = PaddingValues(
-                top = innerPadding.calculateTopPadding(),
-                bottom = LocalScaffoldBottomPadding.current + 16.dp,
+                top = innerPadding.calculateTopPadding() + 12.dp,
+                bottom = LocalScaffoldBottomPadding.current + 12.dp,
             ),
         ) {
+            // 界面卡：风格下拉 + 主题入口
             item {
-                Text(
-                    text = stringResource(R.string.settings_section_appearance),
-                    color = colorScheme.onBackground,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 8.dp),
-                )
-            }
-
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp),
-                ) {
-                    MiuixSelectRow(
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    OverlayDropdownPreference(
                         title = stringResource(R.string.settings_ui_mode),
-                        valueText = if (preferences.uiMode == UiMode.Miuix.value) {
-                            stringResource(R.string.mode_miuix)
-                        } else {
-                            stringResource(R.string.mode_material)
-                        },
+                        summary = stringResource(R.string.settings_ui_mode_summary),
+                        items = uiModeItems,
                         startAction = {
                             Icon(
-                                imageVector = Icons.Filled.Style,
+                                imageVector = Icons.Rounded.DisplaySettings,
                                 contentDescription = null,
                                 tint = colorScheme.onBackground,
                                 modifier = Modifier.padding(end = 6.dp),
                             )
                         },
-                        showDivider = true,
-                        onClick = { showUiModeDialog = true },
+                        selectedIndex = if (preferences.uiMode == UiMode.Miuix.value) 0 else 1,
+                        onSelectedIndexChange = { index ->
+                            scope.launch {
+                                repository.setUiMode(
+                                    if (index == 0) UiMode.Miuix.value else UiMode.Material.value,
+                                )
+                            }
+                        },
                     )
-                    MiuixSelectRow(
+                    ArrowPreference(
                         title = stringResource(R.string.settings_theme),
-                        valueText = when (preferences.themeMode) {
+                        summary = when (preferences.themeMode) {
+                            0 -> stringResource(R.string.theme_system)
                             1 -> stringResource(R.string.theme_light)
-                            2 -> stringResource(R.string.theme_dark)
-                            else -> stringResource(R.string.theme_system)
+                            else -> stringResource(R.string.theme_dark)
                         },
                         startAction = {
                             Icon(
-                                imageVector = Icons.Filled.Colorize,
+                                imageVector = Icons.Rounded.Palette,
                                 contentDescription = null,
                                 tint = colorScheme.onBackground,
                                 modifier = Modifier.padding(end = 6.dp),
                             )
                         },
-                        chevron = true,
                         onClick = onOpenAppearance,
                     )
                 }
             }
-
+            // 通用卡：语言
             item {
-                Text(
-                    text = stringResource(R.string.settings_section_general),
-                    color = colorScheme.onBackground,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 8.dp),
-                )
-            }
-
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp),
-                ) {
-                    MiuixSelectRow(
+                Card(modifier = Modifier.padding(top = 12.dp).fillMaxWidth()) {
+                    OverlayDropdownPreference(
                         title = stringResource(R.string.settings_language),
-                        valueText = languages
-                            .find { it.code == preferences.language }
-                            ?.nativeName
-                            ?: stringResource(R.string.lang_system),
+                        summary = stringResource(R.string.settings_language_summary),
+                        items = languageItems,
                         startAction = {
                             Icon(
-                                imageVector = Icons.Filled.Language,
+                                imageVector = Icons.Rounded.Language,
                                 contentDescription = null,
                                 tint = colorScheme.onBackground,
                                 modifier = Modifier.padding(end = 6.dp),
                             )
                         },
-                        onClick = { showLanguageDialog = true },
+                        selectedIndex = languageIndex,
+                        onSelectedIndexChange = { index ->
+                            val lang = LocaleHelper.supportedLanguages.getOrNull(index)
+                            if (lang != null && lang.code != preferences.language) {
+                                scope.launch { repository.setLanguage(lang.code) }
+                            }
+                        },
                     )
                 }
             }
-
+            // 关于卡
             item {
-                Text(
-                    text = stringResource(R.string.nav_about),
-                    color = colorScheme.onBackground,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 8.dp),
-                )
-            }
-
-            // 关于（原底栏关于页并入设置卡片）
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp),
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Info,
-                            contentDescription = null,
-                            tint = colorScheme.primary,
-                            modifier = Modifier.size(24.dp),
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column {
-                            Text(
-                                text = stringResource(R.string.app_name),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
+                Card(modifier = Modifier.padding(vertical = 12.dp).fillMaxWidth()) {
+                    ArrowPreference(
+                        title = stringResource(R.string.nav_about),
+                        startAction = {
+                            Icon(
+                                imageVector = Icons.Rounded.Info,
+                                contentDescription = null,
+                                tint = colorScheme.onBackground,
+                                modifier = Modifier.padding(end = 6.dp),
                             )
-                            Text(
-                                text = "v" + BuildConfig.VERSION_NAME,
-                                fontSize = 14.sp,
-                                color = colorScheme.onSurfaceVariantSummary,
-                            )
-                        }
-                    }
-                    AboutDivider()
-                    Text(
-                        text = stringResource(R.string.about_desc),
-                        fontSize = 14.sp,
-                        color = colorScheme.onSurfaceVariantSummary,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 12.dp),
-                    )
-                    AboutDivider()
-                    Text(
-                        text = stringResource(R.string.about_arch_title),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 8.dp),
-                    )
-                    Text(
-                        text = stringResource(R.string.about_arch_desc),
-                        fontSize = 13.sp,
-                        color = colorScheme.onSurfaceVariantSummary,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 8.dp),
+                        },
+                        onClick = onOpenAbout,
                     )
                 }
             }
-        }
-    }
-
-    // MIUI 弹窗（OverlayDialog，组合层渲染，无独立窗口）。
-    // UI 模式与语言均为树内切换：停留在当前页面
-    MiuixOptionDialog(
-        show = showUiModeDialog,
-        title = stringResource(R.string.settings_ui_mode),
-        options = listOf(
-            stringResource(R.string.mode_miuix),
-            stringResource(R.string.mode_material),
-        ),
-        selectedIndex = if (preferences.uiMode == UiMode.Miuix.value) 0 else 1,
-        onSelect = { index ->
-            scope.launch {
-                repository.setUiMode(if (index == 0) UiMode.Miuix.value else UiMode.Material.value)
-            }
-        },
-        onDismiss = { showUiModeDialog = false },
-    )
-    MiuixOptionDialog(
-        show = showLanguageDialog,
-        title = stringResource(R.string.settings_language),
-        options = languages.map { it.nativeName },
-        selectedIndex = languages
-            .indexOfFirst { it.code == preferences.language }
-            .coerceIn(0, languages.lastIndex),
-        onSelect = { index ->
-            val lang = languages.getOrNull(index)
-            if (lang != null && lang.code != preferences.language) {
-                // setLanguage 内部已同步 persistLanguage，冷启动 attachBaseContext 可读
-                scope.launch { repository.setLanguage(lang.code) }
-            }
-        },
-        onDismiss = { showLanguageDialog = false },
-    )
-}
-
-@Composable
-private fun AboutDivider() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 20.dp)
-            .height(0.5.dp)
-            .background(MiuixTheme.colorScheme.onSurfaceVariantSummary.copy(alpha = 0.25f)),
-    )
-}
-
-/**
- * 选择行：点击弹 MIUI 弹窗（OverlayDialog）或跳转子页面（chevron=true 时右箭头指示）。
- */
-@Composable
-private fun MiuixSelectRow(
-    title: String,
-    valueText: String,
-    onClick: () -> Unit,
-    startAction: (@Composable () -> Unit)? = null,
-    showDivider: Boolean = false,
-    chevron: Boolean = false,
-) {
-    val colorScheme = MiuixTheme.colorScheme
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 52.dp)
-                .clickable(onClick = onClick)
-                .padding(horizontal = 20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            startAction?.invoke()
-            Text(
-                text = title,
-                fontSize = 16.sp,
-                modifier = Modifier.weight(1f),
-            )
-            Text(
-                text = valueText,
-                fontSize = 14.sp,
-                color = colorScheme.onSurfaceVariantSummary,
-            )
-            Icon(
-                imageVector = if (chevron) {
-                    Icons.AutoMirrored.Filled.KeyboardArrowRight
-                } else {
-                    Icons.Filled.ArrowDropDown
-                },
-                contentDescription = null,
-                tint = colorScheme.onSurfaceVariantSummary,
-                modifier = Modifier.size(24.dp),
-            )
-        }
-        if (showDivider) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 20.dp)
-                    .height(0.5.dp)
-                    .background(colorScheme.onSurfaceVariantSummary.copy(alpha = 0.25f)),
-            )
         }
     }
 }

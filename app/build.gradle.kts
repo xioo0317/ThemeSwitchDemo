@@ -18,8 +18,8 @@ android {
         applicationId = "com.demo.themeswitch"
         minSdk = 26
         targetSdk = 37
-        versionCode = 4
-        versionName = "1.2.0"
+        versionCode = 5
+        versionName = "1.3.0"
     }
 
     buildTypes {
@@ -74,6 +74,10 @@ dependencies {
     // Miuix: MIUI style Compose Multiplatform UI library
     implementation("top.yukonga.miuix.kmp:miuix-ui-android:0.9.3")
     implementation("top.yukonga.miuix.kmp:miuix-preference-android:0.9.3")
+    // Miuix blur: 悬浮底栏液态玻璃（依赖 Android 12 RenderEffect，低版本运行时自动降级）
+    implementation("top.yukonga.miuix.kmp:miuix-blur-android:0.9.3")
+    // Material Kolor: 从种子色生成 Material 3 动态色板（强调色/色彩风格/色彩规格）
+    implementation("com.materialkolor:material-kolor:5.0.1")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

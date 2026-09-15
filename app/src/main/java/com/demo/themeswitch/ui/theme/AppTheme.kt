@@ -1,5 +1,6 @@
 package com.demo.themeswitch.ui.theme
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -34,13 +35,31 @@ fun AppTheme(
         else -> false
     }
 
+    // 毛玻璃依赖 Android 12 的 RenderEffect，低版本全局视为不支持
+    val blurSupported = appPreferences.enableBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
     CompositionLocalProvider(
         LocalColorMode provides colorMode.value,
+        LocalEnableBlur provides blurSupported,
+        LocalEnableFloatingBottomBar provides appPreferences.enableFloatingBottomBar,
+        LocalEnableFloatingBottomBarBlur provides blurSupported && appPreferences.enableFloatingBottomBarBlur,
     ) {
         // 双主题嵌套：外层 miuix 主题让 miuix 组件（OverlayDialog 弹窗/MIUI 顶栏/底栏）
         // 在任何 UI 模式下都可用；内层 M3 主题继续供 Material 页面使用
-        MiuixAppTheme(isDark = isDark) {
-            MaterialAppTheme(isDark = isDark) {
+        MiuixAppTheme(
+            isDark = isDark,
+            isMonet = appPreferences.enableMonet,
+            keyColor = appPreferences.keyColor,
+            colorStyle = appPreferences.colorStyle,
+            colorSpec = appPreferences.colorSpec,
+        ) {
+            MaterialAppTheme(
+                isDark = isDark,
+                isMonet = appPreferences.enableMonet,
+                keyColor = appPreferences.keyColor,
+                colorStyle = appPreferences.colorStyle,
+                colorSpec = appPreferences.colorSpec,
+            ) {
                 content()
             }
         }
@@ -58,3 +77,6 @@ fun isInDarkTheme(): Boolean {
 }
 
 val LocalColorMode = staticCompositionLocalOf { 0 }
+val LocalEnableBlur = staticCompositionLocalOf { false }
+val LocalEnableFloatingBottomBar = staticCompositionLocalOf { false }
+val LocalEnableFloatingBottomBarBlur = staticCompositionLocalOf { false }

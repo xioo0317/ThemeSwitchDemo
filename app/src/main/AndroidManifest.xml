@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- miuix-blur 声明的 minSdk 高于本应用（26）：运行时按 SDK_INT >= 33 判断，低版本自动降级 -->
+    <uses-sdk tools:overrideLibrary="top.yukonga.miuix.kmp.blur" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"

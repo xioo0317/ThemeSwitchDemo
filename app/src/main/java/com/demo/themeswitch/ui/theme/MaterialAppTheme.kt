@@ -1,5 +1,6 @@
 package com.demo.themeswitch.ui.theme
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -9,7 +10,9 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import android.os.Build
+import com.materialkolor.PaletteStyle
+import com.materialkolor.dynamiccolor.ColorSpec
+import com.materialkolor.rememberDynamicColorScheme
 
 private val M3LightColorScheme = lightColorScheme(
     primary = Color(0xFF1976D2),
@@ -44,13 +47,37 @@ private val M3DarkColorScheme = darkColorScheme(
 @Composable
 fun MaterialAppTheme(
     isDark: Boolean = isSystemInDarkTheme(),
+    isMonet: Boolean = true,
+    keyColor: Int = 0,
+    colorStyle: String = "TonalSpot",
+    colorSpec: String = "SPEC_2021",
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
-    val colorScheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-    } else {
-        if (isDark) M3DarkColorScheme else M3LightColorScheme
+
+    // 取色策略：自定义强调色（material-kolor 生成色板） > 系统动态取色（Monet） > 静态配色
+    val colorScheme = when {
+        keyColor != 0 -> {
+            val style = try {
+                PaletteStyle.valueOf(colorStyle)
+            } catch (_: Exception) {
+                PaletteStyle.TonalSpot
+            }
+            val spec = if (colorSpec == "SPEC_2025") {
+                ColorSpec.SpecVersion.SPEC_2025
+            } else {
+                ColorSpec.SpecVersion.SPEC_2021
+            }
+            rememberDynamicColorScheme(
+                seedColor = Color(keyColor),
+                isDark = isDark,
+                style = style,
+                specVersion = spec,
+            )
+        }
+        isMonet && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
+            if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        else -> if (isDark) M3DarkColorScheme else M3LightColorScheme
     }
 
     MaterialTheme(

@@ -1,8 +1,6 @@
 package com.demo.themeswitch.ui.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,7 +19,6 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -54,7 +50,10 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import kotlinx.coroutines.launch
 
 @Composable
-fun SettingsMaterialScreen(onOpenAppearance: () -> Unit) {
+fun SettingsMaterialScreen(
+    onOpenAppearance: () -> Unit,
+    onOpenAbout: () -> Unit,
+) {
     val context = LocalContext.current
     val repository = remember { SettingsRepository(context) }
     val preferences by repository.preferencesFlow.collectAsState(initial = AppPreferences())
@@ -81,19 +80,10 @@ fun SettingsMaterialScreen(onOpenAppearance: () -> Unit) {
                 .fillMaxSize()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
             contentPadding = PaddingValues(
-                top = innerPadding.calculateTopPadding(),
-                bottom = LocalScaffoldBottomPadding.current + 16.dp,
+                top = innerPadding.calculateTopPadding() + 12.dp,
+                bottom = LocalScaffoldBottomPadding.current + 12.dp,
             ),
         ) {
-            item {
-                Text(
-                    text = stringResource(R.string.settings_section_appearance),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 8.dp),
-                )
-            }
-
             // 外观卡：UI 模式 / 主题（跳外观页）
             item {
                 Card(
@@ -109,36 +99,18 @@ fun SettingsMaterialScreen(onOpenAppearance: () -> Unit) {
                     SettingsItem(
                         icon = Icons.Filled.Style,
                         title = stringResource(R.string.settings_ui_mode),
-                        subtitle = if (preferences.uiMode == "miuix") {
-                            stringResource(R.string.mode_miuix)
-                        } else {
-                            stringResource(R.string.mode_material)
-                        },
+                        subtitle = stringResource(R.string.settings_ui_mode_summary),
                         onClick = { showUiModeDialog = true },
                     )
                     CardDivider()
                     SettingsItem(
                         icon = Icons.Filled.Colorize,
                         title = stringResource(R.string.settings_theme),
-                        subtitle = when (preferences.themeMode) {
-                            0 -> stringResource(R.string.theme_system)
-                            1 -> stringResource(R.string.theme_light)
-                            2 -> stringResource(R.string.theme_dark)
-                            else -> stringResource(R.string.theme_system)
-                        },
+                        subtitle = stringResource(R.string.settings_theme_summary),
                         onClick = onOpenAppearance,
                         chevron = true,
                     )
                 }
-            }
-
-            item {
-                Text(
-                    text = stringResource(R.string.settings_section_general),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 8.dp),
-                )
             }
 
             // 通用卡：语言
@@ -146,7 +118,7 @@ fun SettingsMaterialScreen(onOpenAppearance: () -> Unit) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp),
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                     ),
@@ -156,92 +128,30 @@ fun SettingsMaterialScreen(onOpenAppearance: () -> Unit) {
                     SettingsItem(
                         icon = Icons.Filled.Language,
                         title = stringResource(R.string.settings_language),
-                        subtitle = LocaleHelper.supportedLanguages
-                            .find { it.code == preferences.language }
-                            ?.nativeName
-                            ?: stringResource(R.string.lang_system),
+                        subtitle = stringResource(R.string.settings_language_summary),
                         onClick = { showLanguageDialog = true },
                     )
                 }
             }
 
-            item {
-                Text(
-                    text = stringResource(R.string.nav_about),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 8.dp),
-                )
-            }
-
-            // 关于卡（原底栏关于页并入设置）
+            // 关于卡：一行入口，跳转关于页
             item {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp),
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                     ),
                     shape = MaterialTheme.shapes.large,
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Info,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column {
-                            Text(
-                                text = stringResource(R.string.app_name),
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium,
-                            )
-                            Text(
-                                text = "v" + BuildConfig.VERSION_NAME,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                    HorizontalDivider(
-                        modifier = Modifier.padding(start = 56.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                    )
-                    Text(
-                        text = stringResource(R.string.about_desc),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier.padding(start = 16.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                    )
-                    Text(
-                        text = stringResource(R.string.about_arch_title),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                    )
-                    Text(
-                        text = stringResource(R.string.about_arch_desc),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                    SettingsItem(
+                        icon = Icons.Filled.Info,
+                        title = stringResource(R.string.nav_about),
+                        subtitle = "v" + BuildConfig.VERSION_NAME,
+                        onClick = onOpenAbout,
+                        chevron = true,
                     )
                 }
             }
@@ -284,7 +194,7 @@ fun SettingsMaterialScreen(onOpenAppearance: () -> Unit) {
 /** 卡片内行分隔线 */
 @Composable
 private fun CardDivider() {
-    HorizontalDivider(
+    androidx.compose.material3.HorizontalDivider(
         modifier = Modifier.padding(start = 56.dp),
         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
     )

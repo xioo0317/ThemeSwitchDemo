@@ -13,6 +13,8 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.core.view.WindowInsetsControllerCompat
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.LocaleHelper
@@ -59,10 +61,19 @@ class MainActivity : ComponentActivity() {
                     isAppearanceLightNavigationBars = !isDark
                 }
             }
+            // 全局界面缩放（KSU pageScale 同款做法）：密度乘以缩放系数，整体 UI 等比缩放
+            val systemDensity = LocalDensity.current
+            val scaledDensity = remember(systemDensity, prefs.pageScale) {
+                Density(
+                    density = systemDensity.density * prefs.pageScale,
+                    fontScale = systemDensity.fontScale,
+                )
+            }
             CompositionLocalProvider(
                 LocalUiMode provides uiMode,
                 LocalContext provides localizedContext,
                 LocalConfiguration provides localizedContext.resources.configuration,
+                LocalDensity provides scaledDensity,
             ) {
                 AppTheme(appPreferences = prefs) {
                     MainScreen()
