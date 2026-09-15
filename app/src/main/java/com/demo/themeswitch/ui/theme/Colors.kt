@@ -7,21 +7,21 @@ import com.demo.themeswitch.R
  * 顺序与 R.string.color_* 文案一一对应。
  */
 val keyColorOptions: List<Int> = listOf(
-    0xFFF44336, // red
-    0xFFE91E63, // pink
-    0xFF9C27B0, // purple
-    0xFF673AB7, // deep purple
-    0xFF3F51B5, // indigo
-    0xFF2196F3, // blue
-    0xFF00BCD4, // cyan
-    0xFF009688, // teal
-    0xFF4CAF50, // green
-    0xFFFFEB3B, // yellow
-    0xFFFFC107, // amber
-    0xFFFF9800, // orange
-    0xFF795548, // brown
-    0xFF607D8B, // blue grey
-    0xFFFF9CA8, // sakura
+    0xFFF44336.toInt(), // red
+    0xFFE91E63.toInt(), // pink
+    0xFF9C27B0.toInt(), // purple
+    0xFF673AB7.toInt(), // deep purple
+    0xFF3F51B5.toInt(), // indigo
+    0xFF2196F3.toInt(), // blue
+    0xFF00BCD4.toInt(), // cyan
+    0xFF009688.toInt(), // teal
+    0xFF4CAF50.toInt(), // green
+    0xFFFFEB3B.toInt(), // yellow
+    0xFFFFC107.toInt(), // amber
+    0xFFFF9800.toInt(), // orange
+    0xFF795548.toInt(), // brown
+    0xFF607D8B.toInt(), // blue grey
+    0xFFFF9CA8.toInt(), // sakura
 )
 
 /** 强调色名称资源，顺序与 [keyColorOptions] 一致 */

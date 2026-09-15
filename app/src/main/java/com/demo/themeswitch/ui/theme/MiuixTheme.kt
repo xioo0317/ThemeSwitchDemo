@@ -44,8 +44,15 @@ fun MiuixAppTheme(
         else -> null
     }
 
+    // miuix 的 Dark/Light 是静态色板（keyColor/style/spec 均不生效）；
+    // 只有 Monet* 模式才会用 keyColor 走 materialkolor 动态生成（KSU 同款行为）
+    val useMonet = resolvedKeyColor != null
     val controller = ThemeController(
-        if (isDark) ColorSchemeMode.Dark else ColorSchemeMode.Light,
+        if (useMonet) {
+            if (isDark) ColorSchemeMode.MonetDark else ColorSchemeMode.MonetLight
+        } else {
+            if (isDark) ColorSchemeMode.Dark else ColorSchemeMode.Light
+        },
         keyColor = resolvedKeyColor,
         isDark = isDark,
         paletteStyle = paletteStyle,

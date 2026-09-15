@@ -42,7 +42,7 @@ fun AppTheme(
         LocalColorMode provides colorMode.value,
         LocalEnableBlur provides blurSupported,
         LocalEnableFloatingBottomBar provides appPreferences.enableFloatingBottomBar,
-        LocalEnableFloatingBottomBarBlur provides blurSupported && appPreferences.enableFloatingBottomBarBlur,
+        LocalEnableFloatingBottomBarBlur provides (blurSupported && appPreferences.enableFloatingBottomBarBlur),
     ) {
         // 双主题嵌套：外层 miuix 主题让 miuix 组件（OverlayDialog 弹窗/MIUI 顶栏/底栏）
         // 在任何 UI 模式下都可用；内层 M3 主题继续供 Material 页面使用
