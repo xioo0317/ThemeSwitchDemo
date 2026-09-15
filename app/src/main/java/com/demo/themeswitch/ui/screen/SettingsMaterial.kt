@@ -1,5 +1,6 @@
 package com.demo.themeswitch.ui.screen
 
+import android.app.Activity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -144,10 +145,11 @@ fun SettingsMaterialScreen() {
             currentLanguage = preferences.language,
             onDismiss = { showLanguageDialog = false },
             onSelect = { code ->
-                scope.launch {
-                    repository.setLanguage(code)
-                    showLanguageDialog = false
-                }
+                // Persist synchronously first so attachBaseContext picks it up on recreate.
+                LocaleHelper.persistLanguage(context, code)
+                scope.launch { repository.setLanguage(code) }
+                showLanguageDialog = false
+                (context as? Activity)?.recreate()
             },
         )
     }

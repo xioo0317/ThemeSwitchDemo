@@ -1,28 +1,16 @@
 package com.demo.themeswitch.ui.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import android.app.Activity
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Colorize
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Style
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,9 +18,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -42,7 +29,20 @@ import com.demo.themeswitch.R
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.LocaleHelper
 import com.demo.themeswitch.data.SettingsRepository
+import com.demo.themeswitch.ui.UiMode
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.overScrollVertical
+import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 @Composable
 fun SettingsMiuixScreen() {
@@ -50,101 +50,140 @@ fun SettingsMiuixScreen() {
     val repository = remember { SettingsRepository(context) }
     val preferences by repository.preferencesFlow.collectAsState(initial = AppPreferences())
     val scope = rememberCoroutineScope()
-    val scrollState = rememberScrollState()
+    val scrollBehavior = MiuixScrollBehavior()
+    val colorScheme = MiuixTheme.colorScheme
 
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
-    var showUiModeDialog by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(16.dp),
-    ) {
-        Text(
-            text = stringResource(R.string.nav_settings),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 24.dp, top = 8.dp),
-        )
-
-        // Appearance section - MIUI style grouped card
-        MiuixSectionHeader(stringResource(R.string.settings_section_appearance))
-
-        Column(
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = stringResource(R.string.nav_settings),
+                scrollBehavior = scrollBehavior,
+            )
+        },
+    ) { innerPadding ->
+        LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .fillMaxSize()
+                .scrollEndHaptic()
+                .overScrollVertical()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            contentPadding = PaddingValues(
+                top = innerPadding.calculateTopPadding(),
+                bottom = innerPadding.calculateBottomPadding() + 16.dp,
+            ),
         ) {
-            MiuixSettingsItem(
-                icon = Icons.Filled.Style,
-                title = stringResource(R.string.settings_ui_mode),
-                value = if (preferences.uiMode == "miuix") stringResource(R.string.mode_miuix) else stringResource(R.string.mode_material),
-                onClick = { showUiModeDialog = true },
-                showDivider = true,
-            )
-            MiuixSettingsItem(
-                icon = Icons.Filled.Palette,
-                title = stringResource(R.string.settings_theme),
-                value = when (preferences.themeMode) {
-                    0 -> stringResource(R.string.theme_system)
-                    1 -> stringResource(R.string.theme_light)
-                    2 -> stringResource(R.string.theme_dark)
-                    else -> stringResource(R.string.theme_system)
-                },
-                onClick = { showThemeDialog = true },
-                showDivider = true,
-            )
-            MiuixSettingsItem(
-                icon = Icons.Filled.Language,
-                title = stringResource(R.string.settings_language),
-                value = LocaleHelper.supportedLanguages.find { it.code == preferences.language }?.nativeName
-                    ?: stringResource(R.string.lang_system),
-                onClick = { showLanguageDialog = true },
-                showDivider = false,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        MiuixSectionHeader(stringResource(R.string.settings_section_general))
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Palette,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(end = 16.dp),
+            item {
+                Text(
+                    text = stringResource(R.string.settings_section_appearance),
+                    color = colorScheme.primary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 8.dp),
                 )
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.settings_monet),
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp,
+            }
+
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                ) {
+                    OverlayDropdownPreference(
+                        title = stringResource(R.string.settings_ui_mode),
+                        summary = if (preferences.uiMode == UiMode.Miuix.value) {
+                            stringResource(R.string.mode_miuix)
+                        } else {
+                            stringResource(R.string.mode_material)
+                        },
+                        startAction = {
+                            Icon(
+                                imageVector = Icons.Filled.Style,
+                                contentDescription = null,
+                                tint = colorScheme.onBackground,
+                                modifier = Modifier.padding(end = 6.dp),
+                            )
+                        },
+                        items = listOf(
+                            stringResource(R.string.mode_miuix),
+                            stringResource(R.string.mode_material),
+                        ),
+                        selectedIndex = if (preferences.uiMode == UiMode.Miuix.value) 0 else 1,
+                        onSelectedIndexChange = { index ->
+                            val mode = if (index == 0) UiMode.Miuix.value else UiMode.Material.value
+                            scope.launch { repository.setUiMode(mode) }
+                        },
                     )
-                    Text(
-                        text = stringResource(R.string.settings_monet_summary),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    ArrowPreference(
+                        title = stringResource(R.string.settings_theme),
+                        summary = when (preferences.themeMode) {
+                            1 -> stringResource(R.string.theme_light)
+                            2 -> stringResource(R.string.theme_dark)
+                            else -> stringResource(R.string.theme_system)
+                        },
+                        startAction = {
+                            Icon(
+                                imageVector = Icons.Filled.Palette,
+                                contentDescription = null,
+                                tint = colorScheme.onBackground,
+                                modifier = Modifier.padding(end = 6.dp),
+                            )
+                        },
+                        onClick = { showThemeDialog = true },
+                    )
+                    SwitchPreference(
+                        title = stringResource(R.string.settings_monet),
+                        summary = stringResource(R.string.settings_monet_summary),
+                        startAction = {
+                            Icon(
+                                imageVector = Icons.Filled.Colorize,
+                                contentDescription = null,
+                                tint = colorScheme.onBackground,
+                                modifier = Modifier.padding(end = 6.dp),
+                            )
+                        },
+                        checked = preferences.isMiuixMonet,
+                        onCheckedChange = { enabled ->
+                            scope.launch { repository.setMiuixMonet(enabled) }
+                        },
                     )
                 }
-                Switch(
-                    checked = preferences.isMiuixMonet,
-                    onCheckedChange = { scope.launch { repository.setMiuixMonet(it) } },
+            }
+
+            item {
+                Text(
+                    text = stringResource(R.string.settings_section_general),
+                    color = colorScheme.primary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 8.dp),
                 )
+            }
+
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                ) {
+                    ArrowPreference(
+                        title = stringResource(R.string.settings_language),
+                        summary = LocaleHelper.supportedLanguages
+                            .find { it.code == preferences.language }?.nativeName
+                            ?: stringResource(R.string.lang_system),
+                        startAction = {
+                            Icon(
+                                imageVector = Icons.Filled.Language,
+                                contentDescription = null,
+                                tint = colorScheme.onBackground,
+                                modifier = Modifier.padding(end = 6.dp),
+                            )
+                        },
+                        onClick = { showLanguageDialog = true },
+                    )
+                }
             }
         }
     }
@@ -154,10 +193,11 @@ fun SettingsMiuixScreen() {
             currentLanguage = preferences.language,
             onDismiss = { showLanguageDialog = false },
             onSelect = { code ->
-                scope.launch {
-                    repository.setLanguage(code)
-                    showLanguageDialog = false
-                }
+                // Persist synchronously first so attachBaseContext picks it up on recreate.
+                LocaleHelper.persistLanguage(context, code)
+                scope.launch { repository.setLanguage(code) }
+                showLanguageDialog = false
+                (context as? Activity)?.recreate()
             },
         )
     }
@@ -167,84 +207,9 @@ fun SettingsMiuixScreen() {
             currentMode = preferences.themeMode,
             onDismiss = { showThemeDialog = false },
             onSelect = { mode ->
-                scope.launch {
-                    repository.setThemeMode(mode)
-                    showThemeDialog = false
-                }
+                scope.launch { repository.setThemeMode(mode) }
+                showThemeDialog = false
             },
         )
-    }
-
-    if (showUiModeDialog) {
-        UiModeDialog(
-            currentMode = preferences.uiMode,
-            onDismiss = { showUiModeDialog = false },
-            onSelect = { mode ->
-                scope.launch {
-                    repository.setUiMode(mode)
-                    showUiModeDialog = false
-                }
-            },
-        )
-    }
-}
-
-@Composable
-private fun MiuixSectionHeader(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 4.dp, bottom = 8.dp, top = 4.dp),
-    )
-}
-
-@Composable
-private fun MiuixSettingsItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    value: String,
-    onClick: () -> Unit,
-    showDivider: Boolean,
-) {
-    Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, fontWeight = FontWeight.Medium, fontSize = 16.sp)
-            }
-            Text(
-                text = value,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 14.sp,
-            )
-            Icon(
-                imageVector = Icons.Filled.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 4.dp),
-            )
-        }
-        if (showDivider) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .height(0.5.dp)
-                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
-            )
-        }
     }
 }
