@@ -42,6 +42,7 @@ fun AppTheme(
             UiMode.Miuix -> MiuixAppTheme(
                 isDark = isDark,
                 keyColor = appPreferences.keyColor,
+                isMonet = appPreferences.isMiuixMonet,
                 content = content,
             )
             UiMode.Material -> MaterialAppTheme(
