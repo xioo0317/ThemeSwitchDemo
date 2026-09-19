@@ -27,6 +27,9 @@ class SettingsRepository(private val context: Context) {
         val ENABLE_BLUR = booleanPreferencesKey("enable_blur")
         val ENABLE_FLOATING_BOTTOM_BAR = booleanPreferencesKey("enable_floating_bottom_bar")
         val ENABLE_FLOATING_BOTTOM_BAR_BLUR = booleanPreferencesKey("enable_floating_bottom_bar_blur")
+        val ENABLE_SCROLL_ANIMATION = booleanPreferencesKey("enable_scroll_animation")
+        val ENABLE_NAVIGATION_BADGE = booleanPreferencesKey("enable_navigation_badge")
+        val SHOW_SWITCH_ICON = booleanPreferencesKey("show_switch_icon")
         val PAGE_SCALE = floatPreferencesKey("page_scale")
         val SERVER_URL = stringPreferencesKey("server_url")
     }
@@ -43,6 +46,9 @@ class SettingsRepository(private val context: Context) {
             enableBlur = prefs[PreferencesKeys.ENABLE_BLUR] ?: true,
             enableFloatingBottomBar = prefs[PreferencesKeys.ENABLE_FLOATING_BOTTOM_BAR] ?: false,
             enableFloatingBottomBarBlur = prefs[PreferencesKeys.ENABLE_FLOATING_BOTTOM_BAR_BLUR] ?: false,
+            enableScrollAnimation = prefs[PreferencesKeys.ENABLE_SCROLL_ANIMATION] ?: true,
+            enableNavigationBadge = prefs[PreferencesKeys.ENABLE_NAVIGATION_BADGE] ?: false,
+            showSwitchIcon = prefs[PreferencesKeys.SHOW_SWITCH_ICON] ?: true,
             pageScale = prefs[PreferencesKeys.PAGE_SCALE] ?: 1.0f,
             serverUrl = prefs[PreferencesKeys.SERVER_URL] ?: "http://127.0.0.1:8080",
         )
@@ -87,6 +93,18 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setEnableFloatingBottomBarBlur(enabled: Boolean) {
         context.dataStore.edit { it[PreferencesKeys.ENABLE_FLOATING_BOTTOM_BAR_BLUR] = enabled }
+    }
+
+    suspend fun setEnableScrollAnimation(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.ENABLE_SCROLL_ANIMATION] = enabled }
+    }
+
+    suspend fun setEnableNavigationBadge(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.ENABLE_NAVIGATION_BADGE] = enabled }
+    }
+
+    suspend fun setShowSwitchIcon(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.SHOW_SWITCH_ICON] = enabled }
     }
 
     suspend fun setPageScale(scale: Float) {

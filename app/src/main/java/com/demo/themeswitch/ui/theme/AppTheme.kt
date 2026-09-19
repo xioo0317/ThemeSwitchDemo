@@ -43,6 +43,9 @@ fun AppTheme(
         LocalEnableBlur provides blurSupported,
         LocalEnableFloatingBottomBar provides appPreferences.enableFloatingBottomBar,
         LocalEnableFloatingBottomBarBlur provides (blurSupported && appPreferences.enableFloatingBottomBarBlur),
+        LocalScrollAnimation provides appPreferences.enableScrollAnimation,
+        LocalEnableNavigationBadge provides appPreferences.enableNavigationBadge,
+        LocalShowSwitchIcon provides appPreferences.showSwitchIcon,
     ) {
         // 双主题嵌套：外层 miuix 主题让 miuix 组件（OverlayDialog 弹窗/MIUI 顶栏/底栏）
         // 在任何 UI 模式下都可用；内层 M3 主题继续供 Material 页面使用
@@ -80,3 +83,7 @@ val LocalColorMode = staticCompositionLocalOf { 0 }
 val LocalEnableBlur = staticCompositionLocalOf { false }
 val LocalEnableFloatingBottomBar = staticCompositionLocalOf { false }
 val LocalEnableFloatingBottomBarBlur = staticCompositionLocalOf { false }
+// KSU 对齐：页面切换滚动动画 / 底栏导航角标 / Switch thumb 勾叉图标
+val LocalScrollAnimation = staticCompositionLocalOf { true }
+val LocalEnableNavigationBadge = staticCompositionLocalOf { false }
+val LocalShowSwitchIcon = staticCompositionLocalOf { true }
