@@ -34,11 +34,14 @@ import androidx.compose.material.icons.filled.Brightness3
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.rounded.Adjust
+import androidx.compose.material.icons.rounded.Animation
 import androidx.compose.material.icons.rounded.BlurOn
 import androidx.compose.material.icons.rounded.Colorize
 import androidx.compose.material.icons.rounded.FormatSize
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.ToggleOn
 import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.Card as M3Card
 import androidx.compose.material3.CardDefaults
@@ -75,6 +78,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.demo.themeswitch.R
+import com.demo.themeswitch.ui.component.ExpressiveSwitch
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.SettingsRepository
 import com.demo.themeswitch.ui.theme.colorNameResIds
@@ -294,6 +298,59 @@ fun AppearanceMiuixScreen(onBack: () -> Unit) {
                             )
                         }
                     }
+                }
+            }
+            // KSU 官方图标/滚动动画/导航栏角标卡：滚动动画、底栏角标、Switch 勾叉图标
+            item {
+                Card(modifier = Modifier.padding(top = 12.dp).fillMaxWidth()) {
+                    SwitchPreference(
+                        title = stringResource(R.string.settings_scroll_animation),
+                        summary = stringResource(R.string.settings_scroll_animation_summary),
+                        startAction = {
+                            Icon(
+                                imageVector = Icons.Rounded.Animation,
+                                contentDescription = null,
+                                tint = colorScheme.onBackground,
+                                modifier = Modifier.padding(end = 6.dp),
+                            )
+                        },
+                        checked = preferences.enableScrollAnimation,
+                        onCheckedChange = { enabled ->
+                            scope.launch { repository.setEnableScrollAnimation(enabled) }
+                        },
+                    )
+                    SwitchPreference(
+                        title = stringResource(R.string.settings_navigation_badge),
+                        summary = stringResource(R.string.settings_navigation_badge_summary),
+                        startAction = {
+                            Icon(
+                                imageVector = Icons.Rounded.Adjust,
+                                contentDescription = null,
+                                tint = colorScheme.onBackground,
+                                modifier = Modifier.padding(end = 6.dp),
+                            )
+                        },
+                        checked = preferences.enableNavigationBadge,
+                        onCheckedChange = { enabled ->
+                            scope.launch { repository.setEnableNavigationBadge(enabled) }
+                        },
+                    )
+                    SwitchPreference(
+                        title = stringResource(R.string.settings_switch_icon),
+                        summary = stringResource(R.string.settings_switch_icon_summary),
+                        startAction = {
+                            Icon(
+                                imageVector = Icons.Rounded.ToggleOn,
+                                contentDescription = null,
+                                tint = colorScheme.onBackground,
+                                modifier = Modifier.padding(end = 6.dp),
+                            )
+                        },
+                        checked = preferences.showSwitchIcon,
+                        onCheckedChange = { enabled ->
+                            scope.launch { repository.setShowSwitchIcon(enabled) }
+                        },
+                    )
                 }
             }
             item {
@@ -530,6 +587,37 @@ fun AppearanceMaterialScreen(onBack: () -> Unit) {
                 shape = MaterialTheme.shapes.large,
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             ) {
+                MaterialSwitchRow(
+                    icon = Icons.Rounded.Animation,
+                        title = stringResource(R.string.settings_scroll_animation),
+                        summary = stringResource(R.string.settings_scroll_animation_summary),
+                        checked = preferences.enableScrollAnimation,
+                        onCheckedChange = { scope.launch { repository.setEnableScrollAnimation(it) } },
+                    )
+                    MaterialSwitchRow(
+                        icon = Icons.Rounded.Adjust,
+                        title = stringResource(R.string.settings_navigation_badge),
+                        summary = stringResource(R.string.settings_navigation_badge_summary),
+                        checked = preferences.enableNavigationBadge,
+                        onCheckedChange = { scope.launch { repository.setEnableNavigationBadge(it) } },
+                    )
+                    MaterialSwitchRow(
+                        icon = Icons.Rounded.ToggleOn,
+                        title = stringResource(R.string.settings_switch_icon),
+                        summary = stringResource(R.string.settings_switch_icon_summary),
+                        checked = preferences.showSwitchIcon,
+                    onCheckedChange = { scope.launch { repository.setShowSwitchIcon(it) } },
+                )
+            }
+
+            M3Card(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                ),
+                shape = MaterialTheme.shapes.large,
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            ) {
                 var pageScale by remember(preferences.pageScale) {
                     mutableFloatStateOf(preferences.pageScale)
                 }
@@ -621,7 +709,7 @@ private fun MaterialSwitchRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        ExpressiveSwitch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
 
