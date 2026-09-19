@@ -1,5 +1,7 @@
 package com.demo.themeswitch.ui.screen
 
+import android.os.Build
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,24 +18,40 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
-import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.DevicesOther
+import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Memory
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Widgets
+import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.CheckCircleOutline
+import androidx.compose.material.icons.rounded.HourglassTop
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.demo.themeswitch.BuildConfig
 import com.demo.themeswitch.R
+import com.demo.themeswitch.data.AppPreferences
+import com.demo.themeswitch.data.BackendMonitor
+import com.demo.themeswitch.data.SettingsRepository
 import com.demo.themeswitch.ui.theme.isInDarkTheme
+import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
@@ -45,13 +63,44 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
-private const val KERNEL_VERSION = "5.15.104-gki"
-private const val WORKING_MODE = "GKI"
-
 @Composable
 fun HomeMiuixScreen() {
+    val context = LocalContext.current
+    val repository = remember { SettingsRepository(context) }
+    val preferences by repository.preferencesFlow.collectAsState(initial = AppPreferences())
     val scrollBehavior = MiuixScrollBehavior()
     val colorScheme = MiuixTheme.colorScheme
+
+    // 连通性探测：与 Material 主页共享 BackendMonitor，进页自动探测，离线 8s 重试，点击立即重探
+    var probing by rememberSaveable { mutableStateOf(true) }
+    var online by rememberSaveable { mutableStateOf(false) }
+    var latencyMs by remember { mutableLongStateOf(0L) }
+    var probeTick by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(preferences.serverUrl, probeTick) {
+        while (true) {
+            probing = true
+            val result = BackendMonitor.refresh(preferences.serverUrl)
+            probing = false
+            online = result.online
+            latencyMs = result.latencyMs
+            if (result.online) break
+            delay(8000)
+        }
+    }
+
+    // 状态卡三态配色（暗色/亮色）：检测中中性灰、在线绿、离线红
+    val dark = isInDarkTheme()
+    val cardColor = when {
+        probing -> if (dark) Color(0xFF2B2B30) else Color(0xFFEDEDF0)
+        online -> if (dark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
+        else -> if (dark) Color(0xFF3B2125) else Color(0xFFFCE3E3)
+    }
+    val accentColor = when {
+        probing -> if (dark) Color(0xFFB9B9C0) else Color(0xFF6B6B72)
+        online -> Color(0xFF36D167)
+        else -> Color(0xFFE53935)
+    }
 
     Scaffold(
         // 外层 MainScreen Scaffold 统一处理窗口 insets，页面只管顶栏
@@ -75,13 +124,13 @@ fun HomeMiuixScreen() {
             ),
         ) {
             item {
-                // KernelSU 风格工作状态卡：无固定高度，高度由 110dp 对勾内容决定；
-                // 右下大对勾（offset 后被卡片圆角裁切）、左下模式、左上标题/版本
-                val cardColor = if (isInDarkTheme()) Color(0xFF1A3825) else Color(0xFFDFFAE4)
+                // KernelSU 风格工作状态卡：右下大图标、左下服务器地址/重试提示、
+                // 左上标题/延迟。点击卡片立即重新探测
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                        .padding(horizontal = 12.dp, vertical = 12.dp)
+                        .clickable { probeTick++ },
                     colors = CardDefaults.defaultColors(color = cardColor),
                 ) {
                     Box {
@@ -92,9 +141,13 @@ fun HomeMiuixScreen() {
                             contentAlignment = Alignment.BottomEnd,
                         ) {
                             Icon(
-                                imageVector = Icons.Rounded.CheckCircleOutline,
+                                imageVector = when {
+                                    probing -> Icons.Rounded.HourglassTop
+                                    online -> Icons.Rounded.CheckCircleOutline
+                                    else -> Icons.Rounded.Block
+                                },
                                 contentDescription = null,
-                                tint = Color(0xFF36D167),
+                                tint = accentColor,
                                 modifier = Modifier.size(110.dp),
                             )
                         }
@@ -105,7 +158,11 @@ fun HomeMiuixScreen() {
                             contentAlignment = Alignment.BottomStart,
                         ) {
                             Text(
-                                text = WORKING_MODE,
+                                text = if (online || probing) {
+                                    preferences.serverUrl
+                                } else {
+                                    stringResource(R.string.home_tap_to_retry)
+                                },
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium,
                             )
@@ -118,13 +175,23 @@ fun HomeMiuixScreen() {
                         ) {
                             Column {
                                 Text(
-                                    text = stringResource(R.string.home_working),
+                                    text = stringResource(
+                                        when {
+                                            probing -> R.string.home_probing
+                                            online -> R.string.home_working
+                                            else -> R.string.home_not_working
+                                        },
+                                    ),
                                     fontSize = 22.sp,
                                     fontWeight = FontWeight.SemiBold,
                                 )
                                 Spacer(modifier = Modifier.height(1.dp))
                                 Text(
-                                    text = stringResource(R.string.home_working_version, KERNEL_VERSION),
+                                    text = when {
+                                        probing -> stringResource(R.string.home_probing_hint)
+                                        online -> stringResource(R.string.home_latency_ms, latencyMs)
+                                        else -> preferences.serverUrl
+                                    },
                                     fontSize = 15.sp,
                                 )
                             }
@@ -144,17 +211,21 @@ fun HomeMiuixScreen() {
             }
 
             item {
+                // 真实设备信息（替换原硬编码假数据）
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp),
                 ) {
-                    MiuixInfoItem(Icons.Filled.Security, R.string.card_security, stringResource(R.string.status_working))
-                    MiuixInfoItem(Icons.Filled.DevicesOther, R.string.card_device, "Pixel 7 Pro")
-                    MiuixInfoItem(Icons.Filled.Memory, R.string.card_kernel, KERNEL_VERSION)
-                    MiuixInfoItem(Icons.Filled.Android, R.string.card_android, "Android 14")
-                    MiuixInfoItem(Icons.Filled.Storage, R.string.card_storage, "256 GB")
-                    MiuixInfoItem(Icons.Filled.BatteryChargingFull, R.string.card_battery, "85%")
+                    MiuixInfoItem(Icons.Filled.Widgets, R.string.card_app_version, "v" + BuildConfig.VERSION_NAME)
+                    MiuixInfoItem(Icons.Filled.DevicesOther, R.string.card_device, Build.MODEL)
+                    MiuixInfoItem(
+                        Icons.Filled.Android,
+                        R.string.card_android,
+                        "Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")",
+                    )
+                    MiuixInfoItem(Icons.Filled.Memory, R.string.card_kernel, System.getProperty("os.version") ?: "—")
+                    MiuixInfoItem(Icons.Filled.Dns, R.string.card_server, preferences.serverUrl)
                 }
             }
         }
