@@ -17,6 +17,8 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon as MaterialIcon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar as MaterialNavigationBar
@@ -36,12 +38,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.demo.themeswitch.R
+import com.demo.themeswitch.data.BackendMonitor
 import com.demo.themeswitch.ui.LocalUiMode
 import com.demo.themeswitch.ui.UiMode
 import com.demo.themeswitch.ui.component.FloatingCapsuleBar
 import com.demo.themeswitch.ui.component.FloatingTab
 import com.demo.themeswitch.ui.theme.LocalEnableFloatingBottomBar
 import com.demo.themeswitch.ui.theme.LocalEnableFloatingBottomBarBlur
+import com.demo.themeswitch.ui.theme.LocalEnableNavigationBadge
+import com.demo.themeswitch.ui.theme.LocalScrollAnimation
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -82,6 +87,11 @@ fun MainScreen() {
     val isMaterial = uiMode == UiMode.Material
     val enableFloating = LocalEnableFloatingBottomBar.current
     val enableFloatingBlur = LocalEnableFloatingBottomBarBlur.current
+    val enableNavigationBadge = LocalEnableNavigationBadge.current
+
+    // KSU 导航栏角标同款：开启后，执行页 tab 在后端离线时显示红点提醒
+    val backendOffline = BackendMonitor.lastResult?.online == false
+    val showApiBadge = enableNavigationBadge && backendOffline
 
     // 子页（外观/关于）隐藏底栏，只在首页/执行页/设置页显示
     val showBottomBar = currentRoute == Screen.Home.route ||
@@ -112,6 +122,7 @@ fun MainScreen() {
                 MainBottomBar(
                     isMaterial = isMaterial,
                     enableFloating = enableFloating,
+                    showApiBadge = showApiBadge,
                     blurEnabled = blurBackdrop != null,
                     backdrop = blurBackdrop,
                     currentRoute = currentRoute,
@@ -139,6 +150,7 @@ fun MainScreen() {
 private fun MainBottomBar(
     isMaterial: Boolean,
     enableFloating: Boolean,
+    showApiBadge: Boolean,
     blurEnabled: Boolean,
     backdrop: LayerBackdrop?,
     currentRoute: String,
@@ -167,6 +179,7 @@ private fun MainBottomBar(
                 filledIcon = icons.first,
                 outlinedIcon = icons.second,
                 label = stringResource(screen.titleResId),
+                showBadge = showApiBadge && screen == Screen.Api,
             )
         }
         FloatingCapsuleBar(
@@ -189,10 +202,19 @@ private fun MainBottomBar(
                 val selected = currentRoute == screen.first.route
                 MaterialNavigationBarItem(
                     icon = {
-                        MaterialIcon(
-                            imageVector = if (selected) filledIcon else outlinedIcon,
-                            contentDescription = stringResource(screen.first.titleResId),
-                        )
+                        if (showApiBadge && screen == Screen.Api && !selected) {
+                            BadgedBox(badge = { Badge() }) {
+                                MaterialIcon(
+                                    imageVector = if (selected) filledIcon else outlinedIcon,
+                                    contentDescription = stringResource(screen.first.titleResId),
+                                )
+                            }
+                        } else {
+                            MaterialIcon(
+                                imageVector = if (selected) filledIcon else outlinedIcon,
+                                contentDescription = stringResource(screen.first.titleResId),
+                            )
+                        }
                     },
                     label = { MaterialText(stringResource(screen.first.titleResId)) },
                     selected = selected,
@@ -219,21 +241,39 @@ private fun MainBottomBar(
 
 @Composable
 private fun MainNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
+    // KSU scrollAnimation 同款：关闭后页面切换退化为纯淡入淡出
+    val scrollAnimation = LocalScrollAnimation.current
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route,
         modifier = modifier,
         enterTransition = {
-            slideInHorizontally(animationSpec = tween(300)) { it / 4 } + fadeIn(tween(300))
+            if (scrollAnimation) {
+                slideInHorizontally(animationSpec = tween(300)) { it / 4 } + fadeIn(tween(300))
+            } else {
+                fadeIn(animationSpec = tween(150))
+            }
         },
         exitTransition = {
-            slideOutHorizontally(animationSpec = tween(300)) { -it / 4 } + fadeOut(tween(300))
+            if (scrollAnimation) {
+                slideOutHorizontally(animationSpec = tween(300)) { -it / 4 } + fadeOut(tween(300))
+            } else {
+                fadeOut(animationSpec = tween(150))
+            }
         },
         popEnterTransition = {
-            slideInHorizontally(animationSpec = tween(300)) { -it / 4 } + fadeIn(tween(300))
+            if (scrollAnimation) {
+                slideInHorizontally(animationSpec = tween(300)) { -it / 4 } + fadeIn(tween(300))
+            } else {
+                fadeIn(animationSpec = tween(150))
+            }
         },
         popExitTransition = {
-            slideOutHorizontally(animationSpec = tween(300)) { it / 4 } + fadeOut(tween(300))
+            if (scrollAnimation) {
+                slideOutHorizontally(animationSpec = tween(300)) { it / 4 } + fadeOut(tween(300))
+            } else {
+                fadeOut(animationSpec = tween(150))
+            }
         },
     ) {
         composable(Screen.Home.route) {
