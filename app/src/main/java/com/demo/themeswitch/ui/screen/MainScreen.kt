@@ -38,11 +38,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.demo.themeswitch.R
-import com.demo.themeswitch.data.BackendMonitor
 import com.demo.themeswitch.ui.LocalUiMode
 import com.demo.themeswitch.ui.UiMode
 import com.demo.themeswitch.ui.component.FloatingCapsuleBar
 import com.demo.themeswitch.ui.component.FloatingTab
+import com.demo.themeswitch.data.BackendMonitor
 import com.demo.themeswitch.ui.theme.LocalEnableFloatingBottomBar
 import com.demo.themeswitch.ui.theme.LocalEnableFloatingBottomBarBlur
 import com.demo.themeswitch.ui.theme.LocalEnableNavigationBadge
