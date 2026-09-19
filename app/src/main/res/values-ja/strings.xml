@@ -46,4 +46,19 @@
     <string name="api_status_done">ストリーム完了（[DONE] 受信）</string>
     <string name="api_status_error">リクエスト失敗</string>
     <string name="api_invalid_url">サーバーアドレスが無効です</string>
+
+    <!-- KSU: home connectivity probe + new toggles -->
+    <string name="home_not_working">停止中</string>
+    <string name="home_probing">確認中…</string>
+    <string name="home_probing_hint">接続を確認しています…</string>
+    <string name="home_latency_ms">遅延 %1$d ms</string>
+    <string name="home_tap_to_retry">タップして再確認</string>
+    <string name="card_app_version">アプリのバージョン</string>
+    <string name="card_server">サーバー</string>
+    <string name="settings_scroll_animation">スクロールアニメーション</string>
+    <string name="settings_scroll_animation_summary">ページ遷移アニメーションを有効にする</string>
+    <string name="settings_navigation_badge">ナビゲーションバーのバッジ</string>
+    <string name="settings_navigation_badge_summary">バックエンドがオフラインのときに赤い点を表示</string>
+    <string name="settings_switch_icon">スイッチのアイコン</string>
+    <string name="settings_switch_icon_summary">スイッチのつまみにチェック/バツを表示</string>
 </resources>

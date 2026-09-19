@@ -46,4 +46,19 @@
     <string name="api_status_done">Flux terminé ([DONE] reçu)</string>
     <string name="api_status_error">Échec de la requête</string>
     <string name="api_invalid_url">Adresse de serveur invalide</string>
+
+    <!-- KSU: home connectivity probe + new toggles -->
+    <string name="home_not_working">Inactif</string>
+    <string name="home_probing">Vérification…</string>
+    <string name="home_probing_hint">Vérification de la connexion…</string>
+    <string name="home_latency_ms">Latence %1$d ms</string>
+    <string name="home_tap_to_retry">Touchez pour revérifier</string>
+    <string name="card_app_version">Version de l\'application</string>
+    <string name="card_server">Serveur</string>
+    <string name="settings_scroll_animation">Animation de défilement</string>
+    <string name="settings_scroll_animation_summary">Activer l\'animation de transition</string>
+    <string name="settings_navigation_badge">Badge de la barre de navigation</string>
+    <string name="settings_navigation_badge_summary">Affiche un point rouge quand le serveur est hors ligne</string>
+    <string name="settings_switch_icon">Icône de l\'interrupteur</string>
+    <string name="settings_switch_icon_summary">Affiche une coche ou une croix sur l\'interrupteur</string>
 </resources>

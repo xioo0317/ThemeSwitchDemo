@@ -46,4 +46,19 @@
     <string name="api_status_done">Übertragung beendet ([DONE] empfangen)</string>
     <string name="api_status_error">Anfrage fehlgeschlagen</string>
     <string name="api_invalid_url">Ungültige Serveradresse</string>
+
+    <!-- KSU: home connectivity probe + new toggles -->
+    <string name="home_not_working">Nicht aktiv</string>
+    <string name="home_probing">Wird geprüft…</string>
+    <string name="home_probing_hint">Verbindung wird geprüft…</string>
+    <string name="home_latency_ms">Latenz %1$d ms</string>
+    <string name="home_tap_to_retry">Zum erneuten Prüfen tippen</string>
+    <string name="card_app_version">App-Version</string>
+    <string name="card_server">Server</string>
+    <string name="settings_scroll_animation">Scrollanimation</string>
+    <string name="settings_scroll_animation_summary">Seitenübergangsanimation aktivieren</string>
+    <string name="settings_navigation_badge">Navigationsleisten-Badge</string>
+    <string name="settings_navigation_badge_summary">Roter Punkt, wenn das Backend offline ist</string>
+    <string name="settings_switch_icon">Schalter-Symbol</string>
+    <string name="settings_switch_icon_summary">Häkchen/Kreuz auf dem Schalterknopf anzeigen</string>
 </resources>

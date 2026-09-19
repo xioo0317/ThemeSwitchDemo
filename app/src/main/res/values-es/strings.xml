@@ -46,4 +46,19 @@
     <string name="api_status_done">Flujo finalizado ([DONE] recibido)</string>
     <string name="api_status_error">Solicitud fallida</string>
     <string name="api_invalid_url">Dirección de servidor no válida</string>
+
+    <!-- KSU: home connectivity probe + new toggles -->
+    <string name="home_not_working">Sin funcionar</string>
+    <string name="home_probing">Comprobando…</string>
+    <string name="home_probing_hint">Comprobando conexión…</string>
+    <string name="home_latency_ms">Latencia %1$d ms</string>
+    <string name="home_tap_to_retry">Toca para volver a comprobar</string>
+    <string name="card_app_version">Versión de la app</string>
+    <string name="card_server">Servidor</string>
+    <string name="settings_scroll_animation">Animación de desplazamiento</string>
+    <string name="settings_scroll_animation_summary">Activar la animación de transición</string>
+    <string name="settings_navigation_badge">Insignia de la barra de navegación</string>
+    <string name="settings_navigation_badge_summary">Muestra un punto rojo cuando el servidor está sin conexión</string>
+    <string name="settings_switch_icon">Icono del interruptor</string>
+    <string name="settings_switch_icon_summary">Muestra una marca o cruz en el interruptor</string>
 </resources>
