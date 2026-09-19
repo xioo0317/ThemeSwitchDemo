@@ -43,6 +43,8 @@ data class FloatingTab(
     val filledIcon: ImageVector,
     val outlinedIcon: ImageVector,
     val label: String,
+    /** KSU 导航栏角标同款：图标右上角红点 */
+    val showBadge: Boolean = false,
 )
 
 /**
@@ -122,12 +124,23 @@ fun FloatingCapsuleBar(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    MaterialIcon(
-                        imageVector = if (selected) tab.filledIcon else tab.outlinedIcon,
-                        contentDescription = tab.label,
-                        tint = if (selected) accentColor else contentColor,
-                        modifier = Modifier.size(22.dp),
-                    )
+                    Box {
+                        MaterialIcon(
+                            imageVector = if (selected) tab.filledIcon else tab.outlinedIcon,
+                            contentDescription = tab.label,
+                            tint = if (selected) accentColor else contentColor,
+                            modifier = Modifier.size(22.dp),
+                        )
+                        if (tab.showBadge) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .size(7.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFFE53935)),
+                            )
+                        }
+                    }
                     MaterialText(
                         text = tab.label,
                         fontSize = 10.sp,
