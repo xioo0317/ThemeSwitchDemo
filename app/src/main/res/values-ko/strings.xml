@@ -46,4 +46,19 @@
     <string name="api_status_done">스트림 완료([DONE] 수신)</string>
     <string name="api_status_error">요청 실패</string>
     <string name="api_invalid_url">잘못된 서버 주소</string>
+
+    <!-- KSU: home connectivity probe + new toggles -->
+    <string name="home_not_working">작동 안 함</string>
+    <string name="home_probing">확인 중…</string>
+    <string name="home_probing_hint">연결 확인 중…</string>
+    <string name="home_latency_ms">지연 %1$d ms</string>
+    <string name="home_tap_to_retry">탭하여 다시 확인</string>
+    <string name="card_app_version">앱 버전</string>
+    <string name="card_server">서버</string>
+    <string name="settings_scroll_animation">스크롤 애니메이션</string>
+    <string name="settings_scroll_animation_summary">페이지 전환 애니메이션 사용</string>
+    <string name="settings_navigation_badge">탐색 모음 배지</string>
+    <string name="settings_navigation_badge_summary">백엔드가 오프라인일 때 빨간 점 표시</string>
+    <string name="settings_switch_icon">스위치 아이콘</string>
+    <string name="settings_switch_icon_summary">스위치 썸에 체크/십자 아이콘 표시</string>
 </resources>

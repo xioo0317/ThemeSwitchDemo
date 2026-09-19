@@ -78,4 +78,19 @@
     <string name="api_status_done">流已结束（已收到 [DONE]）</string>
     <string name="api_status_error">请求失败</string>
     <string name="api_invalid_url">服务器地址无效</string>
+
+    <!-- KSU: home connectivity probe + new toggles -->
+    <string name="home_not_working">未工作</string>
+    <string name="home_probing">检测中…</string>
+    <string name="home_probing_hint">正在检测连接…</string>
+    <string name="home_latency_ms">延迟 %1$d ms</string>
+    <string name="home_tap_to_retry">点击重新检测</string>
+    <string name="card_app_version">应用版本</string>
+    <string name="card_server">服务器</string>
+    <string name="settings_scroll_animation">滚动动画</string>
+    <string name="settings_scroll_animation_summary">启用页面切换动画</string>
+    <string name="settings_navigation_badge">导航栏角标</string>
+    <string name="settings_navigation_badge_summary">后端离线时显示红点提醒</string>
+    <string name="settings_switch_icon">切换开关图标</string>
+    <string name="settings_switch_icon_summary">在开关滑块上显示勾/叉图标</string>
 </resources>

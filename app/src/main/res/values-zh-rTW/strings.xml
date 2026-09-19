@@ -78,4 +78,19 @@
     <string name="api_status_done">串流已結束（已收到 [DONE]）</string>
     <string name="api_status_error">請求失敗</string>
     <string name="api_invalid_url">伺服器位址無效</string>
+
+    <!-- KSU: home connectivity probe + new toggles -->
+    <string name="home_not_working">未工作</string>
+    <string name="home_probing">檢測中…</string>
+    <string name="home_probing_hint">正在檢測連線…</string>
+    <string name="home_latency_ms">延遲 %1$d ms</string>
+    <string name="home_tap_to_retry">點擊重新檢測</string>
+    <string name="card_app_version">應用程式版本</string>
+    <string name="card_server">伺服器</string>
+    <string name="settings_scroll_animation">捲動動畫</string>
+    <string name="settings_scroll_animation_summary">啟用頁面切換動畫</string>
+    <string name="settings_navigation_badge">導覽列角標</string>
+    <string name="settings_navigation_badge_summary">後端離線時顯示紅點提醒</string>
+    <string name="settings_switch_icon">切換開關圖示</string>
+    <string name="settings_switch_icon_summary">在開關滑塊上顯示勾/叉圖示</string>
 </resources>

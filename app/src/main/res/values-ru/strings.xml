@@ -46,4 +46,19 @@
     <string name="api_status_done">Поток завершён ([DONE] получен)</string>
     <string name="api_status_error">Ошибка запроса</string>
     <string name="api_invalid_url">Неверный адрес сервера</string>
+
+    <!-- KSU: home connectivity probe + new toggles -->
+    <string name="home_not_working">Не работает</string>
+    <string name="home_probing">Проверка…</string>
+    <string name="home_probing_hint">Проверка соединения…</string>
+    <string name="home_latency_ms">Задержка %1$d мс</string>
+    <string name="home_tap_to_retry">Нажмите для повторной проверки</string>
+    <string name="card_app_version">Версия приложения</string>
+    <string name="card_server">Сервер</string>
+    <string name="settings_scroll_animation">Анимация прокрутки</string>
+    <string name="settings_scroll_animation_summary">Включить анимацию перехода страниц</string>
+    <string name="settings_navigation_badge">Значок панели навигации</string>
+    <string name="settings_navigation_badge_summary">Красная точка, когда бэкенд недоступен</string>
+    <string name="settings_switch_icon">Значок переключателя</string>
+    <string name="settings_switch_icon_summary">Показывать галочку или крестик на переключателе</string>
 </resources>
