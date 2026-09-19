@@ -62,9 +62,20 @@
     <string name="dialog_confirm">確定</string>
     <string name="about_desc">一個展示雙主題架構的示範應用，支援 Material Design 3 與 MIUI 風格切換，以及多語言切換。</string>
     <string name="about_arch_title">架構說明</string>
-    <string name="about_arch_desc">本應用使用 UiMode 枚舉和 CompositionLocal 在執行時切換 Material 3（卡片式）和 MIUI 風格介面。靈感來自 KernelSU 的雙主題架構。</string>
+    <string name="about_arch_desc">本應用使用 UiMode 枚舉和 CompositionLocal 在執行時切換 Material 3（卡片式）和 MIUI 風格界面。靈感來自 KernelSU 的雙主題架構。</string>
     <string name="home_working">工作中</string>
     <string name="home_working_version">版本 %1$s</string>
     <string name="about_github">GitHub 儲存庫</string>
     <string name="about_github_summary">在 GitHub 上開啟此專案</string>
+    <string name="nav_api">執行</string>
+    <string name="api_server_address">伺服器位址</string>
+    <string name="api_action_hint">動作</string>
+    <string name="api_custom_body">自訂請求體（可選，JSON）</string>
+    <string name="api_response">響應串流</string>
+    <string name="api_empty_hint">選擇動作並點擊執行</string>
+    <string name="api_run">執行</string>
+    <string name="api_running">執行中…</string>
+    <string name="api_status_done">串流已結束（已收到 [DONE]）</string>
+    <string name="api_status_error">請求失敗</string>
+    <string name="api_invalid_url">伺服器位址無效</string>
 </resources>

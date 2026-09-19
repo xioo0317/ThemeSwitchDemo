@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon as MaterialIcon
@@ -50,6 +52,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 sealed class Screen(val route: String, val titleResId: Int) {
     data object Home : Screen("home", R.string.nav_home)
+    data object Api : Screen("api", R.string.nav_api)
     data object Settings : Screen("settings", R.string.nav_settings)
     // 子页面：从设置页进入，不显示底栏
     data object Appearance : Screen("appearance", R.string.settings_section_appearance)
@@ -68,9 +71,10 @@ fun MainScreen() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
 
-    // 底栏两项：主页 / 设置（外观与关于从设置页进入）
+    // 底栏三项：主页 / 执行 / 设置（外观与关于从设置页进入）
     val items = listOf(
         Screen.Home to (Icons.Filled.Home to Icons.Outlined.Home),
+        Screen.Api to (Icons.Filled.Bolt to Icons.Outlined.Bolt),
         Screen.Settings to (Icons.Filled.Settings to Icons.Outlined.Settings),
     )
 
@@ -79,8 +83,9 @@ fun MainScreen() {
     val enableFloating = LocalEnableFloatingBottomBar.current
     val enableFloatingBlur = LocalEnableFloatingBottomBarBlur.current
 
-    // 子页（外观/关于）隐藏底栏，只在首页/设置页显示
-    val showBottomBar = currentRoute == Screen.Home.route || currentRoute == Screen.Settings.route
+    // 子页（外观/关于）隐藏底栏，只在首页/执行页/设置页显示
+    val showBottomBar = currentRoute == Screen.Home.route ||
+        currentRoute == Screen.Api.route || currentRoute == Screen.Settings.route
 
     // 悬浮底栏液态玻璃的取景层：记录内容区（含背景色），底栏用它做背景模糊
     val containerColor = if (isMaterial) {
@@ -235,6 +240,12 @@ private fun MainNavHost(navController: NavHostController, modifier: Modifier = M
             when (LocalUiMode.current) {
                 UiMode.Material -> HomeMaterialScreen()
                 UiMode.Miuix -> HomeMiuixScreen()
+            }
+        }
+        composable(Screen.Api.route) {
+            when (LocalUiMode.current) {
+                UiMode.Material -> ApiMaterialScreen()
+                UiMode.Miuix -> ApiMiuixScreen()
             }
         }
         composable(Screen.Settings.route) {

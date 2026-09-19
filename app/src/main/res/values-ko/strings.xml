@@ -35,4 +35,15 @@
     <string name="about_arch_desc">이 앱은 UiMode 열거형과 CompositionLocal을 사용하여 런타임에 Material 3(카드 기반)와 MIUI 스타일 UI를 전환합니다. KernelSU의 듀얼 테마 아키텍처에서 영감을 받았습니다.</string>
     <string name="home_working">작동 중</string>
     <string name="home_working_version">버전 %1$s</string>
+    <string name="nav_api">실행</string>
+    <string name="api_server_address">서버 주소</string>
+    <string name="api_action_hint">동작</string>
+    <string name="api_custom_body">사용자 지정 요청 본문(선택, JSON)</string>
+    <string name="api_response">응답 스트림</string>
+    <string name="api_empty_hint">작업을 선택하고 실행을 누르세요</string>
+    <string name="api_run">실행</string>
+    <string name="api_running">실행 중…</string>
+    <string name="api_status_done">스트림 완료([DONE] 수신)</string>
+    <string name="api_status_error">요청 실패</string>
+    <string name="api_invalid_url">잘못된 서버 주소</string>
 </resources>

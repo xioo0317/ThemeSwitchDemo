@@ -28,6 +28,7 @@ class SettingsRepository(private val context: Context) {
         val ENABLE_FLOATING_BOTTOM_BAR = booleanPreferencesKey("enable_floating_bottom_bar")
         val ENABLE_FLOATING_BOTTOM_BAR_BLUR = booleanPreferencesKey("enable_floating_bottom_bar_blur")
         val PAGE_SCALE = floatPreferencesKey("page_scale")
+        val SERVER_URL = stringPreferencesKey("server_url")
     }
 
     val preferencesFlow: Flow<AppPreferences> = context.dataStore.data.map { prefs ->
@@ -43,6 +44,7 @@ class SettingsRepository(private val context: Context) {
             enableFloatingBottomBar = prefs[PreferencesKeys.ENABLE_FLOATING_BOTTOM_BAR] ?: false,
             enableFloatingBottomBarBlur = prefs[PreferencesKeys.ENABLE_FLOATING_BOTTOM_BAR_BLUR] ?: false,
             pageScale = prefs[PreferencesKeys.PAGE_SCALE] ?: 1.0f,
+            serverUrl = prefs[PreferencesKeys.SERVER_URL] ?: "http://127.0.0.1:8080",
         )
     }
 
@@ -89,6 +91,10 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setPageScale(scale: Float) {
         context.dataStore.edit { it[PreferencesKeys.PAGE_SCALE] = scale }
+    }
+
+    suspend fun setServerUrl(url: String) {
+        context.dataStore.edit { it[PreferencesKeys.SERVER_URL] = url }
     }
 
     companion object {

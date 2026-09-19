@@ -35,4 +35,15 @@
     <string name="about_arch_desc">Приложение использует перечисление UiMode с CompositionLocal для переключения между Material 3 (на основе карточек) и интерфейсом MIUI в реальном времени. Вдохновлено архитектурой двойной темы KernelSU.</string>
     <string name="home_working">Работает</string>
     <string name="home_working_version">Версия %1$s</string>
+    <string name="nav_api">Запуск</string>
+    <string name="api_server_address">Адрес сервера</string>
+    <string name="api_action_hint">Действие</string>
+    <string name="api_custom_body">Своё тело запроса (необязательно, JSON)</string>
+    <string name="api_response">Поток ответа</string>
+    <string name="api_empty_hint">Выберите действие и нажмите «Запустить»</string>
+    <string name="api_run">Запустить</string>
+    <string name="api_running">Выполняется…</string>
+    <string name="api_status_done">Поток завершён ([DONE] получен)</string>
+    <string name="api_status_error">Ошибка запроса</string>
+    <string name="api_invalid_url">Неверный адрес сервера</string>
 </resources>

@@ -35,4 +35,15 @@
     <string name="about_arch_desc">本アプリはUiMode列挙体とCompositionLocalを使用して、実行時にMaterial 3（カードベース）とMIUIスタイルのUIを切り替えます。KernelSUのデュアルテーマアーキテクチャにインスパイアされています。</string>
     <string name="home_working">稼働中</string>
     <string name="home_working_version">バージョン %1$s</string>
+    <string name="nav_api">実行</string>
+    <string name="api_server_address">サーバーアドレス</string>
+    <string name="api_action_hint">アクション</string>
+    <string name="api_custom_body">カスタムリクエストボディ（任意、JSON）</string>
+    <string name="api_response">レスポンスストリーム</string>
+    <string name="api_empty_hint">アクションを選んで実行をタップ</string>
+    <string name="api_run">実行</string>
+    <string name="api_running">実行中…</string>
+    <string name="api_status_done">ストリーム完了（[DONE] 受信）</string>
+    <string name="api_status_error">リクエスト失敗</string>
+    <string name="api_invalid_url">サーバーアドレスが無効です</string>
 </resources>

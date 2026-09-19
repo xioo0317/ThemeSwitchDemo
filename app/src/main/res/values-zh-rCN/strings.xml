@@ -67,4 +67,15 @@
     <string name="home_working_version">版本 %1$s</string>
     <string name="about_github">GitHub 仓库</string>
     <string name="about_github_summary">在 GitHub 上打开此项目</string>
+    <string name="nav_api">执行</string>
+    <string name="api_server_address">服务器地址</string>
+    <string name="api_action_hint">动作</string>
+    <string name="api_custom_body">自定义请求体（可选，JSON）</string>
+    <string name="api_response">响应流</string>
+    <string name="api_empty_hint">选择动作并点击执行</string>
+    <string name="api_run">执行</string>
+    <string name="api_running">执行中…</string>
+    <string name="api_status_done">流已结束（已收到 [DONE]）</string>
+    <string name="api_status_error">请求失败</string>
+    <string name="api_invalid_url">服务器地址无效</string>
 </resources>

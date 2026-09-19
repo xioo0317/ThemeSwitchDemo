@@ -35,4 +35,15 @@
     <string name="about_arch_desc">Esta aplicación utiliza la enumeración UiMode con CompositionLocal para alternar entre las interfaces Material 3 (basadas en tarjetas) y MIUI en tiempo de ejecución. Inspirada en la arquitectura de tema dual de KernelSU.</string>
     <string name="home_working">En funcionamiento</string>
     <string name="home_working_version">Versión %1$s</string>
+    <string name="nav_api">Ejecutar</string>
+    <string name="api_server_address">Dirección del servidor</string>
+    <string name="api_action_hint">Acción</string>
+    <string name="api_custom_body">Cuerpo personalizado (opcional, JSON)</string>
+    <string name="api_response">Flujo de respuesta</string>
+    <string name="api_empty_hint">Selecciona una acción y toca Ejecutar</string>
+    <string name="api_run">Ejecutar</string>
+    <string name="api_running">Ejecutando…</string>
+    <string name="api_status_done">Flujo finalizado ([DONE] recibido)</string>
+    <string name="api_status_error">Solicitud fallida</string>
+    <string name="api_invalid_url">Dirección de servidor no válida</string>
 </resources>

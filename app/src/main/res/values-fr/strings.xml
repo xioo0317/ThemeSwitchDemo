@@ -35,4 +35,15 @@
     <string name="about_arch_desc">Cette application utilise l\'énumération UiMode avec CompositionLocal pour basculer entre les interfaces Material 3 (cartes) et MIUI en temps d\'exécution. Inspirée par l\'architecture à double thème de KernelSU.</string>
     <string name="home_working">En fonctionnement</string>
     <string name="home_working_version">Version %1$s</string>
+    <string name="nav_api">Exécuter</string>
+    <string name="api_server_address">Adresse du serveur</string>
+    <string name="api_action_hint">Action</string>
+    <string name="api_custom_body">Corps de requête personnalisé (facultatif, JSON)</string>
+    <string name="api_response">Flux de réponse</string>
+    <string name="api_empty_hint">Choisissez une action puis exécutez</string>
+    <string name="api_run">Exécuter</string>
+    <string name="api_running">Exécution…</string>
+    <string name="api_status_done">Flux terminé ([DONE] reçu)</string>
+    <string name="api_status_error">Échec de la requête</string>
+    <string name="api_invalid_url">Adresse de serveur invalide</string>
 </resources>

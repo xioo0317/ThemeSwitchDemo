@@ -16,4 +16,6 @@ data class AppPreferences(
     val enableFloatingBottomBarBlur: Boolean = false,
     // 全局界面缩放
     val pageScale: Float = 1.0f,
+    // C++ 本地后端地址（POST /api/v1/execute，SSE 流式）
+    val serverUrl: String = "http://127.0.0.1:8080",
 )
