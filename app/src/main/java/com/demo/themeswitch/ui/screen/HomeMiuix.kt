@@ -21,22 +21,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.DevicesOther
-import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.CheckCircleOutline
 import androidx.compose.material.icons.rounded.ErrorOutline
-import androidx.compose.material.icons.rounded.HourglassTop
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,7 +49,6 @@ import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.BackendMonitor
 import com.demo.themeswitch.data.SettingsRepository
 import com.demo.themeswitch.ui.theme.isInDarkTheme
-import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
@@ -63,7 +57,6 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -75,22 +68,14 @@ fun HomeMiuixScreen() {
     val scrollBehavior = MiuixScrollBehavior()
     val colorScheme = MiuixTheme.colorScheme
 
-    // 连通性探测：进页自动探测，离线 8s 自动重试，不再手动点击刷新
-    var probing by rememberSaveable { mutableStateOf(true) }
-    var online by rememberSaveable { mutableStateOf(false) }
+    // 每次进首页探测一次后端状态，只探测一次，不循环重试
+    var online by remember { mutableStateOf(false) }
     var latencyMs by remember { mutableLongStateOf(0L) }
-    var probeTick by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(preferences.serverUrl, probeTick) {
-        while (true) {
-            probing = true
-            val result = BackendMonitor.refresh(preferences.serverUrl)
-            probing = false
-            online = result.online
-            latencyMs = result.latencyMs
-            if (result.online) break
-            delay(8000)
-        }
+    LaunchedEffect(preferences.serverUrl) {
+        val result = BackendMonitor.refresh(preferences.serverUrl)
+        online = result.online
+        latencyMs = result.latencyMs
     }
 
     Scaffold(
@@ -119,14 +104,10 @@ fun HomeMiuixScreen() {
                     modifier = Modifier.padding(top = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    // KSU StatusCard 完全照搬
                     StatusCard(
-                        probing = probing,
                         online = online,
                         latencyMs = latencyMs,
-                        serverUrl = preferences.serverUrl,
                     )
-                    // KSU InfoCard 完全照搬
                     InfoCard(
                         appVersion = "v" + BuildConfig.VERSION_NAME,
                         deviceModel = Build.MODEL,
@@ -140,88 +121,94 @@ fun HomeMiuixScreen() {
 }
 
 /**
- * KSU StatusCard 完全照搬：
- * - 右下大图标 110dp
- * - 左下底部文字
- * - 左上标题+副标题
- * - 按压倾斜反馈
+ * KSU 同款状态卡片：
+ * - 工作中：浅绿色底色 + 右下角大对勾
+ * - 未工作：纯白底色 + 左侧感叹号 + 右侧双行文字（完全复刻 KSU 未安装样式）
  */
 @Composable
 private fun StatusCard(
-    probing: Boolean,
     online: Boolean,
     latencyMs: Long,
-    serverUrl: String,
 ) {
     val colorScheme = MiuixTheme.colorScheme
     val dark = isInDarkTheme()
 
-    val cardColor = when {
-        probing -> colorScheme.surfaceContainer
-        online -> if (dark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
-        else -> if (dark) Color(0xFF2A2223) else Color(0xFFF0EAEA)
-    }
-    val iconTint = when {
-        probing -> colorScheme.primary
-        online -> Color(0xFF36D167)
-        else -> Color(0xFFB07070)
+    val cardColor = if (online) {
+        if (dark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
+    } else {
+        colorScheme.surface
     }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.defaultColors(color = cardColor),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min),
-        ) {
-            // 右下大图标
+        if (online) {
+            // 工作中：右下角大图标布局
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .offset(27.dp, 31.dp),
-                contentAlignment = Alignment.BottomEnd,
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .offset(27.dp, 31.dp),
+                    contentAlignment = Alignment.BottomEnd,
+                ) {
+                    Icon(
+                        modifier = Modifier.size(110.dp),
+                        imageVector = Icons.Rounded.CheckCircleOutline,
+                        tint = Color(0xFF36D167),
+                        contentDescription = null,
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp, 14.dp),
+                    contentAlignment = Alignment.TopStart,
+                ) {
+                    Column {
+                        Text(
+                            text = stringResource(R.string.home_working),
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Spacer(Modifier.height(1.dp))
+                        Text(
+                            text = stringResource(R.string.home_latency_ms, latencyMs),
+                            fontSize = 15.sp,
+                        )
+                    }
+                }
+            }
+        } else {
+            // 未工作：完全复刻 KSU 未安装样式 - 左图标 + 右侧双行文字
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(22.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    modifier = Modifier.size(110.dp),
-                    imageVector = when {
-                        probing -> Icons.Rounded.HourglassTop
-                        online -> Icons.Rounded.CheckCircleOutline
-                        else -> Icons.Rounded.Block
-                    },
-                    tint = iconTint,
+                    imageVector = Icons.Rounded.ErrorOutline,
                     contentDescription = null,
+                    tint = colorScheme.onSurface,
+                    modifier = Modifier.size(42.dp),
                 )
-            }
-            // 左下底部文字 - 已移除，只保留状态和图标
-            // 左上标题 + 副标题
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp, 14.dp),
-                contentAlignment = Alignment.TopStart,
-            ) {
+                Spacer(Modifier.width(16.dp))
                 Column {
                     Text(
-                        text = stringResource(
-                            when {
-                                probing -> R.string.home_probing
-                                online -> R.string.home_working
-                                else -> R.string.home_not_working
-                            },
-                        ),
+                        text = stringResource(R.string.home_not_working),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
-                    Spacer(Modifier.height(1.dp))
+                    Spacer(Modifier.height(2.dp))
                     Text(
-                        text = when {
-                            probing -> stringResource(R.string.home_probing_hint)
-                            online -> stringResource(R.string.home_latency_ms, latencyMs)
-                            else -> ""
-                        },
+                        text = stringResource(R.string.home_not_working_hint),
                         fontSize = 15.sp,
+                        color = colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -230,10 +217,7 @@ private fun StatusCard(
 }
 
 /**
- * KSU InfoCard 完全照搬：
- * - 图标 + 标题(上) + 内容(下) 两行布局
- * - 卡片内边距 16dp
- * - 行间距 24dp
+ * KSU InfoCard 同款：图标 + 标题(上) + 内容(下) 两行布局
  */
 @Composable
 private fun InfoCardItem(
