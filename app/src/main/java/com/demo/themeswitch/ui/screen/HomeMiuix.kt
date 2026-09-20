@@ -171,7 +171,6 @@ private fun StatusCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.defaultColors(color = cardColor),
-        pressFeedbackType = PressFeedbackType.Tilt,
     ) {
         Box(
             modifier = Modifier
