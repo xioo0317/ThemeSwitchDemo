@@ -1,7 +1,6 @@
 package com.demo.themeswitch.ui.screen
 
 import android.os.Build
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -71,7 +70,7 @@ fun HomeMiuixScreen() {
     val scrollBehavior = MiuixScrollBehavior()
     val colorScheme = MiuixTheme.colorScheme
 
-    // 连通性探测：与 Material 主页共享 BackendMonitor，进页自动探测，离线 8s 重试，点击立即重探
+    // 连通性探测：进页自动探测，离线 8s 自动重试，不再手动点击刷新
     var probing by rememberSaveable { mutableStateOf(true) }
     var online by rememberSaveable { mutableStateOf(false) }
     var latencyMs by remember { mutableLongStateOf(0L) }
@@ -89,21 +88,22 @@ fun HomeMiuixScreen() {
         }
     }
 
-    // 状态卡三态配色（暗色/亮色）：检测中中性灰、在线绿、离线红
+    // 状态卡三态配色（暗色/亮色）：检测中中性灰、在线绿、离线柔和低饱和红
     val dark = isInDarkTheme()
     val cardColor = when {
         probing -> if (dark) Color(0xFF2B2B30) else Color(0xFFEDEDF0)
         online -> if (dark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
-        else -> if (dark) Color(0xFF3B2125) else Color(0xFFFCE3E3)
+        // 优化：降低离线卡片饱和度，更柔和不刺眼
+        else -> if (dark) Color(0xFF2A2223) else Color(0xFFF0EAEA)
     }
     val accentColor = when {
         probing -> if (dark) Color(0xFFB9B9C0) else Color(0xFF6B6B72)
         online -> Color(0xFF36D167)
-        else -> Color(0xFFE53935)
+        // 优化：离线图标颜色更柔和
+        else -> Color(0xFFB07070)
     }
 
     Scaffold(
-        // 外层 MainScreen Scaffold 统一处理窗口 insets，页面只管顶栏
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
@@ -124,13 +124,11 @@ fun HomeMiuixScreen() {
             ),
         ) {
             item {
-                // KernelSU 风格工作状态卡：右下大图标、左下服务器地址/重试提示、
-                // 左上标题/延迟。点击卡片立即重新探测
+                // 工作状态卡：去掉点击刷新，只显示状态，不响应点击
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 12.dp)
-                        .clickable { probeTick++ },
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
                     colors = CardDefaults.defaultColors(color = cardColor),
                 ) {
                     Box {
@@ -158,11 +156,7 @@ fun HomeMiuixScreen() {
                             contentAlignment = Alignment.BottomStart,
                         ) {
                             Text(
-                                text = if (online || probing) {
-                                    preferences.serverUrl
-                                } else {
-                                    stringResource(R.string.home_tap_to_retry)
-                                },
+                                text = preferences.serverUrl,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium,
                             )
@@ -211,7 +205,6 @@ fun HomeMiuixScreen() {
             }
 
             item {
-                // 真实设备信息（替换原硬编码假数据）
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
