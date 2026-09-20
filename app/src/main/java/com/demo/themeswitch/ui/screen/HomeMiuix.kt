@@ -1,12 +1,15 @@
 package com.demo.themeswitch.ui.screen
 
 import android.os.Build
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +26,7 @@ import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.CheckCircleOutline
+import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.HourglassTop
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,6 +63,7 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -88,21 +93,6 @@ fun HomeMiuixScreen() {
         }
     }
 
-    // 状态卡三态配色（暗色/亮色）：检测中中性灰、在线绿、离线柔和低饱和红
-    val dark = isInDarkTheme()
-    val cardColor = when {
-        probing -> if (dark) Color(0xFF2B2B30) else Color(0xFFEDEDF0)
-        online -> if (dark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
-        // 优化：降低离线卡片饱和度，更柔和不刺眼
-        else -> if (dark) Color(0xFF2A2223) else Color(0xFFF0EAEA)
-    }
-    val accentColor = when {
-        probing -> if (dark) Color(0xFFB9B9C0) else Color(0xFF6B6B72)
-        online -> Color(0xFF36D167)
-        // 优化：离线图标颜色更柔和
-        else -> Color(0xFFB07070)
-    }
-
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
@@ -114,144 +104,226 @@ fun HomeMiuixScreen() {
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxHeight()
                 .scrollEndHaptic()
                 .overScrollVertical()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .padding(horizontal = 12.dp),
             contentPadding = PaddingValues(
                 top = innerPadding.calculateTopPadding(),
-                bottom = LocalScaffoldBottomPadding.current + 16.dp,
+                bottom = LocalScaffoldBottomPadding.current + 12.dp,
             ),
         ) {
             item {
-                // 工作状态卡：去掉点击刷新，只显示状态，不响应点击
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
-                    colors = CardDefaults.defaultColors(color = cardColor),
+                Column(
+                    modifier = Modifier.padding(top = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Box {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .offset(x = 27.dp, y = 31.dp),
-                            contentAlignment = Alignment.BottomEnd,
-                        ) {
-                            Icon(
-                                imageVector = when {
-                                    probing -> Icons.Rounded.HourglassTop
-                                    online -> Icons.Rounded.CheckCircleOutline
-                                    else -> Icons.Rounded.Block
-                                },
-                                contentDescription = null,
-                                tint = accentColor,
-                                modifier = Modifier.size(110.dp),
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp, 10.dp),
-                            contentAlignment = Alignment.BottomStart,
-                        ) {
-                            Text(
-                                text = preferences.serverUrl,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp, 14.dp),
-                            contentAlignment = Alignment.TopStart,
-                        ) {
-                            Column {
-                                Text(
-                                    text = stringResource(
-                                        when {
-                                            probing -> R.string.home_probing
-                                            online -> R.string.home_working
-                                            else -> R.string.home_not_working
-                                        },
-                                    ),
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                )
-                                Spacer(modifier = Modifier.height(1.dp))
-                                Text(
-                                    text = when {
-                                        probing -> stringResource(R.string.home_probing_hint)
-                                        online -> stringResource(R.string.home_latency_ms, latencyMs)
-                                        else -> preferences.serverUrl
-                                    },
-                                    fontSize = 15.sp,
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            item {
-                Text(
-                    text = stringResource(R.string.section_info),
-                    color = colorScheme.onBackground,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 8.dp),
-                )
-            }
-
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp),
-                ) {
-                    MiuixInfoItem(Icons.Filled.Widgets, R.string.card_app_version, "v" + BuildConfig.VERSION_NAME)
-                    MiuixInfoItem(Icons.Filled.DevicesOther, R.string.card_device, Build.MODEL)
-                    MiuixInfoItem(
-                        Icons.Filled.Android,
-                        R.string.card_android,
-                        "Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")",
+                    // KSU StatusCard 完全照搬
+                    StatusCard(
+                        probing = probing,
+                        online = online,
+                        latencyMs = latencyMs,
+                        serverUrl = preferences.serverUrl,
                     )
-                    MiuixInfoItem(Icons.Filled.Memory, R.string.card_kernel, System.getProperty("os.version") ?: "—")
-                    MiuixInfoItem(Icons.Filled.Dns, R.string.card_server, preferences.serverUrl)
+                    // KSU InfoCard 完全照搬
+                    InfoCard(
+                        appVersion = "v" + BuildConfig.VERSION_NAME,
+                        deviceModel = Build.MODEL,
+                        androidVersion = "Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")",
+                        kernelVersion = System.getProperty("os.version") ?: "—",
+                        serverUrl = preferences.serverUrl,
+                    )
                 }
             }
         }
     }
 }
 
+/**
+ * KSU StatusCard 完全照搬：
+ * - 右下大图标 110dp
+ * - 左下底部文字
+ * - 左上标题+副标题
+ * - 按压倾斜反馈
+ */
 @Composable
-private fun MiuixInfoItem(icon: ImageVector, titleResId: Int, value: String) {
+private fun StatusCard(
+    probing: Boolean,
+    online: Boolean,
+    latencyMs: Long,
+    serverUrl: String,
+) {
+    val colorScheme = MiuixTheme.colorScheme
+    val dark = isInDarkTheme()
+
+    val cardColor = when {
+        probing -> colorScheme.surfaceContainer
+        online -> if (dark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
+        else -> if (dark) Color(0xFF2A2223) else Color(0xFFF0EAEA)
+    }
+    val iconTint = when {
+        probing -> colorScheme.primary
+        online -> Color(0xFF36D167)
+        else -> Color(0xFFB07070)
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.defaultColors(color = cardColor),
+        pressFeedbackType = PressFeedbackType.Tilt,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+        ) {
+            // 右下大图标
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset(27.dp, 31.dp),
+                contentAlignment = Alignment.BottomEnd,
+            ) {
+                Icon(
+                    modifier = Modifier.size(110.dp),
+                    imageVector = when {
+                        probing -> Icons.Rounded.HourglassTop
+                        online -> Icons.Rounded.CheckCircleOutline
+                        else -> Icons.Rounded.Block
+                    },
+                    tint = iconTint,
+                    contentDescription = null,
+                )
+            }
+            // 左下底部文字
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp, 10.dp),
+                contentAlignment = Alignment.BottomStart,
+            ) {
+                Text(
+                    text = serverUrl,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                )
+            }
+            // 左上标题 + 副标题
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp, 14.dp),
+                contentAlignment = Alignment.TopStart,
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(
+                            when {
+                                probing -> R.string.home_probing
+                                online -> R.string.home_working
+                                else -> R.string.home_not_working
+                            },
+                        ),
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Spacer(Modifier.height(1.dp))
+                    Text(
+                        text = when {
+                            probing -> stringResource(R.string.home_probing_hint)
+                            online -> stringResource(R.string.home_latency_ms, latencyMs)
+                            else -> stringResource(R.string.home_not_working)
+                        },
+                        fontSize = 15.sp,
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * KSU InfoCard 完全照搬：
+ * - 图标 + 标题(上) + 内容(下) 两行布局
+ * - 卡片内边距 16dp
+ * - 行间距 24dp
+ */
+@Composable
+private fun InfoCardItem(
+    icon: ImageVector,
+    title: String,
+    content: String,
+    bottomPadding: androidx.compose.ui.unit.Dp = 24.dp,
+) {
     val colorScheme = MiuixTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 14.dp),
+            .padding(bottom = bottomPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = null,
-            tint = colorScheme.primary,
-            modifier = Modifier.size(24.dp),
+            contentDescription = title,
+            modifier = Modifier
+                .padding(end = 12.dp)
+                .size(24.dp),
+            tint = colorScheme.onSurface,
         )
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = stringResource(titleResId),
-            color = colorScheme.onSurfaceVariantSummary,
-            fontSize = 15.sp,
-            modifier = Modifier.weight(1f),
-        )
-        Text(
-            text = value,
-            color = colorScheme.onSurface,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Medium,
-        )
+        Column {
+            Text(
+                text = title,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = colorScheme.onSurface,
+            )
+            Text(
+                text = content,
+                fontSize = 14.sp,
+                color = colorScheme.onSurfaceVariantSummary,
+                modifier = Modifier.padding(top = 2.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun InfoCard(
+    appVersion: String,
+    deviceModel: String,
+    androidVersion: String,
+    kernelVersion: String,
+    serverUrl: String,
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            InfoCardItem(
+                icon = Icons.Filled.Widgets,
+                title = stringResource(R.string.card_app_version),
+                content = appVersion,
+            )
+            InfoCardItem(
+                icon = Icons.Filled.DevicesOther,
+                title = stringResource(R.string.card_device),
+                content = deviceModel,
+            )
+            InfoCardItem(
+                icon = Icons.Filled.Android,
+                title = stringResource(R.string.card_android),
+                content = androidVersion,
+            )
+            InfoCardItem(
+                icon = Icons.Filled.Memory,
+                title = stringResource(R.string.card_kernel),
+                content = kernelVersion,
+            )
+            InfoCardItem(
+                icon = Icons.Filled.Dns,
+                title = stringResource(R.string.card_server),
+                content = serverUrl,
+                bottomPadding = 0.dp,
+            )
+        }
     }
 }
