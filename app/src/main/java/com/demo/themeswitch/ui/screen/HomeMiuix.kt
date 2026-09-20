@@ -208,7 +208,7 @@ private fun StatusCard(
                     Text(
                         text = stringResource(R.string.home_not_working_hint),
                         fontSize = 15.sp,
-                        color = colorScheme.onSurfaceVariant,
+                        color = colorScheme.onSurfaceVariantSummary,
                     )
                 }
             }
