@@ -242,6 +242,7 @@ fun AppearanceMiuixScreen(onBack: () -> Unit) {
                     }
                 }
             }
+            // KSU 同款：所有界面设置合并在一个卡片里
             item {
                 Card(modifier = Modifier.padding(top = 12.dp).fillMaxWidth()) {
                     if (Build.VERSION.SDK_INT >= 33) {
@@ -298,11 +299,6 @@ fun AppearanceMiuixScreen(onBack: () -> Unit) {
                             )
                         }
                     }
-                }
-            }
-            // KSU 官方图标/滚动动画/导航栏角标卡：滚动动画、底栏角标、Switch 勾叉图标
-            item {
-                Card(modifier = Modifier.padding(top = 12.dp).fillMaxWidth()) {
                     SwitchPreference(
                         title = stringResource(R.string.settings_scroll_animation),
                         summary = stringResource(R.string.settings_scroll_animation_summary),
