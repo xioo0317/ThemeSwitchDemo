@@ -132,7 +132,6 @@ fun HomeMiuixScreen() {
                         deviceModel = Build.MODEL,
                         androidVersion = "Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")",
                         kernelVersion = System.getProperty("os.version") ?: "—",
-                        serverUrl = preferences.serverUrl,
                     )
                 }
             }
@@ -195,19 +194,7 @@ private fun StatusCard(
                     contentDescription = null,
                 )
             }
-            // 左下底部文字
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp, 10.dp),
-                contentAlignment = Alignment.BottomStart,
-            ) {
-                Text(
-                    text = serverUrl,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                )
-            }
+            // 左下底部文字 - 已移除，只保留状态和图标
             // 左上标题 + 副标题
             Box(
                 modifier = Modifier
@@ -232,7 +219,7 @@ private fun StatusCard(
                         text = when {
                             probing -> stringResource(R.string.home_probing_hint)
                             online -> stringResource(R.string.home_latency_ms, latencyMs)
-                            else -> stringResource(R.string.home_not_working)
+                            else -> ""
                         },
                         fontSize = 15.sp,
                     )
@@ -293,7 +280,6 @@ private fun InfoCard(
     deviceModel: String,
     androidVersion: String,
     kernelVersion: String,
-    serverUrl: String,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -316,11 +302,6 @@ private fun InfoCard(
                 icon = Icons.Filled.Memory,
                 title = stringResource(R.string.card_kernel),
                 content = kernelVersion,
-            )
-            InfoCardItem(
-                icon = Icons.Filled.Dns,
-                title = stringResource(R.string.card_server),
-                content = serverUrl,
                 bottomPadding = 0.dp,
             )
         }
