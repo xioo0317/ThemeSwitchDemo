@@ -85,6 +85,7 @@
     <string name="home_probing_hint">Checking connection…</string>
     <string name="home_latency_ms">Latency %1$d ms</string>
     <string name="home_tap_to_retry">Tap to re-check</string>
+    <string name="home_not_working_hint">Backend service unreachable</string>
     <string name="card_app_version">App version</string>
     <string name="card_server">Server</string>
     <string name="settings_scroll_animation">Scrolling animation</string>
