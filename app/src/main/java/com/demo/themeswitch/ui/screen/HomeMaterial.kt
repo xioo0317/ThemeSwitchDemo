@@ -20,15 +20,16 @@ import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -52,11 +53,10 @@ import com.demo.themeswitch.R
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.BackendMonitor
 import com.demo.themeswitch.data.SettingsRepository
-import com.demo.themeswitch.ui.component.material.ExpressiveScaffold
 import com.demo.themeswitch.ui.component.material.SegmentedColumn
 import com.demo.themeswitch.ui.component.material.SegmentedListItem
-import com.demo.themeswitch.ui.component.material.expressiveTopAppBarColors
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeMaterialScreen() {
     val context = LocalContext.current
@@ -73,19 +73,30 @@ fun HomeMaterialScreen() {
         latencyMs = result.latencyMs
     }
 
-    // KSU 同款：Expressive Scaffold + 可折叠大标题
-    ExpressiveScaffold(
-        topBar = { HomeTopBar(scrollBehavior = scrollBehavior) },
-        contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
+    Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        topBar = {
+            LargeFlexibleTopAppBar(
+                title = { Text(stringResource(R.string.nav_home)) },
+                colors = TopAppBarDefaults.largeTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                ),
+                windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
+                scrollBehavior = scrollBehavior,
+            )
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(innerPadding)
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(13.dp),
         ) {
+            Spacer(Modifier.height(4.dp))
             StatusCard(online = online, latencyMs = latencyMs)
             InfoCard(
                 appVersion = "v" + BuildConfig.VERSION_NAME,
@@ -98,21 +109,12 @@ fun HomeMaterialScreen() {
     }
 }
 
-@Composable
-private fun HomeTopBar(scrollBehavior: TopAppBarScrollBehavior) {
-    LargeFlexibleTopAppBar(
-        title = { Text(stringResource(R.string.nav_home)) },
-        colors = expressiveTopAppBarColors(),
-        windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
-        scrollBehavior = scrollBehavior,
-    )
-}
-
 /**
- * KSU 同款状态卡：
- * - 工作中：secondaryContainer 底 + 最左 CheckCircle
+ * KSU 同款状态卡片：
+ * - 工作中：secondaryContainer 底（淡蓝）+ 最左 CheckCircle
  * - 未工作：errorContainer 底 + 最左 Warning（感叹号）
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun StatusCard(online: Boolean, latencyMs: Long) {
     val containerColor = if (online) {
@@ -121,7 +123,6 @@ private fun StatusCard(online: Boolean, latencyMs: Long) {
         MaterialTheme.colorScheme.errorContainer
     }
     val contentColor = MaterialTheme.colorScheme.contentColorFor(containerColor)
-
     val statusIcon = if (online) Icons.Rounded.CheckCircle else Icons.Rounded.Warning
     val statusTitle = stringResource(if (online) R.string.home_working else R.string.home_not_working)
     val statusSummary = if (online) {
@@ -138,31 +139,27 @@ private fun StatusCard(online: Boolean, latencyMs: Long) {
     ) {
         ListItem(
             leadingContent = {
-                Icon(statusIcon, contentDescription = statusTitle, tint = contentColor)
+                Icon(statusIcon, contentDescription = statusTitle)
+            },
+            headlineContent = {
+                Text(statusTitle, style = MaterialTheme.typography.titleMedium)
             },
             supportingContent = {
-                Text(
-                    text = statusSummary,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = contentColor.copy(alpha = 0.7f),
-                )
+                Text(statusSummary, style = MaterialTheme.typography.bodyMedium)
             },
-            verticalAlignment = Alignment.CenterVertically,
-            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-            headlineContent = {
-                Text(
-                    text = statusTitle,
-                    style = MaterialTheme.typography.titleMediumEmphasized,
-                    color = contentColor,
-                )
-            },
+            colors = ListItemDefaults.colors(
+                containerColor = Color.Transparent,
+                contentColor = contentColor,
+                leadingContentColor = contentColor,
+                supportingContentColor = contentColor.copy(alpha = 0.7f),
+            ),
         )
     }
 }
 
 /**
- * KSU 同款信息卡：SegmentedColumn 分组列表，
- * 行与行之间的圆角/分隔由 M3 Expressive SegmentedListItem 统一处理。
+ * KSU 同款信息卡：SegmentedColumn 分段列表，行间圆角/分割感由 M3 Expressive 处理。
+ * 调用方式对齐已验证可编译的 SettingsMaterial（显式传入 onClick）。
  */
 @Composable
 private fun InfoCard(
@@ -173,32 +170,16 @@ private fun InfoCard(
 ) {
     SegmentedColumn(modifier = Modifier.fillMaxWidth()) {
         item {
-            InfoEntry(
-                icon = Icons.Filled.Widgets,
-                label = stringResource(R.string.card_app_version),
-                content = appVersion,
-            )
+            InfoEntry(Icons.Filled.Widgets, stringResource(R.string.card_app_version), appVersion)
         }
         item {
-            InfoEntry(
-                icon = Icons.Filled.DevicesOther,
-                label = stringResource(R.string.card_device),
-                content = deviceModel,
-            )
+            InfoEntry(Icons.Filled.DevicesOther, stringResource(R.string.card_device), deviceModel)
         }
         item {
-            InfoEntry(
-                icon = Icons.Filled.Android,
-                label = stringResource(R.string.card_android),
-                content = androidVersion,
-            )
+            InfoEntry(Icons.Filled.Android, stringResource(R.string.card_android), androidVersion)
         }
         item {
-            InfoEntry(
-                icon = Icons.Filled.Memory,
-                label = stringResource(R.string.card_kernel),
-                content = kernelVersion,
-            )
+            InfoEntry(Icons.Filled.Memory, stringResource(R.string.card_kernel), kernelVersion)
         }
     }
 }
@@ -207,18 +188,17 @@ private fun InfoCard(
 private fun InfoEntry(
     icon: ImageVector,
     label: String,
-    content: String,
+    value: String,
 ) {
     SegmentedListItem(
-        headlineContent = {
-            Text(text = label, style = MaterialTheme.typography.bodyLarge)
-        },
+        onClick = { /* 信息展示项，不可点击 */ },
         leadingContent = {
-            Icon(imageVector = icon, contentDescription = label)
+            Icon(icon, contentDescription = label, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         },
+        headlineContent = { Text(label, style = MaterialTheme.typography.bodyLarge) },
         supportingContent = {
             Text(
-                text = content,
+                value,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
