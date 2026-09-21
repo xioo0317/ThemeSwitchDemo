@@ -195,14 +195,15 @@ private fun StatusCard(
                     imageVector = Icons.Rounded.ErrorOutline,
                     contentDescription = null,
                     tint = colorScheme.onSurface,
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(24.dp),
                 )
                 Spacer(Modifier.width(12.dp))
                 Column {
                     Text(
                         text = stringResource(R.string.home_not_working),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = colorScheme.onSurface,
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
