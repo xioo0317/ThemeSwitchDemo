@@ -138,7 +138,11 @@ fun MainScreen() {
                             ),
                         beyondViewportPageCount = TABS.size - 1,
                         overscrollEffect = null,
-                        userScrollEnabled = true,
+                        // CrossAxisInterceptor 模式必须关闭 Pager 原生手势，横向翻页由
+                        // pagerGestureOverride 拦截器 + PagerGestureNestedScrollConnection 接管。
+                        // 若置为 true，Pager 原生拖拽检测会与 miuix 拦截器竞争同一指针序列，
+                        // 取消页内子项的 tap，导致「界面风格 / 关于 / 语言」点击无反应。
+                        userScrollEnabled = false,
                         pageNestedScrollConnection = PagerGestureNestedScrollConnection,
                     ) { page ->
                         MainPage(page, navigator)
