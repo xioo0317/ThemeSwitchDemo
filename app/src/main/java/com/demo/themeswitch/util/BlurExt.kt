@@ -30,24 +30,27 @@ fun rememberBlurBackdrop(enableBlur: Boolean): LayerBackdrop? {
 @Composable
 fun BlurredBar(
     backdrop: LayerBackdrop?,
+    modifier: Modifier = Modifier,
     blurActive: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     Box(
-        modifier = if (blurActive && backdrop != null) {
-            Modifier.textureBlur(
-                backdrop = backdrop,
-                shape = RectangleShape,
-                blurRadius = 25f,
-                colors = BlurColors(
-                    blendColors = listOf(
-                        BlendColorEntry(color = MiuixTheme.colorScheme.surface.copy(0.87f)),
+        modifier = modifier.then(
+            if (blurActive && backdrop != null) {
+                Modifier.textureBlur(
+                    backdrop = backdrop,
+                    shape = RectangleShape,
+                    blurRadius = 25f,
+                    colors = BlurColors(
+                        blendColors = listOf(
+                            BlendColorEntry(color = MiuixTheme.colorScheme.surface.copy(0.87f)),
+                        ),
                     ),
-                ),
-            )
-        } else {
-            Modifier
-        },
+                )
+            } else {
+                Modifier
+            },
+        ),
     ) {
         content()
     }
