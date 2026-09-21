@@ -136,12 +136,12 @@ private fun StatusCard(
     val cardColor = if (online) {
         if (dark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
     } else {
-        null  // 未工作状态用默认卡片颜色
+        colorScheme.surfaceContainer
     }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = if (cardColor != null) CardDefaults.defaultColors(color = cardColor) else CardDefaults.defaultColors(),
+        colors = CardDefaults.defaultColors(color = cardColor),
     ) {
         if (online) {
             // 工作中：右下角大图标布局
