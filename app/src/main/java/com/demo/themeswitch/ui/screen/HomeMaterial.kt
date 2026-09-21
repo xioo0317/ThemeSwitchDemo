@@ -2,33 +2,40 @@ package com.demo.themeswitch.ui.screen
 
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.DevicesOther
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material.icons.rounded.CheckCircleOutline
-import androidx.compose.material.icons.rounded.ErrorOutline
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.rounded.Block
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LargeFlexibleTopAppBar
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,30 +51,22 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.demo.themeswitch.BuildConfig
 import com.demo.themeswitch.R
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.BackendMonitor
 import com.demo.themeswitch.data.SettingsRepository
-import com.demo.themeswitch.ui.theme.isInDarkTheme
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.utils.overScrollVertical
-import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeMaterialScreen() {
     val context = LocalContext.current
     val repository = remember { SettingsRepository(context) }
     val preferences by repository.preferencesFlow.collectAsState(initial = AppPreferences())
-    val scrollBehavior = MiuixScrollBehavior()
-    val colorScheme = MaterialTheme.colorScheme
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
-    // 每次进首页探测一次后端状态，只探测一次，不循环重试
     var online by remember { mutableStateOf(false) }
     var latencyMs by remember { mutableLongStateOf(0L) }
 
@@ -80,184 +79,89 @@ fun HomeMaterialScreen() {
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            TopAppBar(
-                title = stringResource(R.string.nav_home),
-                color = MaterialTheme.colorScheme.surface,
+            LargeFlexibleTopAppBar(
+                title = { Text(stringResource(R.string.nav_home)) },
+                colors = TopAppBarDefaults.largeTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                ),
+                windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
                 scrollBehavior = scrollBehavior,
             )
         },
     ) { innerPadding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
-                .fillMaxSize()
-                .scrollEndHaptic()
-                .overScrollVertical()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = PaddingValues(
-                top = innerPadding.calculateTopPadding(),
-                bottom = LocalScaffoldBottomPadding.current + 16.dp,
-            ),
+                .fillMaxWidth()
+                .padding(innerPadding)
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(13.dp),
         ) {
-            item {
-                Column(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    StatusCard(
-                        online = online,
-                        latencyMs = latencyMs,
-                    )
-                    InfoCard(
-                        appVersion = "v" + BuildConfig.VERSION_NAME,
-                        deviceModel = Build.MODEL,
-                        androidVersion = "Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")",
-                        kernelVersion = System.getProperty("os.version") ?: "—",
-                    )
-                }
-            }
+            Spacer(Modifier.height(4.dp))
+            StatusCard(online = online, latencyMs = latencyMs)
+            InfoCard(
+                appVersion = "v" + BuildConfig.VERSION_NAME,
+                deviceModel = Build.MODEL,
+                androidVersion = "Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")",
+                kernelVersion = System.getProperty("os.version") ?: "—",
+            )
+            Spacer(Modifier.height(LocalScaffoldBottomPadding.current + 16.dp))
         }
     }
 }
 
 /**
- * KSU 同款状态卡片（Material 风格）：
- * - 工作中：浅绿色底色 + 右下角大对勾
- * - 未工作：纯白底色 + 左侧感叹号 + 右侧双行文字
+ * KSU 同款状态卡片：Surface + ListItem 风格
+ * - 工作中：secondaryContainer 绿色底 + CheckCircle 图标
+ * - 未工作：errorContainer 红底 + Warning 图标
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun StatusCard(
-    online: Boolean,
-    latencyMs: Long,
-) {
-    val colorScheme = MaterialTheme.colorScheme
-    val dark = isInDarkTheme()
-
-    val cardColor = if (online) {
-        if (dark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
+private fun StatusCard(online: Boolean, latencyMs: Long) {
+    val containerColor = if (online) {
+        MaterialTheme.colorScheme.secondaryContainer
     } else {
-        colorScheme.surfaceContainer
+        MaterialTheme.colorScheme.errorContainer
+    }
+    val contentColor = MaterialTheme.colorScheme.contentColorFor(containerColor)
+    val statusIcon = if (online) Icons.Rounded.CheckCircle else Icons.Rounded.Warning
+    val statusTitle = stringResource(if (online) R.string.home_working else R.string.home_not_working)
+    val statusSummary = if (online) {
+        stringResource(R.string.home_latency_ms, latencyMs)
+    } else {
+        stringResource(R.string.home_not_working_hint)
     }
 
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = cardColor),
+        color = containerColor,
+        contentColor = contentColor,
+        shape = MaterialTheme.shapes.large,
     ) {
-        if (online) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .offset(27.dp, 31.dp),
-                    contentAlignment = Alignment.BottomEnd,
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.CheckCircleOutline,
-                        contentDescription = null,
-                        tint = Color(0xFF36D167),
-                        modifier = Modifier.size(110.dp),
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp, 14.dp),
-                    contentAlignment = Alignment.TopStart,
-                ) {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.home_working),
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = colorScheme.onSurface,
-                        )
-                        Spacer(Modifier.height(1.dp))
-                        Text(
-                            text = stringResource(R.string.home_latency_ms, latencyMs),
-                            fontSize = 15.sp,
-                            color = colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            }
-        } else {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(22.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.ErrorOutline,
-                    contentDescription = null,
-                    tint = colorScheme.onSurface,
-                    modifier = Modifier.size(42.dp),
-                )
-                Spacer(Modifier.width(16.dp))
-                Column {
-                    Text(
-                        text = stringResource(R.string.home_not_working),
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colorScheme.onSurface,
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    Text(
-                        text = stringResource(R.string.home_not_working_hint),
-                        fontSize = 15.sp,
-                        color = colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        }
+        ListItem(
+            leadingContent = {
+                Icon(statusIcon, contentDescription = statusTitle)
+            },
+            headlineContent = {
+                Text(statusTitle, style = MaterialTheme.typography.titleMedium)
+            },
+            supportingContent = {
+                Text(statusSummary, style = MaterialTheme.typography.bodyMedium)
+            },
+            colors = ListItemDefaults.colors(
+                containerColor = Color.Transparent,
+                contentColor = contentColor,
+                leadingContentColor = contentColor,
+                supportingContentColor = contentColor.copy(alpha = 0.7f),
+            ),
+        )
     }
 }
 
 /**
- * KSU InfoCard 同款：图标 + 标题(上) + 内容(下) 两行布局
+ * KSU 同款 InfoCard：Card 包裹 ListItem 分组
  */
-@Composable
-private fun InfoCardItem(
-    icon: ImageVector,
-    title: String,
-    content: String,
-    bottomPadding: androidx.compose.ui.unit.Dp = 24.dp,
-) {
-    val colorScheme = MaterialTheme.colorScheme
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = bottomPadding),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = title,
-            tint = colorScheme.primary,
-            modifier = Modifier
-                .padding(end = 12.dp)
-                .size(24.dp),
-        )
-        Column {
-            Text(
-                text = title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = colorScheme.onSurface,
-            )
-            Text(
-                text = content,
-                fontSize = 14.sp,
-                color = colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 2.dp),
-            )
-        }
-    }
-}
-
 @Composable
 private fun InfoCard(
     appVersion: String,
@@ -265,32 +169,40 @@ private fun InfoCard(
     androidVersion: String,
     kernelVersion: String,
 ) {
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shape = MaterialTheme.shapes.large,
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            InfoCardItem(
-                icon = Icons.Filled.Widgets,
-                title = stringResource(R.string.card_app_version),
-                content = appVersion,
-            )
-            InfoCardItem(
-                icon = Icons.Filled.DevicesOther,
-                title = stringResource(R.string.card_device),
-                content = deviceModel,
-            )
-            InfoCardItem(
-                icon = Icons.Filled.Android,
-                title = stringResource(R.string.card_android),
-                content = androidVersion,
-            )
-            InfoCardItem(
-                icon = Icons.Filled.Memory,
-                title = stringResource(R.string.card_kernel),
-                content = kernelVersion,
-                bottomPadding = 0.dp,
-            )
+        Column {
+            InfoRow(Icons.Filled.Widgets, stringResource(R.string.card_app_version), appVersion)
+            InfoRow(Icons.Filled.DevicesOther, stringResource(R.string.card_device), deviceModel)
+            InfoRow(Icons.Filled.Android, stringResource(R.string.card_android), androidVersion)
+            InfoRow(Icons.Filled.Memory, stringResource(R.string.card_kernel), kernelVersion, isLast = true)
+        }
+    }
+}
+
+@Composable
+private fun InfoRow(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    isLast: Boolean = false,
+) {
+    ListItem(
+        leadingContent = {
+            Icon(icon, contentDescription = label, tint = MaterialTheme.colorScheme.primary)
+        },
+        headlineContent = { Text(label, style = MaterialTheme.typography.bodyLarge) },
+        supportingContent = {
+            Text(value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+    )
+    if (!isLast) {
+        Row(Modifier.padding(start = 72.dp)) {
+            Spacer(Modifier.height(1.dp).fillMaxWidth())
         }
     }
 }

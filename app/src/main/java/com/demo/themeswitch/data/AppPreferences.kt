@@ -2,7 +2,7 @@ package com.demo.themeswitch.data
 
 data class AppPreferences(
     val themeMode: Int = 0,
-    val uiMode: String = SettingsRepository.UI_MODE_MIUI,
+    val uiMode: String = SettingsRepository.UI_MODE_MIUIX,
     val language: String = "system",
     // 取色：Monet 跟随系统 / keyColor 自定义种子色（0 表示默认） / PaletteStyle 与 ColorSpec
     val enableMonet: Boolean = true,
