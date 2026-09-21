@@ -12,10 +12,12 @@ data class AppPreferences(
     // 毛玻璃效果（Android 12+）
     val enableBlur: Boolean = true,
     // KSU 风格悬浮底栏
-    val enableFloatingBottomBar: Boolean = false,
-    val enableFloatingBottomBarBlur: Boolean = false,
+    val enableFloatingBottomBar: Boolean = true,
+    val enableFloatingBottomBarBlur: Boolean = true,
     // KSU 对齐偏好：页面切换动画
     val enableScrollAnimation: Boolean = true,
+    // 预测性手势返回（Android 13+）
+    val enablePredictiveBack: Boolean = true,
     // 全局界面缩放
     val pageScale: Float = 1.0f,
     // C++ 本地后端地址（POST /api/v1/execute，SSE 流式）

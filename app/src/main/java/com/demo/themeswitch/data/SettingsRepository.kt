@@ -28,6 +28,7 @@ class SettingsRepository(private val context: Context) {
         val ENABLE_FLOATING_BOTTOM_BAR = booleanPreferencesKey("enable_floating_bottom_bar")
         val ENABLE_FLOATING_BOTTOM_BAR_BLUR = booleanPreferencesKey("enable_floating_bottom_bar_blur")
         val ENABLE_SCROLL_ANIMATION = booleanPreferencesKey("enable_scroll_animation")
+        val ENABLE_PREDICTIVE_BACK = booleanPreferencesKey("enable_predictive_back")
         val PAGE_SCALE = floatPreferencesKey("page_scale")
         val SERVER_URL = stringPreferencesKey("server_url")
     }
@@ -45,6 +46,7 @@ class SettingsRepository(private val context: Context) {
             enableFloatingBottomBar = prefs[PreferencesKeys.ENABLE_FLOATING_BOTTOM_BAR] ?: false,
             enableFloatingBottomBarBlur = prefs[PreferencesKeys.ENABLE_FLOATING_BOTTOM_BAR_BLUR] ?: false,
             enableScrollAnimation = prefs[PreferencesKeys.ENABLE_SCROLL_ANIMATION] ?: true,
+            enablePredictiveBack = prefs[PreferencesKeys.ENABLE_PREDICTIVE_BACK] ?: true,
             pageScale = prefs[PreferencesKeys.PAGE_SCALE] ?: 1.0f,
             serverUrl = prefs[PreferencesKeys.SERVER_URL] ?: "http://127.0.0.1:8080",
         )
@@ -93,6 +95,10 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setEnableScrollAnimation(enabled: Boolean) {
         context.dataStore.edit { it[PreferencesKeys.ENABLE_SCROLL_ANIMATION] = enabled }
+    }
+
+    suspend fun setEnablePredictiveBack(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.ENABLE_PREDICTIVE_BACK] = enabled }
     }
 
     suspend fun setPageScale(scale: Float) {

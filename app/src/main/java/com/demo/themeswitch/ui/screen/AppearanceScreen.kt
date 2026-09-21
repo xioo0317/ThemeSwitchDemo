@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.rounded.AspectRatio
+import androidx.compose.material.icons.rounded.BackHand
 import androidx.compose.material.icons.rounded.BlurOn
 import androidx.compose.material.icons.rounded.CallToAction
 import androidx.compose.material.icons.rounded.Colorize
@@ -346,6 +347,23 @@ fun AppearanceMiuixScreen(onBack: () -> Unit) {
                             checked = preferences.enableScrollAnimation,
                             onCheckedChange = { enabled ->
                                 scope.launch { repository.setEnableScrollAnimation(enabled) }
+                            },
+                        )
+                        // 预测性手势返回（Android 13+ 边缘侧滑预览）
+                        SwitchPreference(
+                            title = stringResource(R.string.settings_predictive_back),
+                            summary = stringResource(R.string.settings_predictive_back_summary),
+                            startAction = {
+                                Icon(
+                                    imageVector = Icons.Rounded.BackHand,
+                                    contentDescription = null,
+                                    tint = colorScheme.onBackground,
+                                    modifier = Modifier.padding(end = 6.dp),
+                                )
+                            },
+                            checked = preferences.enablePredictiveBack,
+                            onCheckedChange = { enabled ->
+                                scope.launch { repository.setEnablePredictiveBack(enabled) }
                             },
                         )
                     }

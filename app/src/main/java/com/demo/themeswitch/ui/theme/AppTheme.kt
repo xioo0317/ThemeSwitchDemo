@@ -50,6 +50,7 @@ fun AppTheme(
         LocalEnableFloatingBottomBar provides appPreferences.enableFloatingBottomBar,
         LocalEnableFloatingBottomBarBlur provides (glassSupported && appPreferences.enableFloatingBottomBarBlur),
         LocalScrollAnimation provides appPreferences.enableScrollAnimation,
+        LocalEnablePredictiveBack provides appPreferences.enablePredictiveBack,
     ) {
         when (uiMode) {
             UiMode.Miuix -> MiuixAppTheme(
@@ -86,3 +87,4 @@ val LocalEnableBlur = staticCompositionLocalOf { false }
 val LocalEnableFloatingBottomBar = staticCompositionLocalOf { false }
 val LocalEnableFloatingBottomBarBlur = staticCompositionLocalOf { false }
 val LocalScrollAnimation = staticCompositionLocalOf { true }
+val LocalEnablePredictiveBack = staticCompositionLocalOf { true }

@@ -58,6 +58,7 @@ import com.demo.themeswitch.ui.component.bottombar.rememberMainPagerState
 import com.demo.themeswitch.ui.theme.LocalEnableFloatingBottomBar
 import com.demo.themeswitch.ui.theme.LocalEnableFloatingBottomBarBlur
 import com.demo.themeswitch.ui.theme.LocalEnableBlur
+import com.demo.themeswitch.ui.theme.LocalEnablePredictiveBack
 import com.demo.themeswitch.ui.theme.LocalScrollAnimation
 import com.demo.themeswitch.util.BlurredBar
 import com.demo.themeswitch.util.rememberBlurBackdrop
@@ -100,18 +101,29 @@ fun MainScreen() {
 
     var subRoute by rememberSaveable { mutableStateOf<String?>(null) }
 
-    // KSU 同款：预测性手势返回（Android 13+ 边缘侧滑预览动画）
+    // KSU 同款：预测性手势返回（Android 13+ 边缘侧滑预览动画），可在外观设置中关闭
+    val enablePredictiveBack = LocalEnablePredictiveBack.current
     val navEventState = rememberNavigationEventState(NavigationEventInfo.None)
-    NavigationBackHandler(
-        state = navEventState,
-        isBackEnabled = subRoute != null || mainPagerState.selectedPage != 0,
-        onBackCompleted = {
+    val backEnabled = subRoute != null || mainPagerState.selectedPage != 0
+    if (enablePredictiveBack) {
+        NavigationBackHandler(
+            state = navEventState,
+            isBackEnabled = backEnabled,
+            onBackCompleted = {
+                when {
+                    subRoute != null -> subRoute = null
+                    else -> mainPagerState.animateToPage(0)
+                }
+            }
+        )
+    } else {
+        BackHandler(enabled = backEnabled) {
             when {
                 subRoute != null -> subRoute = null
                 else -> mainPagerState.animateToPage(0)
             }
         }
-    )
+    }
 
     val uiMode = LocalUiMode.current
     val isMaterial = uiMode == UiMode.Material

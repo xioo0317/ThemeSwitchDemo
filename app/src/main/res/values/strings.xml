@@ -89,4 +89,6 @@
     <string name="card_server">Server</string>
     <string name="settings_scroll_animation">Scrolling animation</string>
     <string name="settings_scroll_animation_summary">Enable page transition animation</string>
+    <string name="settings_predictive_back">Predictive back</string>
+    <string name="settings_predictive_back_summary">Edge-swipe back gesture preview (Android 13+)</string>
 </resources>
