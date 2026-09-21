@@ -12,7 +12,7 @@ enum class UiMode(val value: String) {
             else -> Material
         }
 
-        val DEFAULT_VALUE: String = Material.value
+        val DEFAULT_VALUE: String = Miuix.value
     }
 }
 
