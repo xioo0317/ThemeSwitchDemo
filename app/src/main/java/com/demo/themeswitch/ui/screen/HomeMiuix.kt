@@ -54,6 +54,8 @@ import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
+import com.demo.themeswitch.ui.screen.LocalBlurBackdrop
+import com.demo.themeswitch.util.BlurredBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -81,10 +83,13 @@ fun HomeMiuixScreen() {
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            TopAppBar(
-                title = stringResource(R.string.nav_home),
-                scrollBehavior = scrollBehavior,
-            )
+            val blurBackdrop = LocalBlurBackdrop.current
+            BlurredBar(backdrop = blurBackdrop) {
+                TopAppBar(
+                    title = stringResource(R.string.nav_home),
+                    scrollBehavior = scrollBehavior,
+                )
+            }
         },
     ) { innerPadding ->
         LazyColumn(

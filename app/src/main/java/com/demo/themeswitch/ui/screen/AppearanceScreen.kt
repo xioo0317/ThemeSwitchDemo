@@ -80,6 +80,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.demo.themeswitch.R
 import com.demo.themeswitch.ui.component.ExpressiveSwitch
+import com.demo.themeswitch.ui.screen.LocalBlurBackdrop
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.SettingsRepository
 import com.demo.themeswitch.app.CoverRootApp
@@ -120,9 +121,8 @@ fun AppearanceMiuixScreen(onBack: () -> Unit) {
     val colorScheme = MiuixTheme.colorScheme
             val activity = LocalActivity.current
 
-    // KSU 同款模糊
-    val enableBlur = com.demo.themeswitch.ui.theme.LocalEnableBlur.current
-    val blurBackdrop = rememberBlurBackdrop(enableBlur)
+    // KSU 同款模糊：复用 MainScreen 的全局 blurBackdrop，顶栏底栏共用
+    val blurBackdrop = LocalBlurBackdrop.current
     val blurActive = blurBackdrop != null
     val barColor = if (blurActive) Color.Transparent else colorScheme.surface
 

@@ -86,6 +86,7 @@ sealed class Screen(val route: String, val titleResId: Int) {
 private val MAIN_PAGES = listOf(Screen.Home, Screen.Api, Screen.Settings)
 
 val LocalScaffoldBottomPadding = staticCompositionLocalOf { 0.dp }
+val LocalBlurBackdrop = staticCompositionLocalOf<top.yukonga.miuix.kmp.blur.LayerBackdrop?> { null }
 
 @Composable
 fun MainScreen() {
@@ -156,6 +157,7 @@ fun MainScreen() {
         ) { innerPadding ->
             CompositionLocalProvider(
                 LocalScaffoldBottomPadding provides innerPadding.calculateBottomPadding(),
+                LocalBlurBackdrop provides blurBackdrop,
             ) {
                 Box(
                     modifier = Modifier

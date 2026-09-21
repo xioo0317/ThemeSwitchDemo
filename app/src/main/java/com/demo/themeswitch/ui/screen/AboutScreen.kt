@@ -49,6 +49,8 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
+import com.demo.themeswitch.ui.screen.LocalBlurBackdrop
+import com.demo.themeswitch.util.BlurredBar
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -73,19 +75,22 @@ fun AboutMiuixScreen(onBack: () -> Unit) {
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            TopAppBar(
-                title = stringResource(R.string.nav_about),
-                scrollBehavior = scrollBehavior,
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
-                            tint = colorScheme.onBackground,
-                        )
-                    }
-                },
-            )
+            val blurBackdrop = LocalBlurBackdrop.current
+            BlurredBar(backdrop = blurBackdrop) {
+                TopAppBar(
+                    title = stringResource(R.string.nav_about),
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = null,
+                                tint = colorScheme.onBackground,
+                            )
+                        }
+                    },
+                )
+            }
         },
     ) { innerPadding ->
         Column(
