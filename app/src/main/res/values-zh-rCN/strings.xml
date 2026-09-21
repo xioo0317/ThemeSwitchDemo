@@ -90,4 +90,7 @@
     <string name="settings_scroll_animation_summary">启用页面切换动画</string>
     <string name="settings_predictive_back">预测性返回</string>
     <string name="settings_predictive_back_summary">启用预测性返回手势动画</string>
+    <string name="settings_enable_swipe_dismiss">滑动返回</string>
+    <string name="settings_enable_swipe_dismiss_summary">从屏幕左缘滑动即可在页面间返回</string>
+    <string name="settings_theme_amoled">AMOLED</string>
 </resources>
