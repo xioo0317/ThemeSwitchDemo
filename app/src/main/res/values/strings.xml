@@ -44,7 +44,7 @@
     <string name="color_blue_grey">Blue grey</string>
     <string name="color_sakura">Sakura</string>
     <string name="settings_enable_blur">Blur</string>
-    <string name="settings_enable_blur_summary">Frosted glass effect (Android 12+)</string>
+    <string name="settings_enable_blur_summary">Frosted glass for top and bottom bars (Android 13+)</string>
     <string name="settings_floating_bottom_bar">Floating bottom bar</string>
     <string name="settings_floating_bottom_bar_summary">Use a floating capsule navigation bar</string>
     <string name="settings_enable_glass">Liquid glass</string>

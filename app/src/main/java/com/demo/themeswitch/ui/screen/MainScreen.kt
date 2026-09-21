@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
@@ -108,22 +109,16 @@ fun MainScreen() {
     val enableFloating = LocalEnableFloatingBottomBar.current
     val enableFloatingBlur = LocalEnableFloatingBottomBarBlur.current
 
-    // KSU 同款：全局模糊取景层，顶栏/底栏/悬浮底栏共用
-    val containerColor = if (isMaterial) {
-        MaterialTheme.colorScheme.surface
-    } else {
-        MiuixTheme.colorScheme.surface
-    }
+    // KSU 同款：Scaffold 背景透明，让窗口背景墙透出来给液态玻璃折射
     val blurBackdrop = rememberBlurBackdrop(enableBlur)
     val layerBackdrop = rememberLayerBackdrop {
-        drawRect(containerColor)
         drawContent()
     }
     val useBackdropLayer = enableFloating && enableFloatingBlur
 
     CompositionLocalProvider(LocalMainPagerState provides mainPagerState) {
         Scaffold(
-            containerColor = containerColor,
+            containerColor = Color.Transparent,
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = {
                 if (subRoute == null) {
@@ -143,6 +138,13 @@ fun MainScreen() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .then(
+                            if (isMaterial) {
+                                Modifier.background(MaterialTheme.colorScheme.surface)
+                            } else {
+                                Modifier.background(MiuixTheme.colorScheme.surface)
+                            }
+                        )
                         .then(if (useBackdropLayer) Modifier.layerBackdrop(layerBackdrop) else Modifier),
                 ) {
                     if (subRoute != null) {

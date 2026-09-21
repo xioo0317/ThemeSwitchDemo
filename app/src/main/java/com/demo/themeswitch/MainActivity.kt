@@ -1,8 +1,10 @@
 package com.demo.themeswitch
 
 import android.content.Context
+import android.graphics.Color as AndroidColor
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -33,7 +35,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        // KSU 同款：透明系统栏，关闭导航栏对比度保护，让窗口背景墙透出来
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(AndroidColor.TRANSPARENT, AndroidColor.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.auto(AndroidColor.TRANSPARENT, AndroidColor.TRANSPARENT),
+        )
+        window.isNavigationBarContrastEnforced = false
         val repository = SettingsRepository(applicationContext)
         setContent {
             // 等 DataStore 首个真实值到达再渲染，避免初始默认值与真实 UI 模式之间
