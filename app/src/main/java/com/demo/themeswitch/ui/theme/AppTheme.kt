@@ -35,14 +35,16 @@ fun AppTheme(
         else -> false
     }
 
-    // 毛玻璃依赖 Android 12 的 RenderEffect，低版本全局视为不支持
+    // 毛玻璃依赖 Android 13 的 RenderEffect，低版本全局视为不支持
     val blurSupported = appPreferences.enableBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    // KSU 同款：液态玻璃（悬浮底栏 lens 折射）独立于毛玻璃总开关，只要 SDK 支持就生效
+    val glassSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
     CompositionLocalProvider(
         LocalColorMode provides colorMode.value,
         LocalEnableBlur provides blurSupported,
         LocalEnableFloatingBottomBar provides appPreferences.enableFloatingBottomBar,
-        LocalEnableFloatingBottomBarBlur provides (blurSupported && appPreferences.enableFloatingBottomBarBlur),
+        LocalEnableFloatingBottomBarBlur provides (glassSupported && appPreferences.enableFloatingBottomBarBlur),
         LocalScrollAnimation provides appPreferences.enableScrollAnimation,
     ) {
         // 双主题嵌套：外层 miuix 主题让 miuix 组件（OverlayDialog 弹窗/MIUI 顶栏/底栏）
