@@ -10,14 +10,14 @@ data class AppPreferences(
     val colorStyle: String = "TonalSpot",
     val colorSpec: String = "SPEC_2021",
     // 毛玻璃效果（Android 12+）
-    val enableBlur: Boolean = true,
+    val enableBlur: Boolean = false,
     // KSU 风格悬浮底栏
-    val enableFloatingBottomBar: Boolean = true,
-    val enableFloatingBottomBarBlur: Boolean = true,
+    val enableFloatingBottomBar: Boolean = false,
+    val enableFloatingBottomBarBlur: Boolean = false,
     // KSU 对齐偏好：页面切换动画
-    val enableScrollAnimation: Boolean = true,
+    val enableScrollAnimation: Boolean = false,
     // 预测性手势返回（Android 13+）
-    val enablePredictiveBack: Boolean = true,
+    val enablePredictiveBack: Boolean = false,
     // 全局界面缩放
     val pageScale: Float = 1.0f,
     // C++ 本地后端地址（POST /api/v1/execute，SSE 流式）
