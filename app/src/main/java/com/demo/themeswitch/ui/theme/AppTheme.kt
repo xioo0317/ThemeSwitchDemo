@@ -22,6 +22,10 @@ enum class ColorMode(val value: Int) {
     val isDark: Boolean get() = value == 2
 }
 
+/**
+ * KSU 同款：双 UI 单选一分流。Miuix 模式只套 MiuixAppTheme，
+ * Material 模式只套 MaterialAppTheme，不再嵌套共存。
+ */
 @Composable
 fun AppTheme(
     appPreferences: AppPreferences,
@@ -47,24 +51,22 @@ fun AppTheme(
         LocalEnableFloatingBottomBarBlur provides (glassSupported && appPreferences.enableFloatingBottomBarBlur),
         LocalScrollAnimation provides appPreferences.enableScrollAnimation,
     ) {
-        // 双主题嵌套：外层 miuix 主题让 miuix 组件（OverlayDialog 弹窗/MIUI 顶栏/底栏）
-        // 在任何 UI 模式下都可用；内层 M3 主题继续供 Material 页面使用
-        MiuixAppTheme(
-            isDark = isDark,
-            isMonet = appPreferences.enableMonet,
-            keyColor = appPreferences.keyColor,
-            colorStyle = appPreferences.colorStyle,
-            colorSpec = appPreferences.colorSpec,
-        ) {
-            MaterialAppTheme(
+        when (uiMode) {
+            UiMode.Miuix -> MiuixAppTheme(
                 isDark = isDark,
                 isMonet = appPreferences.enableMonet,
                 keyColor = appPreferences.keyColor,
                 colorStyle = appPreferences.colorStyle,
                 colorSpec = appPreferences.colorSpec,
-            ) {
-                content()
-            }
+            ) { content() }
+
+            UiMode.Material -> MaterialAppTheme(
+                isDark = isDark,
+                isMonet = appPreferences.enableMonet,
+                keyColor = appPreferences.keyColor,
+                colorStyle = appPreferences.colorStyle,
+                colorSpec = appPreferences.colorSpec,
+            ) { content() }
         }
     }
 }
@@ -83,5 +85,4 @@ val LocalColorMode = staticCompositionLocalOf { 0 }
 val LocalEnableBlur = staticCompositionLocalOf { false }
 val LocalEnableFloatingBottomBar = staticCompositionLocalOf { false }
 val LocalEnableFloatingBottomBarBlur = staticCompositionLocalOf { false }
-// KSU 对齐：页面切换滚动动画
 val LocalScrollAnimation = staticCompositionLocalOf { true }

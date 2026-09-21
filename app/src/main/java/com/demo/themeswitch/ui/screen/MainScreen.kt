@@ -117,8 +117,9 @@ fun MainScreen() {
     val useBackdropLayer = enableFloating && enableFloatingBlur
 
     CompositionLocalProvider(LocalMainPagerState provides mainPagerState) {
+        // KSU 同款分流：Material 模式不透明 surfaceContainer，Miuix 模式透明（液态玻璃透背景墙）
         Scaffold(
-            containerColor = Color.Transparent,
+            containerColor = if (isMaterial) MaterialTheme.colorScheme.surfaceContainer else Color.Transparent,
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = {
                 if (subRoute == null) {
@@ -138,13 +139,8 @@ fun MainScreen() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .then(
-                            if (isMaterial) {
-                                Modifier.background(MaterialTheme.colorScheme.surface)
-                            } else {
-                                Modifier.background(MiuixTheme.colorScheme.surface)
-                            }
-                        )
+                        // Miuix 模式 Scaffold 透明，内容自己画 surface 背景；Material 模式 Scaffold 已画
+                        .then(if (!isMaterial) Modifier.background(MiuixTheme.colorScheme.surface) else Modifier)
                         .then(if (useBackdropLayer) Modifier.layerBackdrop(layerBackdrop) else Modifier),
                 ) {
                     if (subRoute != null) {
