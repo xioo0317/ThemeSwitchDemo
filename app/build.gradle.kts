@@ -57,14 +57,14 @@ dependencies {
     // 与 navigationevent 1.1.2 对齐（miuix 弹层 Back 处理依赖 navigationevent）
     implementation("androidx.activity:activity-compose:1.13.0")
 
-    implementation(platform("androidx.compose:compose-bom:2026.08.00"))
+    implementation(platform("androidx.compose:compose-bom:2026.09.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+    // M3 Expressive（SegmentedListItem/ShortNavigationBar 等）：对齐 KSU 显式版本
+    implementation("androidx.compose.material3:material3:1.5.0-alpha28")
     implementation("androidx.compose.material:material-icons-extended")
 
-    implementation("androidx.navigation:navigation-compose:2.8.5")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     // miuix 0.9.3 的弹层（PopupEntry）依赖 navigationevent-compose 做 Back 处理，
@@ -72,10 +72,10 @@ dependencies {
     implementation("androidx.navigationevent:navigationevent-compose:1.1.2")
 
     // Miuix: MIUI style Compose Multiplatform UI library
-    implementation("top.yukonga.miuix.kmp:miuix-ui-android:0.9.3")
-    implementation("top.yukonga.miuix.kmp:miuix-preference-android:0.9.3")
+    implementation("top.yukonga.miuix.kmp:miuix-ui-android:0.9.4")
+    implementation("top.yukonga.miuix.kmp:miuix-preference-android:0.9.4")
     // Miuix blur: 悬浮底栏液态玻璃（依赖 Android 12 RenderEffect，低版本运行时自动降级）
-    implementation("top.yukonga.miuix.kmp:miuix-blur-android:0.9.3")
+    implementation("top.yukonga.miuix.kmp:miuix-blur-android:0.9.4")
     // Material Kolor: 从种子色生成 Material 3 动态色板（强调色/色彩风格/色彩规格）
     implementation("com.materialkolor:material-kolor:5.0.1")
 

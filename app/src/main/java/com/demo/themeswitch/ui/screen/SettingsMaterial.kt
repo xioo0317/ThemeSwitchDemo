@@ -1,52 +1,41 @@
 package com.demo.themeswitch.ui.screen
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Colorize
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Style
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.demo.themeswitch.BuildConfig
 import com.demo.themeswitch.R
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.LocaleHelper
 import com.demo.themeswitch.data.SettingsRepository
-import com.demo.themeswitch.ui.component.MiuixOptionDialog
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.TopAppBar
+import com.demo.themeswitch.ui.component.material.ExpressiveScaffold
+import com.demo.themeswitch.ui.component.material.SegmentedColumn
+import com.demo.themeswitch.ui.component.material.SegmentedDropdownItem
+import com.demo.themeswitch.ui.component.material.SegmentedListItem
+import com.demo.themeswitch.ui.component.material.expressiveTopAppBarColors
 import kotlinx.coroutines.launch
 
 @Composable
@@ -58,187 +47,124 @@ fun SettingsMaterialScreen(
     val repository = remember { SettingsRepository(context) }
     val preferences by repository.preferencesFlow.collectAsState(initial = AppPreferences())
     val scope = rememberCoroutineScope()
-    val scrollBehavior = MiuixScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-    var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
-    var showUiModeDialog by rememberSaveable { mutableStateOf(false) }
+    val uiModeOptions = listOf(
+        stringResource(R.string.mode_miuix),
+        stringResource(R.string.mode_material),
+    )
+    val languageOptions = LocaleHelper.supportedLanguages.map { it.nativeName }
 
-    // M3 模式也用 MIUI 大标题顶栏（颜色跟 M3 主题协调），内容保持 M3 卡片分组
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+    // KSU 同款：原生 M3 Expressive Scaffold + 大标题顶栏 + SegmentedColumn 分组列表
+    ExpressiveScaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = stringResource(R.string.nav_settings),
-                color = MaterialTheme.colorScheme.surface,
+            LargeFlexibleTopAppBar(
+                title = { Text(stringResource(R.string.nav_settings)) },
+                colors = expressiveTopAppBarColors(),
                 scrollBehavior = scrollBehavior,
             )
         },
     ) { innerPadding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = PaddingValues(
-                top = innerPadding.calculateTopPadding() + 12.dp,
-                bottom = LocalScaffoldBottomPadding.current + 12.dp,
-            ),
+                .verticalScroll(rememberScrollState())
+                .padding(
+                    top = innerPadding.calculateTopPadding() + 8.dp,
+                    bottom = innerPadding.calculateBottomPadding(),
+                ),
         ) {
-            // 外观卡：UI 模式 / 主题（跳外观页）
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    ),
-                    shape = MaterialTheme.shapes.large,
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                ) {
-                    SettingsItem(
+            // 外观组：界面模式（内联下拉）+ 主题入口
+            SegmentedColumn(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp),
+            ) {
+                item {
+                    SegmentedDropdownItem(
                         icon = Icons.Filled.Style,
                         title = stringResource(R.string.settings_ui_mode),
-                        subtitle = stringResource(R.string.settings_ui_mode_summary),
-                        onClick = { showUiModeDialog = true },
+                        summary = stringResource(R.string.settings_ui_mode_summary),
+                        items = uiModeOptions,
+                        selectedIndex = if (preferences.uiMode == "miuix") 0 else 1,
+                        onItemSelected = { index ->
+                            scope.launch {
+                                repository.setUiMode(if (index == 0) "miuix" else "material")
+                            }
+                        },
                     )
-                    CardDivider()
-                    SettingsItem(
-                        icon = Icons.Filled.Colorize,
-                        title = stringResource(R.string.settings_theme),
-                        subtitle = stringResource(R.string.settings_theme_summary),
+                }
+                item {
+                    SegmentedListItem(
                         onClick = onOpenAppearance,
-                        chevron = true,
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.Filled.Colorize,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        },
+                        headlineContent = { Text(stringResource(R.string.settings_theme)) },
+                        supportingContent = { Text(stringResource(R.string.settings_theme_summary)) },
+                        trailingContent = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        },
                     )
                 }
             }
 
-            // 通用卡：语言
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    ),
-                    shape = MaterialTheme.shapes.large,
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                ) {
-                    SettingsItem(
+            // 通用组：语言（内联下拉）
+            SegmentedColumn(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp),
+            ) {
+                item {
+                    SegmentedDropdownItem(
                         icon = Icons.Filled.Language,
                         title = stringResource(R.string.settings_language),
-                        subtitle = stringResource(R.string.settings_language_summary),
-                        onClick = { showLanguageDialog = true },
+                        summary = stringResource(R.string.settings_language_summary),
+                        items = languageOptions,
+                        selectedIndex = LocaleHelper.supportedLanguages
+                            .indexOfFirst { it.code == preferences.language }
+                            .coerceIn(0, languageOptions.lastIndex),
+                        onItemSelected = { index ->
+                            val lang = LocaleHelper.supportedLanguages.getOrNull(index)
+                            if (lang != null && lang.code != preferences.language) {
+                                scope.launch { repository.setLanguage(lang.code) }
+                            }
+                        },
                     )
                 }
             }
 
-            // 关于卡：一行入口，跳转关于页
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    ),
-                    shape = MaterialTheme.shapes.large,
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                ) {
-                    SettingsItem(
-                        icon = Icons.Filled.Info,
-                        title = stringResource(R.string.nav_about),
-                        subtitle = "v" + BuildConfig.VERSION_NAME,
+            // 关于组：版本号 + 入口
+            SegmentedColumn(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp),
+            ) {
+                item {
+                    SegmentedListItem(
                         onClick = onOpenAbout,
-                        chevron = true,
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.Filled.Info,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        },
+                        headlineContent = { Text(stringResource(R.string.nav_about)) },
+                        supportingContent = { Text("v" + BuildConfig.VERSION_NAME) },
+                        trailingContent = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        },
                     )
                 }
             }
-        }
-    }
-
-    // MIUI 风格弹窗（M3 模式同样使用，miuix OverlayDialog 组合层渲染）。树内切换，不 recreate
-    MiuixOptionDialog(
-        show = showUiModeDialog,
-        title = stringResource(R.string.settings_ui_mode),
-        options = listOf(
-            stringResource(R.string.mode_miuix),
-            stringResource(R.string.mode_material),
-        ),
-        selectedIndex = if (preferences.uiMode == "miuix") 0 else 1,
-        onSelect = { index ->
-            scope.launch {
-                repository.setUiMode(if (index == 0) "miuix" else "material")
-            }
-        },
-        onDismiss = { showUiModeDialog = false },
-    )
-    MiuixOptionDialog(
-        show = showLanguageDialog,
-        title = stringResource(R.string.settings_language),
-        options = LocaleHelper.supportedLanguages.map { it.nativeName },
-        selectedIndex = LocaleHelper.supportedLanguages
-            .indexOfFirst { it.code == preferences.language }
-            .coerceIn(0, LocaleHelper.supportedLanguages.lastIndex),
-        onSelect = { index ->
-            val lang = LocaleHelper.supportedLanguages.getOrNull(index)
-            if (lang != null && lang.code != preferences.language) {
-                scope.launch { repository.setLanguage(lang.code) }
-            }
-        },
-        onDismiss = { showLanguageDialog = false },
-    )
-}
-
-/** 卡片内行分隔线 */
-@Composable
-private fun CardDivider() {
-    androidx.compose.material3.HorizontalDivider(
-        modifier = Modifier.padding(start = 56.dp),
-        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-    )
-}
-
-@Composable
-private fun SettingsItem(
-    icon: ImageVector,
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit,
-    chevron: Boolean = false,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        if (chevron) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
     }
 }

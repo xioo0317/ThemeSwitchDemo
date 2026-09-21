@@ -1,15 +1,17 @@
 package com.demo.themeswitch.ui.screen
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Home
@@ -17,43 +19,54 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Badge as MaterialBadge
+import androidx.compose.material3.BadgedBox as MaterialBadgedBox
 import androidx.compose.material3.Icon as MaterialIcon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar as MaterialNavigationBar
-import androidx.compose.material3.NavigationBarItem as MaterialNavigationBarItem
+import androidx.compose.material3.ShortNavigationBar as MaterialShortNavigationBar
+import androidx.compose.material3.ShortNavigationBarItem as MaterialShortNavigationBarItem
 import androidx.compose.material3.Text as MaterialText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.unit.sp
 import com.demo.themeswitch.R
+import com.demo.themeswitch.data.BackendMonitor
 import com.demo.themeswitch.ui.LocalUiMode
 import com.demo.themeswitch.ui.UiMode
-import com.demo.themeswitch.ui.component.FloatingCapsuleBar
-import com.demo.themeswitch.ui.component.FloatingTab
-import com.demo.themeswitch.data.BackendMonitor
+import com.demo.themeswitch.ui.component.FloatingBottomBar
+import com.demo.themeswitch.ui.component.FloatingBottomBarItem
+import com.demo.themeswitch.ui.component.bottombar.LocalMainPagerState
+import com.demo.themeswitch.ui.component.bottombar.MainPagerState
+import com.demo.themeswitch.ui.component.bottombar.rememberMainPagerState
 import com.demo.themeswitch.ui.theme.LocalEnableFloatingBottomBar
 import com.demo.themeswitch.ui.theme.LocalEnableFloatingBottomBarBlur
 import com.demo.themeswitch.ui.theme.LocalEnableNavigationBadge
 import com.demo.themeswitch.ui.theme.LocalScrollAnimation
+import top.yukonga.miuix.kmp.basic.Badge as MiuixBadge
+import top.yukonga.miuix.kmp.basic.BadgedBox as MiuixBadgedBox
+import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.Text as MiuixText
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PagerGestureNestedScrollConnection
+import top.yukonga.miuix.kmp.utils.PagerInterceptionMode
+import top.yukonga.miuix.kmp.utils.pagerGestureOverride
 
 sealed class Screen(val route: String, val titleResId: Int) {
     data object Home : Screen("home", R.string.nav_home)
@@ -64,6 +77,9 @@ sealed class Screen(val route: String, val titleResId: Int) {
     data object About : Screen("about", R.string.nav_about)
 }
 
+/** 主界面 3 个可左右滑动的页面 */
+private val MAIN_PAGES = listOf(Screen.Home, Screen.Api, Screen.Settings)
+
 /**
  * 底栏总高度（含系统手势区）。页面用它在底部留出避让空间，
  * 防止最后一项被底栏遮住。
@@ -72,16 +88,25 @@ val LocalScaffoldBottomPadding = staticCompositionLocalOf { 0.dp }
 
 @Composable
 fun MainScreen() {
-    val navController = rememberNavController()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
-
-    // 底栏三项：主页 / 执行 / 设置（外观与关于从设置页进入）
-    val items = listOf(
-        Screen.Home to (Icons.Filled.Home to Icons.Outlined.Home),
-        Screen.Api to (Icons.Filled.Bolt to Icons.Outlined.Bolt),
-        Screen.Settings to (Icons.Filled.Settings to Icons.Outlined.Settings),
+    val scrollAnimation = LocalScrollAnimation.current
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = { MAIN_PAGES.size })
+    val mainPagerState = rememberMainPagerState(
+        pagerState = pagerState,
+        animatePageChanges = true,
+        initialPage = 0,
     )
+    mainPagerState.usePager = scrollAnimation
+
+    // 子页面（外观/关于）：简单状态栈，替代原 NavHost
+    var subRoute by rememberSaveable { mutableStateOf<String?>(null) }
+
+    // KSU 同款返回键：子页面返回上一级，主界面非首页先回首页
+    BackHandler(enabled = subRoute != null || mainPagerState.selectedPage != 0) {
+        when {
+            subRoute != null -> subRoute = null
+            else -> mainPagerState.animateToPage(0)
+        }
+    }
 
     val uiMode = LocalUiMode.current
     val isMaterial = uiMode == UiMode.Material
@@ -93,55 +118,125 @@ fun MainScreen() {
     val backendOffline = BackendMonitor.lastResult?.online == false
     val showApiBadge = enableNavigationBadge && backendOffline
 
-    // 子页（外观/关于）隐藏底栏，只在首页/执行页/设置页显示
-    val showBottomBar = currentRoute == Screen.Home.route ||
-        currentRoute == Screen.Api.route || currentRoute == Screen.Settings.route
-
-    // 悬浮底栏液态玻璃的取景层：记录内容区（含背景色），底栏用它做背景模糊
+    // 悬浮底栏液态玻璃的取景层：记录内容区（含背景色），底栏用它做背景折射
     val containerColor = if (isMaterial) {
         MaterialTheme.colorScheme.surface
     } else {
         MiuixTheme.colorScheme.background
     }
-    val blurBackdrop: LayerBackdrop? = if (enableFloating && enableFloatingBlur) {
-        rememberLayerBackdrop {
-            drawRect(containerColor)
-            drawContent()
-        }
-    } else {
-        null
+    val layerBackdrop = rememberLayerBackdrop {
+        drawRect(containerColor)
+        drawContent()
     }
+    val useBackdropLayer = enableFloating && enableFloatingBlur
 
-    // 单一 Scaffold：UI 模式只影响颜色与底栏内容，NavHost 永远保持同一调用位置，
-    // 树内切换 UI 模式/语言时导航状态不丢，停留在当前页面
-    Scaffold(
-        containerColor = containerColor,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        bottomBar = {
-            if (showBottomBar) {
-                MainBottomBar(
-                    isMaterial = isMaterial,
-                    enableFloating = enableFloating,
-                    showApiBadge = showApiBadge,
-                    blurEnabled = blurBackdrop != null,
-                    backdrop = blurBackdrop,
-                    currentRoute = currentRoute,
-                    items = items,
-                    onSelect = { navigateTo(navController, it) },
-                )
-            }
-        },
-    ) { innerPadding ->
-        CompositionLocalProvider(
-            LocalScaffoldBottomPadding provides innerPadding.calculateBottomPadding(),
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(if (blurBackdrop != null) Modifier.layerBackdrop(blurBackdrop) else Modifier),
+    CompositionLocalProvider(LocalMainPagerState provides mainPagerState) {
+        Scaffold(
+            containerColor = containerColor,
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            bottomBar = {
+                if (subRoute == null) {
+                    MainBottomBar(
+                        isMaterial = isMaterial,
+                        enableFloating = enableFloating,
+                        blurEnabled = enableFloatingBlur,
+                        backdrop = layerBackdrop,
+                        showApiBadge = showApiBadge,
+                    )
+                }
+            },
+        ) { innerPadding ->
+            CompositionLocalProvider(
+                LocalScaffoldBottomPadding provides innerPadding.calculateBottomPadding(),
             ) {
-                MainNavHost(navController, Modifier.fillMaxSize())
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(if (useBackdropLayer) Modifier.layerBackdrop(layerBackdrop) else Modifier),
+                ) {
+                    if (subRoute != null) {
+                        when (subRoute) {
+                            Screen.Appearance.route -> {
+                                if (isMaterial) {
+                                    AppearanceMaterialScreen(onBack = { subRoute = null })
+                                } else {
+                                    AppearanceMiuixScreen(onBack = { subRoute = null })
+                                }
+                            }
+                            Screen.About.route -> {
+                                if (isMaterial) {
+                                    AboutMaterialScreen(onBack = { subRoute = null })
+                                } else {
+                                    AboutMiuixScreen(onBack = { subRoute = null })
+                                }
+                            }
+                        }
+                    } else if (scrollAnimation) {
+                        // 「页面切换动画」开：HorizontalPager，支持左右滑动 + 手势拦截（列表竖滑不误触横滑）
+                        HorizontalPager(
+                            state = mainPagerState.pagerState,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .pagerGestureOverride(
+                                    pagerState = mainPagerState.pagerState,
+                                    mode = PagerInterceptionMode.CrossAxisInterceptor,
+                                ),
+                            beyondViewportPageCount = MAIN_PAGES.size - 1,
+                            overscrollEffect = null,
+                            userScrollEnabled = false,
+                            pageNestedScrollConnection = PagerGestureNestedScrollConnection,
+                        ) { page ->
+                            MainPage(
+                                page = page,
+                                isMaterial = isMaterial,
+                                onOpenAppearance = { subRoute = Screen.Appearance.route },
+                                onOpenAbout = { subRoute = Screen.About.route },
+                            )
+                        }
+                    } else {
+                        // 「页面切换动画」关：KSU 同款淡入淡出
+                        AnimatedContent(
+                            targetState = mainPagerState.selectedPage,
+                            transitionSpec = {
+                                fadeIn(tween(340)) togetherWith fadeOut(tween(340))
+                            },
+                            label = "MainScreenTransition",
+                        ) { page ->
+                            MainPage(
+                                page = page,
+                                isMaterial = isMaterial,
+                                onOpenAppearance = { subRoute = Screen.Appearance.route },
+                                onOpenAbout = { subRoute = Screen.About.route },
+                            )
+                        }
+                    }
+                }
             }
+        }
+
+        // 手动滑动结束时，把 pager 当前页同步回 selectedPage（底栏选中态跟随）
+        LaunchedEffect(mainPagerState) {
+            snapshotFlow { mainPagerState.pagerState.currentPage }.collect {
+                mainPagerState.syncPage()
+            }
+        }
+    }
+}
+
+@Composable
+private fun MainPage(
+    page: Int,
+    isMaterial: Boolean,
+    onOpenAppearance: () -> Unit,
+    onOpenAbout: () -> Unit,
+) {
+    when (page) {
+        0 -> if (isMaterial) HomeMaterialScreen() else HomeMiuixScreen()
+        1 -> if (isMaterial) ApiMaterialScreen() else ApiMiuixScreen()
+        2 -> if (isMaterial) {
+            SettingsMaterialScreen(onOpenAppearance = onOpenAppearance, onOpenAbout = onOpenAbout)
+        } else {
+            SettingsMiuixScreen(onOpenAppearance = onOpenAppearance, onOpenAbout = onOpenAbout)
         }
     }
 }
@@ -150,177 +245,100 @@ fun MainScreen() {
 private fun MainBottomBar(
     isMaterial: Boolean,
     enableFloating: Boolean,
-    showApiBadge: Boolean,
     blurEnabled: Boolean,
-    backdrop: LayerBackdrop?,
-    currentRoute: String,
-    items: List<Pair<Screen, Pair<ImageVector, ImageVector>>>,
-    onSelect: (String) -> Unit,
+    backdrop: LayerBackdrop,
+    showApiBadge: Boolean,
 ) {
+    val mainPagerState = LocalMainPagerState.current
+
     if (enableFloating) {
-        // KSU 风格悬浮胶囊底栏
-        val accentColor = if (isMaterial) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MiuixTheme.colorScheme.primary
-        }
-        val contentColor = if (isMaterial) {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        } else {
-            MiuixTheme.colorScheme.onBackground
-        }
-        val containerColor = if (isMaterial) {
-            MaterialTheme.colorScheme.surfaceContainer
-        } else {
-            MiuixTheme.colorScheme.surface
-        }
-        val floatingTabs = items.map { (screen, icons) ->
-            FloatingTab(
-                filledIcon = icons.first,
-                outlinedIcon = icons.second,
-                label = stringResource(screen.titleResId),
-                showBadge = showApiBadge && screen == Screen.Api,
-            )
-        }
-        FloatingCapsuleBar(
-            items = floatingTabs,
-            selectedIndex = items.indexOfFirst { it.first.route == currentRoute }.coerceAtLeast(0),
-            onSelected = { index ->
-                items.getOrNull(index)?.let { onSelect(it.first.route) }
-            },
-            accentColor = accentColor,
-            contentColor = contentColor,
-            containerColor = containerColor,
-            blurEnabled = blurEnabled,
+        // KSU 同款液态玻璃悬浮胶囊底栏（lens 折射 + vibrancy + 内阴影 + 可拖拽指示器）
+        FloatingBottomBar(
+            selectedIndex = mainPagerState.selectedPage,
+            onSelected = { index -> mainPagerState.animateToPage(index) },
             backdrop = backdrop,
-        )
+            tabsCount = MAIN_PAGES.size,
+            isBlurEnabled = blurEnabled,
+        ) { activateTab ->
+            MAIN_PAGES.forEachIndexed { index, screen ->
+                val selected = mainPagerState.selectedPage == index
+                FloatingBottomBarItem(
+                    selected = selected,
+                    onClick = { activateTab(index) },
+                    modifier = Modifier.defaultMinSize(minWidth = 76.dp),
+                ) {
+                    val icon: @Composable () -> Unit = {
+                        MiuixIcon(
+                            imageVector = if (selected) tabFilledIcon(screen.route) else tabOutlinedIcon(screen.route),
+                            contentDescription = stringResource(screen.titleResId),
+                        )
+                    }
+                    if (showApiBadge && screen == Screen.Api && !selected) {
+                        MiuixBadgedBox(badge = { MiuixBadge() }) { icon() }
+                    } else {
+                        icon()
+                    }
+                    MiuixText(
+                        text = stringResource(screen.titleResId),
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Visible,
+                    )
+                }
+            }
+        }
     } else if (isMaterial) {
-        val surfaceColor = MaterialTheme.colorScheme.surface
-        MaterialNavigationBar(containerColor = surfaceColor) {
-            items.forEach { screen ->
-                val (filledIcon, outlinedIcon) = screen.second
-                val selected = currentRoute == screen.first.route
-                MaterialNavigationBarItem(
+        // M3 Expressive 底栏：ShortNavigationBar + filled/outlined 双态图标
+        MaterialShortNavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
+            MAIN_PAGES.forEachIndexed { index, screen ->
+                val selected = mainPagerState.selectedPage == index
+                MaterialShortNavigationBarItem(
+                    selected = selected,
+                    onClick = { if (!selected) mainPagerState.animateToPage(index) },
                     icon = {
                         if (showApiBadge && screen == Screen.Api && !selected) {
-                            BadgedBox(badge = { Badge() }) {
+                            MaterialBadgedBox(badge = { MaterialBadge() }) {
                                 MaterialIcon(
-                                    imageVector = if (selected) filledIcon else outlinedIcon,
-                                    contentDescription = stringResource(screen.first.titleResId),
+                                    imageVector = if (selected) tabFilledIcon(screen.route) else tabOutlinedIcon(screen.route),
+                                    contentDescription = stringResource(screen.titleResId),
                                 )
                             }
                         } else {
                             MaterialIcon(
-                                imageVector = if (selected) filledIcon else outlinedIcon,
-                                contentDescription = stringResource(screen.first.titleResId),
+                                imageVector = if (selected) tabFilledIcon(screen.route) else tabOutlinedIcon(screen.route),
+                                contentDescription = stringResource(screen.titleResId),
                             )
                         }
                     },
-                    label = { MaterialText(stringResource(screen.first.titleResId)) },
-                    selected = selected,
-                    onClick = { onSelect(screen.first.route) },
+                    label = { MaterialText(stringResource(screen.titleResId)) },
                 )
             }
         }
     } else {
         val surfaceColor = MiuixTheme.colorScheme.surface
         NavigationBar(color = surfaceColor) {
-            items.forEach { screen ->
-                val (filledIcon, outlinedIcon) = screen.second
-                val selected = currentRoute == screen.first.route
+            MAIN_PAGES.forEachIndexed { index, screen ->
                 NavigationBarItem(
-                    selected = selected,
-                    onClick = { onSelect(screen.first.route) },
-                    icon = if (selected) filledIcon else outlinedIcon,
-                    label = stringResource(screen.first.titleResId),
+                    selected = mainPagerState.selectedPage == index,
+                    onClick = { mainPagerState.animateToPage(index) },
+                    icon = if (mainPagerState.selectedPage == index) tabFilledIcon(screen.route) else tabOutlinedIcon(screen.route),
+                    label = stringResource(screen.titleResId),
                 )
             }
         }
     }
 }
 
-@Composable
-private fun MainNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
-    // KSU scrollAnimation 同款：关闭后页面切换退化为纯淡入淡出
-    val scrollAnimation = LocalScrollAnimation.current
-    NavHost(
-        navController = navController,
-        startDestination = Screen.Home.route,
-        modifier = modifier,
-        enterTransition = {
-            if (scrollAnimation) {
-                slideInHorizontally(animationSpec = tween(300)) { it / 4 } + fadeIn(tween(300))
-            } else {
-                fadeIn(animationSpec = tween(150))
-            }
-        },
-        exitTransition = {
-            if (scrollAnimation) {
-                slideOutHorizontally(animationSpec = tween(300)) { -it / 4 } + fadeOut(tween(300))
-            } else {
-                fadeOut(animationSpec = tween(150))
-            }
-        },
-        popEnterTransition = {
-            if (scrollAnimation) {
-                slideInHorizontally(animationSpec = tween(300)) { -it / 4 } + fadeIn(tween(300))
-            } else {
-                fadeIn(animationSpec = tween(150))
-            }
-        },
-        popExitTransition = {
-            if (scrollAnimation) {
-                slideOutHorizontally(animationSpec = tween(300)) { it / 4 } + fadeOut(tween(300))
-            } else {
-                fadeOut(animationSpec = tween(150))
-            }
-        },
-    ) {
-        composable(Screen.Home.route) {
-            when (LocalUiMode.current) {
-                UiMode.Material -> HomeMaterialScreen()
-                UiMode.Miuix -> HomeMiuixScreen()
-            }
-        }
-        composable(Screen.Api.route) {
-            when (LocalUiMode.current) {
-                UiMode.Material -> ApiMaterialScreen()
-                UiMode.Miuix -> ApiMiuixScreen()
-            }
-        }
-        composable(Screen.Settings.route) {
-            when (LocalUiMode.current) {
-                UiMode.Material -> SettingsMaterialScreen(
-                    onOpenAppearance = { navController.navigate(Screen.Appearance.route) },
-                    onOpenAbout = { navController.navigate(Screen.About.route) },
-                )
-                UiMode.Miuix -> SettingsMiuixScreen(
-                    onOpenAppearance = { navController.navigate(Screen.Appearance.route) },
-                    onOpenAbout = { navController.navigate(Screen.About.route) },
-                )
-            }
-        }
-        composable(Screen.Appearance.route) {
-            when (LocalUiMode.current) {
-                UiMode.Material -> AppearanceMaterialScreen(onBack = { navController.popBackStack() })
-                UiMode.Miuix -> AppearanceMiuixScreen(onBack = { navController.popBackStack() })
-            }
-        }
-        composable(Screen.About.route) {
-            when (LocalUiMode.current) {
-                UiMode.Material -> AboutMaterialScreen(onBack = { navController.popBackStack() })
-                UiMode.Miuix -> AboutMiuixScreen(onBack = { navController.popBackStack() })
-            }
-        }
-    }
+private fun tabFilledIcon(route: String) = when (route) {
+    Screen.Home.route -> Icons.Filled.Home
+    Screen.Api.route -> Icons.Filled.Bolt
+    else -> Icons.Filled.Settings
 }
 
-private fun navigateTo(navController: NavHostController, route: String) {
-    navController.navigate(route) {
-        popUpTo(navController.graph.startDestinationId) {
-            saveState = true
-        }
-        launchSingleTop = true
-        restoreState = true
-    }
+private fun tabOutlinedIcon(route: String) = when (route) {
+    Screen.Home.route -> Icons.Outlined.Home
+    Screen.Api.route -> Icons.Outlined.Bolt
+    else -> Icons.Outlined.Settings
 }
