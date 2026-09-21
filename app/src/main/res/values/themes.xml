@@ -4,5 +4,7 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
+        <!-- KSU 同款：启用预测性手势返回（Android 13+） -->
+        <item name="android:enableOnBackInvokedCallback">true</item>
     </style>
 </resources>

@@ -1,6 +1,9 @@
 package com.demo.themeswitch.ui.screen
 
 import androidx.activity.compose.BackHandler
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -97,12 +100,18 @@ fun MainScreen() {
 
     var subRoute by rememberSaveable { mutableStateOf<String?>(null) }
 
-    BackHandler(enabled = subRoute != null || mainPagerState.selectedPage != 0) {
-        when {
-            subRoute != null -> subRoute = null
-            else -> mainPagerState.animateToPage(0)
+    // KSU 同款：预测性手势返回（Android 13+ 边缘侧滑预览动画）
+    val navEventState = rememberNavigationEventState(NavigationEventInfo.None)
+    NavigationBackHandler(
+        state = navEventState,
+        isBackEnabled = subRoute != null || mainPagerState.selectedPage != 0,
+        onBackCompleted = {
+            when {
+                subRoute != null -> subRoute = null
+                else -> mainPagerState.animateToPage(0)
+            }
         }
-    }
+    )
 
     val uiMode = LocalUiMode.current
     val isMaterial = uiMode == UiMode.Material
