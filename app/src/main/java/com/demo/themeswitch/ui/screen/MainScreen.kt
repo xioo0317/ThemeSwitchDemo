@@ -21,10 +21,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon as MaterialIcon
@@ -356,12 +356,12 @@ private fun MainBottomBar(
 
 private fun tabFilledIcon(route: String) = when (route) {
     Screen.Home.route -> Icons.Filled.Home
-    Screen.Api.route -> Icons.Filled.Bolt
+    Screen.Api.route -> Icons.Filled.Apps
     else -> Icons.Filled.Settings
 }
 
 private fun tabOutlinedIcon(route: String) = when (route) {
     Screen.Home.route -> Icons.Outlined.Home
-    Screen.Api.route -> Icons.Outlined.Bolt
+    Screen.Api.route -> Icons.Outlined.Apps
     else -> Icons.Outlined.Settings
 }

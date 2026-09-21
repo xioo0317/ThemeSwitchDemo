@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Thema wechseln</string>
+    <string name="app_name">coverRoot</string>
     <string name="nav_home">Startseite</string>
     <string name="nav_settings">Einstellungen</string>
     <string name="nav_about">Über</string>
@@ -21,12 +21,12 @@
     <string name="settings_theme">Thema</string>
     <string name="settings_language">Sprache</string>
     <string name="settings_monet">Material You</string>
-    <string name="theme_system">Systemstandard</string>
+    <string name="theme_system">System folgen</string>
     <string name="theme_light">Hell</string>
     <string name="theme_dark">Dunkel</string>
-    <string name="mode_material">Material Design 3</string>
-    <string name="mode_miuix">MIUI-Stil</string>
-    <string name="lang_system">Systemstandard</string>
+    <string name="mode_material">Material</string>
+    <string name="mode_miuix">Miuix</string>
+    <string name="lang_system">System folgen</string>
     <string name="dialog_cancel">Abbrechen</string>
     <string name="dialog_confirm">Bestätigen</string>
     <string name="about_desc">Eine Demo-App mit Dual-Theme-Architektur, die Material Design 3 und MIUI-Stil umschaltet, sowie mehrsprachige Unterstützung bietet.</string>
@@ -34,14 +34,14 @@
     <string name="about_arch_desc">Diese App verwendet das UiMode-Enum mit CompositionLocal, um zur Laufzeit zwischen Material 3 (kartenbasiert) und MIUI-UI zu wechseln. Inspiriert von der Dual-Theme-Architektur von KernelSU.</string>
     <string name="home_working">Aktiv</string>
     <string name="home_working_version">Version %1$s</string>
-    <string name="nav_api">Ausführen</string>
+    <string name="nav_api">Funktionen</string>
     <string name="api_server_address">Server-Adresse</string>
     <string name="api_action_hint">Aktion</string>
     <string name="api_custom_body">Eigener Request-Body (optional, JSON)</string>
     <string name="api_response">Antwort-Stream</string>
     <string name="api_empty_hint">Aktion wählen und Ausführen tippen</string>
-    <string name="api_run">Ausführen</string>
-    <string name="api_running">Wird ausgeführt…</string>
+    <string name="api_run">Starten</string>
+    <string name="api_running">Läuft…</string>
     <string name="api_status_done">Übertragung beendet ([DONE] empfangen)</string>
     <string name="api_status_error">Anfrage fehlgeschlagen</string>
     <string name="api_invalid_url">Ungültige Serveradresse</string>
@@ -56,4 +56,6 @@
     <string name="card_server">Server</string>
     <string name="settings_scroll_animation">Scrollanimation</string>
     <string name="settings_scroll_animation_summary">Seitenübergangsanimation aktivieren</string>
+    <string name="settings_predictive_back">Prädiktives Zurück</string>
+    <string name="settings_predictive_back_summary">Prädiktive Zurück-Gestenanimation aktivieren</string>
 </resources>

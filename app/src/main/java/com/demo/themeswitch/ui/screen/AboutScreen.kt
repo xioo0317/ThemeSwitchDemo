@@ -267,7 +267,7 @@ fun AboutMaterialScreen(onBack: () -> Unit) {
                     MaterialIcon(
                         imageVector = Icons.Rounded.Code,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(Modifier.width(16.dp))
                     Column(Modifier.weight(1f)) {

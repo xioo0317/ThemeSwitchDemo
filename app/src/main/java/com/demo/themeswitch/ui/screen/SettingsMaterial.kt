@@ -100,7 +100,7 @@ fun SettingsMaterialScreen(
                             Icon(
                                 imageVector = Icons.Filled.Colorize,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         },
                         headlineContent = { Text(stringResource(R.string.settings_theme)) },
@@ -150,7 +150,7 @@ fun SettingsMaterialScreen(
                             Icon(
                                 imageVector = Icons.Filled.Info,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         },
                         headlineContent = { Text(stringResource(R.string.nav_about)) },

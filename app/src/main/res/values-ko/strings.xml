@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">테마 전환</string>
+    <string name="app_name">coverRoot</string>
     <string name="nav_home">홈</string>
     <string name="nav_settings">설정</string>
     <string name="nav_about">정보</string>
@@ -21,12 +21,12 @@
     <string name="settings_theme">테마</string>
     <string name="settings_language">언어</string>
     <string name="settings_monet">Material You</string>
-    <string name="theme_system">시스템 기본값</string>
+    <string name="theme_system">시스템 따르기</string>
     <string name="theme_light">라이트</string>
     <string name="theme_dark">다크</string>
-    <string name="mode_material">Material Design 3</string>
-    <string name="mode_miuix">MIUI 스타일</string>
-    <string name="lang_system">시스템 기본값</string>
+    <string name="mode_material">Material</string>
+    <string name="mode_miuix">Miuix</string>
+    <string name="lang_system">시스템 따르기</string>
     <string name="dialog_cancel">취소</string>
     <string name="dialog_confirm">확인</string>
     <string name="about_desc">Material Design 3와 MIUI 스타일 전환 및 다국어 지원을 갖춘 듀얼 테마 아키텍처 데모 앱입니다.</string>
@@ -34,7 +34,7 @@
     <string name="about_arch_desc">이 앱은 UiMode 열거형과 CompositionLocal을 사용하여 런타임에 Material 3(카드 기반)와 MIUI 스타일 UI를 전환합니다. KernelSU의 듀얼 테마 아키텍처에서 영감을 받았습니다.</string>
     <string name="home_working">작동 중</string>
     <string name="home_working_version">버전 %1$s</string>
-    <string name="nav_api">실행</string>
+    <string name="nav_api">기능</string>
     <string name="api_server_address">서버 주소</string>
     <string name="api_action_hint">동작</string>
     <string name="api_custom_body">사용자 지정 요청 본문(선택, JSON)</string>
@@ -56,4 +56,6 @@
     <string name="card_server">서버</string>
     <string name="settings_scroll_animation">스크롤 애니메이션</string>
     <string name="settings_scroll_animation_summary">페이지 전환 애니메이션 사용</string>
+    <string name="settings_predictive_back">예측 뒤로 가기</string>
+    <string name="settings_predictive_back_summary">예측 뒤로 가기 제스처 애니메이션 사용</string>
 </resources>

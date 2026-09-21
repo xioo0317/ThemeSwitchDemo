@@ -192,7 +192,7 @@ private fun InfoRow(
 ) {
     ListItem(
         leadingContent = {
-            Icon(icon, contentDescription = label, tint = MaterialTheme.colorScheme.primary)
+            Icon(icon, contentDescription = label, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         },
         headlineContent = { Text(label, style = MaterialTheme.typography.bodyLarge) },
         supportingContent = {

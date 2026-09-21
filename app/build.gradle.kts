@@ -81,6 +81,9 @@ dependencies {
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    // Hidden API bypass for predictive back gesture
+    implementation("org.lsposed.hiddenapibypass:hiddenapibypass:6.1")
 }
 
 kotlin {

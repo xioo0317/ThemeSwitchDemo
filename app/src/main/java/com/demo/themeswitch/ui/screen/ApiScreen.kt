@@ -338,7 +338,7 @@ private fun StatusLine(executor: ApiExecutor) {
                 Icon(
                     Icons.Rounded.CheckCircle,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.width(18.dp),
                 )
                 Spacer(Modifier.width(8.dp))

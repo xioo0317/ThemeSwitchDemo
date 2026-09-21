@@ -81,6 +81,7 @@ import com.demo.themeswitch.R
 import com.demo.themeswitch.ui.component.ExpressiveSwitch
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.SettingsRepository
+import com.demo.themeswitch.app.CoverRootApp
 import com.demo.themeswitch.ui.theme.colorNameResIds
 import com.demo.themeswitch.ui.theme.colorSpecOptions
 import com.demo.themeswitch.ui.theme.isInDarkTheme
@@ -116,6 +117,7 @@ fun AppearanceMiuixScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val scrollBehavior = MiuixScrollBehavior()
     val colorScheme = MiuixTheme.colorScheme
+            val activity = LocalActivity.current
 
     // KSU 同款模糊
     val enableBlur = com.demo.themeswitch.ui.theme.LocalEnableBlur.current
@@ -363,7 +365,15 @@ fun AppearanceMiuixScreen(onBack: () -> Unit) {
                             },
                             checked = preferences.enablePredictiveBack,
                             onCheckedChange = { enabled ->
-                                scope.launch { repository.setEnablePredictiveBack(enabled) }
+                                scope.launch {
+                                    repository.setEnablePredictiveBack(enabled)
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                                        CoverRootApp.setEnableOnBackInvokedCallback(
+                                            context.applicationInfo, enabled
+                                        )
+                                    }
+                                    activity?.recreate()
+                                }
                             },
                         )
                     }
@@ -597,6 +607,24 @@ fun AppearanceMaterialScreen(onBack: () -> Unit) {
                     checked = preferences.enableScrollAnimation,
                     onCheckedChange = { scope.launch { repository.setEnableScrollAnimation(it) } },
                 )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    CardDivider()
+                    MaterialSwitchRow(
+                        icon = Icons.Rounded.BackHand,
+                        title = stringResource(R.string.settings_predictive_back),
+                        summary = stringResource(R.string.settings_predictive_back_summary),
+                        checked = preferences.enablePredictiveBack,
+                        onCheckedChange = { enabled ->
+                            scope.launch {
+                                repository.setEnablePredictiveBack(enabled)
+                                CoverRootApp.setEnableOnBackInvokedCallback(
+                                    context.applicationInfo, enabled
+                                )
+                                activity?.recreate()
+                            }
+                        },
+                    )
+                }
             }
 
             M3Card(
@@ -619,7 +647,7 @@ fun AppearanceMaterialScreen(onBack: () -> Unit) {
                     MaterialIcon(
                         imageVector = Icons.Rounded.AspectRatio,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(Modifier.width(16.dp))
                     Column(Modifier.weight(1f)) {
@@ -682,7 +710,7 @@ private fun MaterialSwitchRow(
         MaterialIcon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.width(16.dp))
         Column(Modifier.weight(1f)) {
@@ -723,7 +751,7 @@ private fun SettingDropdownRow(
             MaterialIcon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
@@ -787,7 +815,7 @@ private fun ColorButton(
             MaterialIcon(
                 imageVector = Icons.Filled.AutoAwesome,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(18.dp),
             )
         } else if (selected) {

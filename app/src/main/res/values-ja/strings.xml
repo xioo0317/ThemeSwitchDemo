@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">テーマ切替</string>
+    <string name="app_name">coverRoot</string>
     <string name="nav_home">ホーム</string>
     <string name="nav_settings">設定</string>
     <string name="nav_about">について</string>
@@ -21,12 +21,12 @@
     <string name="settings_theme">テーマ</string>
     <string name="settings_language">言語</string>
     <string name="settings_monet">Material You</string>
-    <string name="theme_system">システムデフォルト</string>
+    <string name="theme_system">システムに従う</string>
     <string name="theme_light">ライト</string>
     <string name="theme_dark">ダーク</string>
-    <string name="mode_material">Material Design 3</string>
-    <string name="mode_miuix">MIUIスタイル</string>
-    <string name="lang_system">システムデフォルト</string>
+    <string name="mode_material">Material</string>
+    <string name="mode_miuix">Miuix</string>
+    <string name="lang_system">システムに従う</string>
     <string name="dialog_cancel">キャンセル</string>
     <string name="dialog_confirm">確認</string>
     <string name="about_desc">Material Design 3とMIUIスタイルの切り替え、および多言語サポートを備えたデュアルテーマアーキテクチャのデモアプリです。</string>
@@ -34,7 +34,7 @@
     <string name="about_arch_desc">本アプリはUiMode列挙体とCompositionLocalを使用して、実行時にMaterial 3（カードベース）とMIUIスタイルのUIを切り替えます。KernelSUのデュアルテーマアーキテクチャにインスパイアされています。</string>
     <string name="home_working">稼働中</string>
     <string name="home_working_version">バージョン %1$s</string>
-    <string name="nav_api">実行</string>
+    <string name="nav_api">機能</string>
     <string name="api_server_address">サーバーアドレス</string>
     <string name="api_action_hint">アクション</string>
     <string name="api_custom_body">カスタムリクエストボディ（任意、JSON）</string>
@@ -56,4 +56,6 @@
     <string name="card_server">サーバー</string>
     <string name="settings_scroll_animation">スクロールアニメーション</string>
     <string name="settings_scroll_animation_summary">ページ遷移アニメーションを有効にする</string>
+    <string name="settings_predictive_back">予測バック</string>
+    <string name="settings_predictive_back_summary">予測バックジェスチャーアニメーションを有効にする</string>
 </resources>

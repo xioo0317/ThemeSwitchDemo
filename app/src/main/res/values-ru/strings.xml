@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Смена Темы</string>
+    <string name="app_name">coverRoot</string>
     <string name="nav_home">Главная</string>
     <string name="nav_settings">Настройки</string>
     <string name="nav_about">О приложении</string>
@@ -21,12 +21,12 @@
     <string name="settings_theme">Тема</string>
     <string name="settings_language">Язык</string>
     <string name="settings_monet">Material You</string>
-    <string name="theme_system">По умолчанию системы</string>
+    <string name="theme_system">Следовать системе</string>
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Тёмная</string>
-    <string name="mode_material">Material Design 3</string>
-    <string name="mode_miuix">Стиль MIUI</string>
-    <string name="lang_system">По умолчанию системы</string>
+    <string name="mode_material">Material</string>
+    <string name="mode_miuix">Miuix</string>
+    <string name="lang_system">Следовать системе</string>
     <string name="dialog_cancel">Отмена</string>
     <string name="dialog_confirm">Подтвердить</string>
     <string name="about_desc">Демо-приложение с архитектурой двойной темы, поддерживающее переключение между Material Design 3 и стилем MIUI, а также многоязычную поддержку.</string>
@@ -34,7 +34,7 @@
     <string name="about_arch_desc">Приложение использует перечисление UiMode с CompositionLocal для переключения между Material 3 (на основе карточек) и интерфейсом MIUI в реальном времени. Вдохновлено архитектурой двойной темы KernelSU.</string>
     <string name="home_working">Работает</string>
     <string name="home_working_version">Версия %1$s</string>
-    <string name="nav_api">Запуск</string>
+    <string name="nav_api">Функции</string>
     <string name="api_server_address">Адрес сервера</string>
     <string name="api_action_hint">Действие</string>
     <string name="api_custom_body">Своё тело запроса (необязательно, JSON)</string>
@@ -56,4 +56,6 @@
     <string name="card_server">Сервер</string>
     <string name="settings_scroll_animation">Анимация прокрутки</string>
     <string name="settings_scroll_animation_summary">Включить анимацию перехода страниц</string>
+    <string name="settings_predictive_back">Прогнозируемое возвращение</string>
+    <string name="settings_predictive_back_summary">Включить анимацию жеста прогнозируемого возврата</string>
 </resources>

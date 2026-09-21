@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Changement de Thème</string>
+    <string name="app_name">coverRoot</string>
     <string name="nav_home">Accueil</string>
     <string name="nav_settings">Paramètres</string>
     <string name="nav_about">À propos</string>
@@ -21,12 +21,12 @@
     <string name="settings_theme">Thème</string>
     <string name="settings_language">Langue</string>
     <string name="settings_monet">Material You</string>
-    <string name="theme_system">Par défaut du système</string>
+    <string name="theme_system">Suivre le système</string>
     <string name="theme_light">Clair</string>
     <string name="theme_dark">Sombre</string>
-    <string name="mode_material">Material Design 3</string>
-    <string name="mode_miuix">Style MIUI</string>
-    <string name="lang_system">Par défaut du système</string>
+    <string name="mode_material">Material</string>
+    <string name="mode_miuix">Miuix</string>
+    <string name="lang_system">Suivre le système</string>
     <string name="dialog_cancel">Annuler</string>
     <string name="dialog_confirm">Confirmer</string>
     <string name="about_desc">Une application démo présentant une architecture à double thème avec Material Design 3 et le style MIUI, ainsi qu\'un support multilingue.</string>
@@ -34,14 +34,14 @@
     <string name="about_arch_desc">Cette application utilise l\'énumération UiMode avec CompositionLocal pour basculer entre les interfaces Material 3 (cartes) et MIUI en temps d\'exécution. Inspirée par l\'architecture à double thème de KernelSU.</string>
     <string name="home_working">En fonctionnement</string>
     <string name="home_working_version">Version %1$s</string>
-    <string name="nav_api">Exécuter</string>
+    <string name="nav_api">Fonctions</string>
     <string name="api_server_address">Adresse du serveur</string>
     <string name="api_action_hint">Action</string>
     <string name="api_custom_body">Corps de requête personnalisé (facultatif, JSON)</string>
     <string name="api_response">Flux de réponse</string>
     <string name="api_empty_hint">Choisissez une action puis exécutez</string>
-    <string name="api_run">Exécuter</string>
-    <string name="api_running">Exécution…</string>
+    <string name="api_run">Lancer</string>
+    <string name="api_running">En cours…</string>
     <string name="api_status_done">Flux terminé ([DONE] reçu)</string>
     <string name="api_status_error">Échec de la requête</string>
     <string name="api_invalid_url">Adresse de serveur invalide</string>
@@ -56,4 +56,6 @@
     <string name="card_server">Serveur</string>
     <string name="settings_scroll_animation">Animation de défilement</string>
     <string name="settings_scroll_animation_summary">Activer l\'animation de transition</string>
+    <string name="settings_predictive_back">Retour prédictif</string>
+    <string name="settings_predictive_back_summary">Activer l'animation de geste de retour prédictif</string>
 </resources>
