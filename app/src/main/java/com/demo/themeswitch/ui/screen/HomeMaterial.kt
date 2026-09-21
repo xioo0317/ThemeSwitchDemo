@@ -138,26 +138,22 @@ private fun StatusCard(online: Boolean, latencyMs: Long) {
     ) {
         ListItem(
             leadingContent = {
-                Icon(statusIcon, contentDescription = statusTitle)
+                Icon(statusIcon, contentDescription = statusTitle, tint = contentColor)
             },
             supportingContent = {
                 Text(
                     text = statusSummary,
                     style = MaterialTheme.typography.bodyMedium,
+                    color = contentColor.copy(alpha = 0.7f),
                 )
             },
             verticalAlignment = Alignment.CenterVertically,
-            colors = ListItemDefaults.colors(
-                containerColor = Color.Transparent,
-                contentColor = contentColor,
-                leadingContentColor = contentColor,
-                trailingContentColor = contentColor,
-                supportingContentColor = contentColor.copy(alpha = 0.7f),
-            ),
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
             headlineContent = {
                 Text(
                     text = statusTitle,
                     style = MaterialTheme.typography.titleMediumEmphasized,
+                    color = contentColor,
                 )
             },
         )
