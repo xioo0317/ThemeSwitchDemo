@@ -57,5 +57,5 @@
     <string name="settings_scroll_animation">Animation de défilement</string>
     <string name="settings_scroll_animation_summary">Activer l\'animation de transition</string>
     <string name="settings_predictive_back">Retour prédictif</string>
-    <string name="settings_predictive_back_summary">Activer l'animation de geste de retour prédictif</string>
+    <string name="settings_predictive_back_summary">Activer l\'animation de geste de retour prédictif</string>
 </resources>
