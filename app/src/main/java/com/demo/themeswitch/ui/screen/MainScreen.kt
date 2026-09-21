@@ -55,7 +55,7 @@ import com.demo.themeswitch.ui.navigation.Navigator
 import com.demo.themeswitch.ui.navigation.Route
 import com.demo.themeswitch.ui.theme.LocalEnableFloatingBottomBar
 import com.demo.themeswitch.ui.theme.LocalEnableFloatingBottomBarBlur
-import com.demo.themeswitch.ui.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import com.demo.themeswitch.util.BlurredBar
 import com.demo.themeswitch.util.rememberBlurBackdrop
 import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
