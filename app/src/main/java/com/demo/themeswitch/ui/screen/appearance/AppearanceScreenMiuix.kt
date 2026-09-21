@@ -3,6 +3,7 @@ package com.demo.themeswitch.ui.screen.appearance
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement

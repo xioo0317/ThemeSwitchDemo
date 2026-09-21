@@ -73,6 +73,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
@@ -418,7 +419,7 @@ private fun ColorSwatch(
     onClick: () -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
-    val keyColor = if (color == Color.Unspecified) 0 else color.value
+    val keyColor = if (color == Color.Unspecified) 0 else color.toArgb()
     val scheme = previewScheme(keyColor, isDark, isAmoled, paletteStyle, colorSpec)
 
     Surface(
@@ -439,8 +440,8 @@ private fun ColorSwatch(
             Box(modifier = Modifier.graphicsLayer { scaleX = scale; scaleY = scale }) {
                 AnimatedVisibility(
                     visible = selected,
-                    enter = fadeIn() + scaleIn(0.8f),
-                    exit = fadeOut() + scaleOut(0.8f),
+                    enter = fadeIn() + scaleIn(initialScale = 0.8f),
+                    exit = fadeOut() + scaleOut(targetScale = 0.8f),
                 ) {
                     Box(
                         modifier = Modifier.size(56.dp).border(2.dp, scheme.primary),
@@ -459,8 +460,8 @@ private fun ColorSwatch(
                 }
                 AnimatedVisibility(
                     visible = !selected,
-                    enter = fadeIn() + scaleIn(0.8f),
-                    exit = fadeOut() + scaleOut(0.8f),
+                    enter = fadeIn() + scaleIn(initialScale = 0.8f),
+                    exit = fadeOut() + scaleOut(targetScale = 0.8f),
                 ) {
                     Box(modifier = Modifier.size(20.dp).background(scheme.primary))
                 }
