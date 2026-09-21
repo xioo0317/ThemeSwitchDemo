@@ -75,9 +75,7 @@ import top.yukonga.miuix.kmp.utils.PagerGestureNestedScrollConnection
 import top.yukonga.miuix.kmp.utils.PagerInterceptionMode
 import com.demo.themeswitch.ui.navigation.Route
 import top.yukonga.miuix.kmp.nav.core.NavDisplay
-import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
 import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
-import top.yukonga.miuix.kmp.nav.core.rememberNavSystemCornerRadius
 import top.yukonga.miuix.kmp.utils.pagerGestureOverride
 
 sealed class Screen(val route: String, val titleResId: Int) {
@@ -159,7 +157,6 @@ fun MainScreen() {
             ) {
                 NavDisplay(
                     backStack = backStack,
-                    effects = NavDisplayEffects(cornerClipRadius = rememberNavSystemCornerRadius()),
                     onBack = { backStack.removeLastOrNull() },
                 ) {
                     entry<Route.Main> {
