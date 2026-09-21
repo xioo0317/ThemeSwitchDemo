@@ -188,26 +188,26 @@ private fun StatusCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(22.dp),
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
                     imageVector = Icons.Rounded.ErrorOutline,
                     contentDescription = null,
                     tint = colorScheme.onSurface,
-                    modifier = Modifier.size(42.dp),
+                    modifier = Modifier.size(32.dp),
                 )
-                Spacer(Modifier.width(16.dp))
+                Spacer(Modifier.width(12.dp))
                 Column {
                     Text(
                         text = stringResource(R.string.home_not_working),
-                        fontSize = 22.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
                         text = stringResource(R.string.home_not_working_hint),
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         color = colorScheme.onSurfaceVariantSummary,
                     )
                 }
