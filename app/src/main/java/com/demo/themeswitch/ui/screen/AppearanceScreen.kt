@@ -1,6 +1,7 @@
 package com.demo.themeswitch.ui.screen
 
 import android.os.Build
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -430,6 +431,7 @@ fun AppearanceMiuixScreen(onBack: () -> Unit) {
 @Composable
 fun AppearanceMaterialScreen(onBack: () -> Unit) {
     val context = LocalContext.current
+    val activity = LocalActivity.current
     val repository = remember { SettingsRepository(context) }
     val preferences by repository.preferencesFlow.collectAsState(initial = AppPreferences())
     val scope = rememberCoroutineScope()
