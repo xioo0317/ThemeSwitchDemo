@@ -73,6 +73,11 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PagerGestureNestedScrollConnection
 import top.yukonga.miuix.kmp.utils.PagerInterceptionMode
+import com.demo.themeswitch.ui.navigation.Route
+import top.yukonga.miuix.kmp.nav.core.NavDisplay
+import top.yukonga.miuix.kmp.nav.core.NavDisplayEffects
+import top.yukonga.miuix.kmp.nav.core.rememberNavBackStack
+import top.yukonga.miuix.kmp.nav.core.rememberNavSystemCornerRadius
 import top.yukonga.miuix.kmp.utils.pagerGestureOverride
 
 sealed class Screen(val route: String, val titleResId: Int) {
@@ -100,30 +105,23 @@ fun MainScreen() {
     )
     mainPagerState.usePager = scrollAnimation
 
-    var subRoute by rememberSaveable { mutableStateOf<String?>(null) }
+    // KSU 同款：miuix-nav 回退栈，支持预测性手势返回转场
+    val backStack = rememberNavBackStack<Route>(Route.Main)
+    val currentRoute = backStack.lastOrNull()
+    val isMainRoute = currentRoute == Route.Main
 
-    // KSU 同款：预测性手势返回（Android 13+ 边缘侧滑预览动画），可在外观设置中关闭
+    // KSU 同款：预测性手势返回——只在主页面且非首页时处理；二级页面返回由 NavDisplay 自带转场处理
     val enablePredictiveBack = LocalEnablePredictiveBack.current
     val navEventState = rememberNavigationEventState(NavigationEventInfo.None)
-    val backEnabled = subRoute != null || mainPagerState.selectedPage != 0
+    val pagerBackEnabled = isMainRoute && mainPagerState.selectedPage != 0
     if (enablePredictiveBack) {
         NavigationBackHandler(
             state = navEventState,
-            isBackEnabled = backEnabled,
-            onBackCompleted = {
-                when {
-                    subRoute != null -> subRoute = null
-                    else -> mainPagerState.animateToPage(0)
-                }
-            }
+            isBackEnabled = pagerBackEnabled,
+            onBackCompleted = { mainPagerState.animateToPage(0) }
         )
     } else {
-        BackHandler(enabled = backEnabled) {
-            when {
-                subRoute != null -> subRoute = null
-                else -> mainPagerState.animateToPage(0)
-            }
-        }
+        BackHandler(enabled = pagerBackEnabled) { mainPagerState.animateToPage(0) }
     }
 
     val uiMode = LocalUiMode.current
@@ -144,7 +142,7 @@ fun MainScreen() {
             containerColor = if (isMaterial) MaterialTheme.colorScheme.surfaceContainer else Color.Transparent,
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = {
-                if (subRoute == null) {
+                if (isMainRoute) {
                     MainBottomBar(
                         isMaterial = isMaterial,
                         enableFloating = enableFloating,
@@ -159,65 +157,69 @@ fun MainScreen() {
                 LocalScaffoldBottomPadding provides innerPadding.calculateBottomPadding(),
                 LocalBlurBackdrop provides blurBackdrop,
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        // Miuix 模式 Scaffold 透明，内容自己画 surface 背景；Material 模式 Scaffold 已画
-                        .then(if (!isMaterial) Modifier.background(MiuixTheme.colorScheme.surface) else Modifier)
-                        .then(if (useBackdropLayer) Modifier.layerBackdrop(layerBackdrop) else Modifier),
+                NavDisplay(
+                    backStack = backStack,
+                    effects = NavDisplayEffects(cornerClipRadius = rememberNavSystemCornerRadius()),
+                    onBack = { backStack.removeLastOrNull() },
                 ) {
-                    if (subRoute != null) {
-                        when (subRoute) {
-                            Screen.Appearance.route -> {
-                                if (isMaterial) {
-                                    AppearanceMaterialScreen(onBack = { subRoute = null })
-                                } else {
-                                    AppearanceMiuixScreen(onBack = { subRoute = null })
-                                }
-                            }
-                            Screen.About.route -> {
-                                if (isMaterial) {
-                                    AboutMaterialScreen(onBack = { subRoute = null })
-                                } else {
-                                    AboutMiuixScreen(onBack = { subRoute = null })
-                                }
-                            }
-                        }
-                    } else if (scrollAnimation) {
-                        HorizontalPager(
-                            state = mainPagerState.pagerState,
+                    entry<Route.Main> {
+                        Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .pagerGestureOverride(
-                                    pagerState = mainPagerState.pagerState,
-                                    mode = PagerInterceptionMode.CrossAxisInterceptor,
-                                ),
-                            beyondViewportPageCount = MAIN_PAGES.size - 1,
-                            overscrollEffect = null,
-                            userScrollEnabled = false,
-                            pageNestedScrollConnection = PagerGestureNestedScrollConnection,
-                        ) { page ->
-                            MainPage(
-                                page = page,
-                                isMaterial = isMaterial,
-                                onOpenAppearance = { subRoute = Screen.Appearance.route },
-                                onOpenAbout = { subRoute = Screen.About.route },
-                            )
+                                .then(if (!isMaterial) Modifier.background(MiuixTheme.colorScheme.surface) else Modifier)
+                                .then(if (useBackdropLayer) Modifier.layerBackdrop(layerBackdrop) else Modifier),
+                        ) {
+                            if (scrollAnimation) {
+                                HorizontalPager(
+                                    state = mainPagerState.pagerState,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .pagerGestureOverride(
+                                            pagerState = mainPagerState.pagerState,
+                                            mode = PagerInterceptionMode.CrossAxisInterceptor,
+                                        ),
+                                    beyondViewportPageCount = MAIN_PAGES.size - 1,
+                                    overscrollEffect = null,
+                                    userScrollEnabled = false,
+                                    pageNestedScrollConnection = PagerGestureNestedScrollConnection,
+                                ) { page ->
+                                    MainPage(
+                                        page = page,
+                                        isMaterial = isMaterial,
+                                        onOpenAppearance = { backStack.add(Route.Appearance) },
+                                        onOpenAbout = { backStack.add(Route.About) },
+                                    )
+                                }
+                            } else {
+                                AnimatedContent(
+                                    targetState = mainPagerState.selectedPage,
+                                    transitionSpec = {
+                                        fadeIn(tween(340)) togetherWith fadeOut(tween(340))
+                                    },
+                                    label = "MainScreenTransition",
+                                ) { page ->
+                                    MainPage(
+                                        page = page,
+                                        isMaterial = isMaterial,
+                                        onOpenAppearance = { backStack.add(Route.Appearance) },
+                                        onOpenAbout = { backStack.add(Route.About) },
+                                    )
+                                }
+                            }
                         }
-                    } else {
-                        AnimatedContent(
-                            targetState = mainPagerState.selectedPage,
-                            transitionSpec = {
-                                fadeIn(tween(340)) togetherWith fadeOut(tween(340))
-                            },
-                            label = "MainScreenTransition",
-                        ) { page ->
-                            MainPage(
-                                page = page,
-                                isMaterial = isMaterial,
-                                onOpenAppearance = { subRoute = Screen.Appearance.route },
-                                onOpenAbout = { subRoute = Screen.About.route },
-                            )
+                    }
+                    entry<Route.Appearance> {
+                        if (isMaterial) {
+                            AppearanceMaterialScreen(onBack = { backStack.removeLastOrNull() })
+                        } else {
+                            AppearanceMiuixScreen(onBack = { backStack.removeLastOrNull() })
+                        }
+                    }
+                    entry<Route.About> {
+                        if (isMaterial) {
+                            AboutMaterialScreen(onBack = { backStack.removeLastOrNull() })
+                        } else {
+                            AboutMiuixScreen(onBack = { backStack.removeLastOrNull() })
                         }
                     }
                 }
