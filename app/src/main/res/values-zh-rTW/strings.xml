@@ -24,7 +24,6 @@
     <string name="settings_language">語言</string>
     <string name="settings_language_summary">選擇應用語言</string>
     <string name="settings_monet">啟用動態取色</string>
-    <string name="settings_monet_summary">使用系統動態取色</string>
     <string name="settings_key_color">強調色</string>
     <string name="settings_key_color_default">預設</string>
     <string name="settings_color_style">色彩風格</string>
@@ -89,8 +88,4 @@
     <string name="card_server">伺服器</string>
     <string name="settings_scroll_animation">捲動動畫</string>
     <string name="settings_scroll_animation_summary">啟用頁面切換動畫</string>
-    <string name="settings_navigation_badge">導覽列角標</string>
-    <string name="settings_navigation_badge_summary">後端離線時顯示紅點提醒</string>
-    <string name="settings_switch_icon">切換開關圖示</string>
-    <string name="settings_switch_icon_summary">在開關滑塊上顯示勾/叉圖示</string>
 </resources>

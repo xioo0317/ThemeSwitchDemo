@@ -23,8 +23,7 @@
     <string name="settings_theme_summary">Choose the theme mode</string>
     <string name="settings_language">Language</string>
     <string name="settings_language_summary">Choose the app language</string>
-    <string name="settings_monet">Enable Monet</string>
-    <string name="settings_monet_summary">Use system dynamic colors</string>
+    <string name="settings_monet">Enable Monet colors</string>
     <string name="settings_key_color">Key color</string>
     <string name="settings_key_color_default">Default</string>
     <string name="settings_color_style">Color style</string>
@@ -90,8 +89,4 @@
     <string name="card_server">Server</string>
     <string name="settings_scroll_animation">Scrolling animation</string>
     <string name="settings_scroll_animation_summary">Enable page transition animation</string>
-    <string name="settings_navigation_badge">Navigation bar badge</string>
-    <string name="settings_navigation_badge_summary">Show a red dot when the backend is offline</string>
-    <string name="settings_switch_icon">Switch icon</string>
-    <string name="settings_switch_icon_summary">Show check/cross icon on switch thumb</string>
 </resources>

@@ -14,10 +14,8 @@ data class AppPreferences(
     // KSU 风格悬浮底栏
     val enableFloatingBottomBar: Boolean = false,
     val enableFloatingBottomBarBlur: Boolean = false,
-    // KSU 对齐偏好：页面切换动画 / 底栏导航角标 / Switch thumb 勾叉图标
+    // KSU 对齐偏好：页面切换动画
     val enableScrollAnimation: Boolean = true,
-    val enableNavigationBadge: Boolean = false,
-    val showSwitchIcon: Boolean = true,
     // 全局界面缩放
     val pageScale: Float = 1.0f,
     // C++ 本地后端地址（POST /api/v1/execute，SSE 流式）

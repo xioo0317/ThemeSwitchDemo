@@ -21,7 +21,6 @@
     <string name="settings_theme">Thème</string>
     <string name="settings_language">Langue</string>
     <string name="settings_monet">Material You</string>
-    <string name="settings_monet_summary">Utiliser les couleurs dynamiques du système</string>
     <string name="theme_system">Par défaut du système</string>
     <string name="theme_light">Clair</string>
     <string name="theme_dark">Sombre</string>
@@ -57,8 +56,4 @@
     <string name="card_server">Serveur</string>
     <string name="settings_scroll_animation">Animation de défilement</string>
     <string name="settings_scroll_animation_summary">Activer l\'animation de transition</string>
-    <string name="settings_navigation_badge">Badge de la barre de navigation</string>
-    <string name="settings_navigation_badge_summary">Affiche un point rouge quand le serveur est hors ligne</string>
-    <string name="settings_switch_icon">Icône de l\'interrupteur</string>
-    <string name="settings_switch_icon_summary">Affiche une coche ou une croix sur l\'interrupteur</string>
 </resources>

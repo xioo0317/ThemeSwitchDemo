@@ -34,14 +34,14 @@ import androidx.compose.material.icons.filled.Brightness3
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.rounded.Adjust
-import androidx.compose.material.icons.rounded.Animation
+import androidx.compose.material.icons.rounded.AspectRatio
 import androidx.compose.material.icons.rounded.BlurOn
+import androidx.compose.material.icons.rounded.CallToAction
 import androidx.compose.material.icons.rounded.Colorize
-import androidx.compose.material.icons.rounded.FormatSize
-import androidx.compose.material.icons.rounded.Layers
-import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material.icons.rounded.ToggleOn
+import androidx.compose.material.icons.rounded.DesignServices
+import androidx.compose.material.icons.rounded.Style
+import androidx.compose.material.icons.rounded.ViewCarousel
+import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.Card as M3Card
 import androidx.compose.material3.CardDefaults
@@ -54,7 +54,6 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text as MaterialText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -86,6 +85,8 @@ import com.demo.themeswitch.ui.theme.colorSpecOptions
 import com.demo.themeswitch.ui.theme.isInDarkTheme
 import com.demo.themeswitch.ui.theme.keyColorOptions
 import com.demo.themeswitch.ui.theme.paletteStyleOptions
+import com.demo.themeswitch.util.BlurredBar
+import com.demo.themeswitch.util.rememberBlurBackdrop
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Card
@@ -93,9 +94,13 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.Slider as MiuixSlider
+import top.yukonga.miuix.kmp.basic.SliderDefaults
 import top.yukonga.miuix.kmp.basic.TabRow
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -111,290 +116,283 @@ fun AppearanceMiuixScreen(onBack: () -> Unit) {
     val scrollBehavior = MiuixScrollBehavior()
     val colorScheme = MiuixTheme.colorScheme
 
+    // KSU 同款模糊
+    val enableBlur = com.demo.themeswitch.ui.theme.LocalEnableBlur.current
+    val blurBackdrop = rememberBlurBackdrop(enableBlur)
+    val blurActive = blurBackdrop != null
+    val barColor = if (blurActive) Color.Transparent else colorScheme.surface
+
     val keyColorItems = listOf(stringResource(R.string.settings_key_color_default)) +
         colorNameResIds.map { stringResource(it) }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            TopAppBar(
-                title = stringResource(R.string.settings_section_appearance),
-                scrollBehavior = scrollBehavior,
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
-                            tint = colorScheme.onBackground,
-                        )
-                    }
-                },
-            )
-        },
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .scrollEndHaptic()
-                .overScrollVertical()
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .padding(horizontal = 12.dp),
-            contentPadding = PaddingValues(
-                top = innerPadding.calculateTopPadding(),
-                bottom = LocalScaffoldBottomPadding.current + 24.dp,
-            ),
-        ) {
-            item {
-                ThemePreviewCard(
-                    backgroundColor = colorScheme.surface,
-                    textColor = colorScheme.onBackground,
-                    accentCardColor = if (isInDarkTheme()) Color(0xFF1A3825) else Color(0xFFDFFAE4),
-                    cardColor = colorScheme.surfaceVariant,
-                    navBarColor = colorScheme.surface,
-                    dividerColor = colorScheme.onBackground.copy(alpha = 0.1f),
-                    iconColor = colorScheme.primary,
-                    outlineColor = colorScheme.outline,
-                    floatingBar = preferences.enableFloatingBottomBar,
-                    modifier = Modifier.padding(vertical = 24.dp),
-                )
-            }
-            item {
-                val themeItems = listOf(
-                    stringResource(R.string.theme_system),
-                    stringResource(R.string.theme_light),
-                    stringResource(R.string.theme_dark),
-                )
-                TabRow(
-                    tabs = themeItems,
-                    selectedTabIndex = preferences.themeMode.coerceIn(0, 2),
-                    onTabSelected = { mode -> scope.launch { repository.setThemeMode(mode) } },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-            item {
-                Card(modifier = Modifier.padding(top = 12.dp).fillMaxWidth()) {
-                    SwitchPreference(
-                        title = stringResource(R.string.settings_monet),
-                        summary = stringResource(R.string.settings_monet_summary),
-                        startAction = {
+            BlurredBar(backdrop = blurBackdrop) {
+                TopAppBar(
+                    title = stringResource(R.string.settings_section_appearance),
+                    color = barColor,
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
                             Icon(
-                                imageVector = Icons.Rounded.Palette,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = null,
                                 tint = colorScheme.onBackground,
-                                modifier = Modifier.padding(end = 6.dp),
                             )
-                        },
-                        checked = preferences.enableMonet,
-                        onCheckedChange = { enabled ->
-                            scope.launch { repository.setEnableMonet(enabled) }
-                        },
-                    )
-                    AnimatedVisibility(visible = preferences.enableMonet) {
-                        Column {
-                            OverlayDropdownPreference(
-                                title = stringResource(R.string.settings_key_color),
-                                items = keyColorItems,
-                                startAction = {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Colorize,
-                                        contentDescription = null,
-                                        tint = colorScheme.onBackground,
-                                        modifier = Modifier.padding(end = 6.dp),
-                                    )
-                                },
-                                selectedIndex = (keyColorOptions.indexOf(preferences.keyColor) + 1)
-                                    .coerceIn(0, keyColorItems.lastIndex),
-                                onSelectedIndexChange = { index ->
-                                    scope.launch {
-                                        repository.setKeyColor(if (index == 0) 0 else keyColorOptions[index - 1])
-                                    }
-                                },
-                            )
-                            AnimatedVisibility(visible = preferences.keyColor != 0) {
-                                Column {
-                                    OverlayDropdownPreference(
-                                        title = stringResource(R.string.settings_color_style),
-                                        items = paletteStyleOptions,
-                                        selectedIndex = paletteStyleOptions
-                                            .indexOf(preferences.colorStyle)
-                                            .coerceIn(0, paletteStyleOptions.lastIndex),
-                                        onSelectedIndexChange = { index ->
-                                            paletteStyleOptions.getOrNull(index)?.let { style ->
-                                                scope.launch { repository.setColorStyle(style) }
-                                            }
-                                        },
-                                    )
-                                    OverlayDropdownPreference(
-                                        title = stringResource(R.string.settings_color_spec),
-                                        items = colorSpecOptions,
-                                        selectedIndex = colorSpecOptions
-                                            .indexOf(preferences.colorSpec)
-                                            .coerceIn(0, colorSpecOptions.lastIndex),
-                                        onSelectedIndexChange = { index ->
-                                            colorSpecOptions.getOrNull(index)?.let { spec ->
-                                                scope.launch { repository.setColorSpec(spec) }
-                                            }
-                                        },
-                                    )
-                                }
-                            }
                         }
-                    }
-                }
+                    },
+                )
             }
-            // KSU 同款：所有界面设置合并在一个卡片里
-            item {
-                Card(modifier = Modifier.padding(top = 12.dp).fillMaxWidth()) {
-                    if (Build.VERSION.SDK_INT >= 33) {
+        },
+    ) { innerPadding ->
+        Box(modifier = if (blurBackdrop != null) Modifier.layerBackdrop(blurBackdrop) else Modifier) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .scrollEndHaptic()
+                    .overScrollVertical()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .padding(horizontal = 12.dp),
+                contentPadding = PaddingValues(
+                    top = innerPadding.calculateTopPadding(),
+                    bottom = LocalScaffoldBottomPadding.current + 24.dp,
+                ),
+            ) {
+                item {
+                    ThemePreviewCard(
+                        backgroundColor = colorScheme.surface,
+                        textColor = colorScheme.onBackground,
+                        accentCardColor = if (isInDarkTheme()) Color(0xFF1A3825) else Color(0xFFDFFAE4),
+                        cardColor = colorScheme.surfaceVariant,
+                        navBarColor = colorScheme.surface,
+                        dividerColor = colorScheme.onBackground.copy(alpha = 0.1f),
+                        iconColor = colorScheme.primary,
+                        outlineColor = colorScheme.outline,
+                        floatingBar = preferences.enableFloatingBottomBar,
+                        modifier = Modifier.padding(vertical = 24.dp),
+                    )
+                }
+                item {
+                    val themeItems = listOf(
+                        stringResource(R.string.theme_system),
+                        stringResource(R.string.theme_light),
+                        stringResource(R.string.theme_dark),
+                    )
+                    TabRow(
+                        tabs = themeItems,
+                        selectedTabIndex = preferences.themeMode.coerceIn(0, 2),
+                        onTabSelected = { mode -> scope.launch { repository.setThemeMode(mode) } },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                item {
+                    Card(modifier = Modifier.padding(top = 12.dp).fillMaxWidth()) {
+                        // KSU 同款：启用 Monet 颜色，壁纸图标，无 summary
                         SwitchPreference(
-                            title = stringResource(R.string.settings_enable_blur),
-                            summary = stringResource(R.string.settings_enable_blur_summary),
+                            title = stringResource(R.string.settings_monet),
                             startAction = {
                                 Icon(
-                                    imageVector = Icons.Rounded.BlurOn,
+                                    imageVector = Icons.Rounded.Wallpaper,
                                     contentDescription = null,
                                     tint = colorScheme.onBackground,
                                     modifier = Modifier.padding(end = 6.dp),
                                 )
                             },
-                            checked = preferences.enableBlur,
+                            checked = preferences.enableMonet,
                             onCheckedChange = { enabled ->
-                                scope.launch { repository.setEnableBlur(enabled) }
-                            },
+                                scope.launch { repository.setEnableMonet(enabled) }
+                            }
                         )
+                        AnimatedVisibility(visible = preferences.enableMonet) {
+                            Column {
+                                OverlayDropdownPreference(
+                                    title = stringResource(R.string.settings_key_color),
+                                    items = keyColorItems,
+                                    startAction = {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Colorize,
+                                            contentDescription = null,
+                                            tint = colorScheme.onBackground,
+                                            modifier = Modifier.padding(end = 6.dp),
+                                        )
+                                    },
+                                    selectedIndex = (keyColorOptions.indexOf(preferences.keyColor) + 1)
+                                        .coerceIn(0, keyColorItems.lastIndex),
+                                    onSelectedIndexChange = { index ->
+                                        scope.launch {
+                                            repository.setKeyColor(if (index == 0) 0 else keyColorOptions[index - 1])
+                                        }
+                                    },
+                                )
+                                AnimatedVisibility(visible = preferences.keyColor != 0) {
+                                    Column {
+                                        OverlayDropdownPreference(
+                                            title = stringResource(R.string.settings_color_style),
+                                            items = paletteStyleOptions,
+                                            startAction = {
+                                                Icon(
+                                                    imageVector = Icons.Rounded.Style,
+                                                    contentDescription = null,
+                                                    tint = colorScheme.onBackground,
+                                                    modifier = Modifier.padding(end = 6.dp),
+                                                )
+                                            },
+                                            selectedIndex = paletteStyleOptions
+                                                .indexOf(preferences.colorStyle)
+                                                .coerceIn(0, paletteStyleOptions.lastIndex),
+                                            onSelectedIndexChange = { index ->
+                                                paletteStyleOptions.getOrNull(index)?.let { style ->
+                                                    scope.launch { repository.setColorStyle(style) }
+                                                }
+                                            },
+                                        )
+                                        OverlayDropdownPreference(
+                                            title = stringResource(R.string.settings_color_spec),
+                                            items = colorSpecOptions,
+                                            startAction = {
+                                                Icon(
+                                                    imageVector = Icons.Rounded.DesignServices,
+                                                    contentDescription = null,
+                                                    tint = colorScheme.onBackground,
+                                                    modifier = Modifier.padding(end = 6.dp),
+                                                )
+                                            },
+                                            selectedIndex = colorSpecOptions
+                                                .indexOf(preferences.colorSpec)
+                                                .coerceIn(0, colorSpecOptions.lastIndex),
+                                            onSelectedIndexChange = { index ->
+                                                colorSpecOptions.getOrNull(index)?.let { spec ->
+                                                    scope.launch { repository.setColorSpec(spec) }
+                                                }
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
-                    SwitchPreference(
-                        title = stringResource(R.string.settings_floating_bottom_bar),
-                        summary = stringResource(R.string.settings_floating_bottom_bar_summary),
-                        startAction = {
-                            Icon(
-                                imageVector = Icons.Rounded.Layers,
-                                contentDescription = null,
-                                tint = colorScheme.onBackground,
-                                modifier = Modifier.padding(end = 6.dp),
-                            )
-                        },
-                        checked = preferences.enableFloatingBottomBar,
-                        onCheckedChange = { enabled ->
-                            scope.launch { repository.setEnableFloatingBottomBar(enabled) }
-                        },
-                    )
-                    if (Build.VERSION.SDK_INT >= 33) {
-                        AnimatedVisibility(visible = preferences.enableFloatingBottomBar) {
+                }
+                // KSU 同款：界面设置合并在一个卡片
+                item {
+                    Card(modifier = Modifier.padding(top = 12.dp).fillMaxWidth()) {
+                        if (Build.VERSION.SDK_INT >= 33) {
                             SwitchPreference(
-                                title = stringResource(R.string.settings_enable_glass),
-                                summary = stringResource(R.string.settings_enable_glass_summary),
+                                title = stringResource(R.string.settings_enable_blur),
+                                summary = stringResource(R.string.settings_enable_blur_summary),
                                 startAction = {
                                     Icon(
-                                        imageVector = Icons.Rounded.WaterDrop,
+                                        imageVector = Icons.Rounded.BlurOn,
                                         contentDescription = null,
                                         tint = colorScheme.onBackground,
                                         modifier = Modifier.padding(end = 6.dp),
                                     )
                                 },
-                                checked = preferences.enableFloatingBottomBarBlur,
+                                checked = preferences.enableBlur,
                                 onCheckedChange = { enabled ->
-                                    scope.launch { repository.setEnableFloatingBottomBarBlur(enabled) }
+                                    scope.launch { repository.setEnableBlur(enabled) }
                                 },
                             )
                         }
-                    }
-                    SwitchPreference(
-                        title = stringResource(R.string.settings_scroll_animation),
-                        summary = stringResource(R.string.settings_scroll_animation_summary),
-                        startAction = {
-                            Icon(
-                                imageVector = Icons.Rounded.Animation,
-                                contentDescription = null,
-                                tint = colorScheme.onBackground,
-                                modifier = Modifier.padding(end = 6.dp),
-                            )
-                        },
-                        checked = preferences.enableScrollAnimation,
-                        onCheckedChange = { enabled ->
-                            scope.launch { repository.setEnableScrollAnimation(enabled) }
-                        },
-                    )
-                    SwitchPreference(
-                        title = stringResource(R.string.settings_navigation_badge),
-                        summary = stringResource(R.string.settings_navigation_badge_summary),
-                        startAction = {
-                            Icon(
-                                imageVector = Icons.Rounded.Adjust,
-                                contentDescription = null,
-                                tint = colorScheme.onBackground,
-                                modifier = Modifier.padding(end = 6.dp),
-                            )
-                        },
-                        checked = preferences.enableNavigationBadge,
-                        onCheckedChange = { enabled ->
-                            scope.launch { repository.setEnableNavigationBadge(enabled) }
-                        },
-                    )
-                    SwitchPreference(
-                        title = stringResource(R.string.settings_switch_icon),
-                        summary = stringResource(R.string.settings_switch_icon_summary),
-                        startAction = {
-                            Icon(
-                                imageVector = Icons.Rounded.ToggleOn,
-                                contentDescription = null,
-                                tint = colorScheme.onBackground,
-                                modifier = Modifier.padding(end = 6.dp),
-                            )
-                        },
-                        checked = preferences.showSwitchIcon,
-                        onCheckedChange = { enabled ->
-                            scope.launch { repository.setShowSwitchIcon(enabled) }
-                        },
-                    )
-                }
-            }
-            item {
-                var pageScale by remember(preferences.pageScale) {
-                    mutableFloatStateOf(preferences.pageScale)
-                }
-                Card(modifier = Modifier.padding(top = 12.dp).fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.FormatSize,
-                            contentDescription = null,
-                            tint = colorScheme.onBackground,
-                            modifier = Modifier.padding(end = 12.dp),
+                        // KSU 同款：CallToAction 图标
+                        SwitchPreference(
+                            title = stringResource(R.string.settings_floating_bottom_bar),
+                            summary = stringResource(R.string.settings_floating_bottom_bar_summary),
+                            startAction = {
+                                Icon(
+                                    imageVector = Icons.Rounded.CallToAction,
+                                    contentDescription = null,
+                                    tint = colorScheme.onBackground,
+                                    modifier = Modifier.padding(end = 6.dp),
+                                )
+                            },
+                            checked = preferences.enableFloatingBottomBar,
+                            onCheckedChange = { enabled ->
+                                scope.launch { repository.setEnableFloatingBottomBar(enabled) }
+                            },
                         )
-                        Column(Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.settings_page_scale),
-                                fontSize = 16.sp,
-                            )
-                            Text(
-                                text = stringResource(R.string.settings_page_scale_summary),
-                                fontSize = 13.sp,
-                                color = colorScheme.onSurfaceVariantSummary,
-                            )
+                        if (Build.VERSION.SDK_INT >= 33) {
+                            AnimatedVisibility(visible = preferences.enableFloatingBottomBar) {
+                                SwitchPreference(
+                                    title = stringResource(R.string.settings_enable_glass),
+                                    summary = stringResource(R.string.settings_enable_glass_summary),
+                                    startAction = {
+                                        Icon(
+                                            imageVector = Icons.Rounded.WaterDrop,
+                                            contentDescription = null,
+                                            tint = colorScheme.onBackground,
+                                            modifier = Modifier.padding(end = 6.dp),
+                                        )
+                                    },
+                                    checked = preferences.enableFloatingBottomBarBlur,
+                                    onCheckedChange = { enabled ->
+                                        scope.launch { repository.setEnableFloatingBottomBarBlur(enabled) }
+                                    },
+                                )
+                            }
                         }
-                        Text(
-                            text = "${(pageScale * 100).roundToInt()}%",
-                            fontSize = 14.sp,
-                            color = colorScheme.onSurfaceVariantSummary,
+                        // KSU 同款：ViewCarousel 图标
+                        SwitchPreference(
+                            title = stringResource(R.string.settings_scroll_animation),
+                            summary = stringResource(R.string.settings_scroll_animation_summary),
+                            startAction = {
+                                Icon(
+                                    imageVector = Icons.Rounded.ViewCarousel,
+                                    contentDescription = null,
+                                    tint = colorScheme.onBackground,
+                                    modifier = Modifier.padding(end = 6.dp),
+                                )
+                            },
+                            checked = preferences.enableScrollAnimation,
+                            onCheckedChange = { enabled ->
+                                scope.launch { repository.setEnableScrollAnimation(enabled) }
+                            },
                         )
                     }
-                    Slider(
-                        value = pageScale,
-                        onValueChange = { pageScale = it },
-                        onValueChangeFinished = {
-                            scope.launch { repository.setPageScale(pageScale) }
-                        },
-                        valueRange = 0.8f..1.1f,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp)
-                            .padding(bottom = 12.dp),
-                    )
+                }
+                // KSU 同款：页面缩放用 ArrowPreference + bottomAction Slider
+                item {
+                    var pageScale by remember(preferences.pageScale) {
+                        mutableFloatStateOf(preferences.pageScale)
+                    }
+                    var showScaleSlider by rememberSaveable { mutableStateOf(false) }
+                    Card(modifier = Modifier.padding(top = 12.dp).fillMaxWidth()) {
+                        ArrowPreference(
+                            title = stringResource(R.string.settings_page_scale),
+                            summary = stringResource(R.string.settings_page_scale_summary),
+                            startAction = {
+                                Icon(
+                                    imageVector = Icons.Rounded.AspectRatio,
+                                    contentDescription = null,
+                                    tint = colorScheme.onBackground,
+                                    modifier = Modifier.padding(end = 6.dp),
+                                )
+                            },
+                            endActions = {
+                                Text(
+                                    text = "${(pageScale * 100).roundToInt()}%",
+                                    color = colorScheme.onSurfaceVariantActions,
+                                )
+                            },
+                            onClick = { showScaleSlider = !showScaleSlider },
+                            holdDownState = showScaleSlider,
+                            bottomAction = {
+                                MiuixSlider(
+                                    value = pageScale,
+                                    onValueChange = { pageScale = it },
+                                    onValueChangeFinished = {
+                                        scope.launch { repository.setPageScale(pageScale) }
+                                    },
+                                    valueRange = 0.8f..1.1f,
+                                    showKeyPoints = true,
+                                    keyPoints = listOf(0.8f, 0.9f, 1f, 1.1f),
+                                    magnetThreshold = 0.01f,
+                                    hapticEffect = SliderDefaults.SliderHapticEffect.Step,
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                )
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -481,9 +479,8 @@ fun AppearanceMaterialScreen(onBack: () -> Unit) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             ) {
                 MaterialSwitchRow(
-                    icon = Icons.Rounded.Palette,
+                    icon = Icons.Rounded.Wallpaper,
                     title = stringResource(R.string.settings_monet),
-                    summary = stringResource(R.string.settings_monet_summary),
                     checked = preferences.enableMonet,
                     onCheckedChange = { scope.launch { repository.setEnableMonet(it) } },
                 )
@@ -515,7 +512,7 @@ fun AppearanceMaterialScreen(onBack: () -> Unit) {
                             Column {
                                 CardDivider()
                                 SettingDropdownRow(
-                                    icon = Icons.Rounded.Palette,
+                                    icon = Icons.Rounded.Style,
                                     title = stringResource(R.string.settings_color_style),
                                     value = preferences.colorStyle,
                                     options = paletteStyleOptions,
@@ -526,7 +523,7 @@ fun AppearanceMaterialScreen(onBack: () -> Unit) {
                                     },
                                 )
                                 SettingDropdownRow(
-                                    icon = Icons.Rounded.Palette,
+                                    icon = Icons.Rounded.DesignServices,
                                     title = stringResource(R.string.settings_color_spec),
                                     value = preferences.colorSpec,
                                     options = colorSpecOptions,
@@ -552,7 +549,7 @@ fun AppearanceMaterialScreen(onBack: () -> Unit) {
                     CardDivider()
                 }
                 MaterialSwitchRow(
-                    icon = Icons.Rounded.Layers,
+                    icon = Icons.Rounded.CallToAction,
                     title = stringResource(R.string.settings_floating_bottom_bar),
                     summary = stringResource(R.string.settings_floating_bottom_bar_summary),
                     checked = preferences.enableFloatingBottomBar,
@@ -574,35 +571,13 @@ fun AppearanceMaterialScreen(onBack: () -> Unit) {
                         }
                     }
                 }
-            }
-            M3Card(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                ),
-                shape = MaterialTheme.shapes.large,
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-            ) {
+                CardDivider()
                 MaterialSwitchRow(
-                    icon = Icons.Rounded.Animation,
-                        title = stringResource(R.string.settings_scroll_animation),
-                        summary = stringResource(R.string.settings_scroll_animation_summary),
-                        checked = preferences.enableScrollAnimation,
-                        onCheckedChange = { scope.launch { repository.setEnableScrollAnimation(it) } },
-                    )
-                    MaterialSwitchRow(
-                        icon = Icons.Rounded.Adjust,
-                        title = stringResource(R.string.settings_navigation_badge),
-                        summary = stringResource(R.string.settings_navigation_badge_summary),
-                        checked = preferences.enableNavigationBadge,
-                        onCheckedChange = { scope.launch { repository.setEnableNavigationBadge(it) } },
-                    )
-                    MaterialSwitchRow(
-                        icon = Icons.Rounded.ToggleOn,
-                        title = stringResource(R.string.settings_switch_icon),
-                        summary = stringResource(R.string.settings_switch_icon_summary),
-                        checked = preferences.showSwitchIcon,
-                    onCheckedChange = { scope.launch { repository.setShowSwitchIcon(it) } },
+                    icon = Icons.Rounded.ViewCarousel,
+                    title = stringResource(R.string.settings_scroll_animation),
+                    summary = stringResource(R.string.settings_scroll_animation_summary),
+                    checked = preferences.enableScrollAnimation,
+                    onCheckedChange = { scope.launch { repository.setEnableScrollAnimation(it) } },
                 )
             }
 
@@ -624,7 +599,7 @@ fun AppearanceMaterialScreen(onBack: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     MaterialIcon(
-                        imageVector = Icons.Rounded.FormatSize,
+                        imageVector = Icons.Rounded.AspectRatio,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                     )
@@ -664,7 +639,6 @@ fun AppearanceMaterialScreen(onBack: () -> Unit) {
     }
 }
 
-/** 卡片内行分隔线 */
 @Composable
 private fun CardDivider() {
     HorizontalDivider(
@@ -677,7 +651,7 @@ private fun CardDivider() {
 private fun MaterialSwitchRow(
     icon: ImageVector,
     title: String,
-    summary: String,
+    summary: String? = null,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
@@ -699,11 +673,13 @@ private fun MaterialSwitchRow(
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
             )
-            MaterialText(
-                text = summary,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            if (summary != null) {
+                MaterialText(
+                    text = summary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
         ExpressiveSwitch(checked = checked, onCheckedChange = onCheckedChange)
     }
@@ -807,7 +783,7 @@ private fun ColorButton(
     }
 }
 
-/** 主题预览缩略图：模拟顶栏/状态卡/信息卡/底栏，悬浮底栏时渲染为胶囊 */
+/** 主题预览缩略图 */
 @Composable
 private fun ThemePreviewCard(
     backgroundColor: Color,

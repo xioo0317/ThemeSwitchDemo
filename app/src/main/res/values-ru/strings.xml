@@ -21,7 +21,6 @@
     <string name="settings_theme">Тема</string>
     <string name="settings_language">Язык</string>
     <string name="settings_monet">Material You</string>
-    <string name="settings_monet_summary">Использовать динамические цвета системы</string>
     <string name="theme_system">По умолчанию системы</string>
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Тёмная</string>
@@ -57,8 +56,4 @@
     <string name="card_server">Сервер</string>
     <string name="settings_scroll_animation">Анимация прокрутки</string>
     <string name="settings_scroll_animation_summary">Включить анимацию перехода страниц</string>
-    <string name="settings_navigation_badge">Значок панели навигации</string>
-    <string name="settings_navigation_badge_summary">Красная точка, когда бэкенд недоступен</string>
-    <string name="settings_switch_icon">Значок переключателя</string>
-    <string name="settings_switch_icon_summary">Показывать галочку или крестик на переключателе</string>
 </resources>

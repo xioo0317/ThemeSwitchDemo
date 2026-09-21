@@ -21,7 +21,6 @@
     <string name="settings_theme">テーマ</string>
     <string name="settings_language">言語</string>
     <string name="settings_monet">Material You</string>
-    <string name="settings_monet_summary">システムのダイナミックカラーを使用</string>
     <string name="theme_system">システムデフォルト</string>
     <string name="theme_light">ライト</string>
     <string name="theme_dark">ダーク</string>
@@ -57,8 +56,4 @@
     <string name="card_server">サーバー</string>
     <string name="settings_scroll_animation">スクロールアニメーション</string>
     <string name="settings_scroll_animation_summary">ページ遷移アニメーションを有効にする</string>
-    <string name="settings_navigation_badge">ナビゲーションバーのバッジ</string>
-    <string name="settings_navigation_badge_summary">バックエンドがオフラインのときに赤い点を表示</string>
-    <string name="settings_switch_icon">スイッチのアイコン</string>
-    <string name="settings_switch_icon_summary">スイッチのつまみにチェック/バツを表示</string>
 </resources>

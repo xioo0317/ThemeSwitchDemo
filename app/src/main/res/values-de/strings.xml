@@ -21,7 +21,6 @@
     <string name="settings_theme">Thema</string>
     <string name="settings_language">Sprache</string>
     <string name="settings_monet">Material You</string>
-    <string name="settings_monet_summary">Dynamische Systemfarben verwenden</string>
     <string name="theme_system">Systemstandard</string>
     <string name="theme_light">Hell</string>
     <string name="theme_dark">Dunkel</string>
@@ -57,8 +56,4 @@
     <string name="card_server">Server</string>
     <string name="settings_scroll_animation">Scrollanimation</string>
     <string name="settings_scroll_animation_summary">Seitenübergangsanimation aktivieren</string>
-    <string name="settings_navigation_badge">Navigationsleisten-Badge</string>
-    <string name="settings_navigation_badge_summary">Roter Punkt, wenn das Backend offline ist</string>
-    <string name="settings_switch_icon">Schalter-Symbol</string>
-    <string name="settings_switch_icon_summary">Häkchen/Kreuz auf dem Schalterknopf anzeigen</string>
 </resources>

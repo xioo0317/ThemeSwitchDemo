@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.demo.themeswitch.ui.theme.LocalShowSwitchIcon
 
 @Composable
 fun ExpressiveSwitch(
@@ -25,7 +24,7 @@ fun ExpressiveSwitch(
     enabled: Boolean = true,
     colors: SwitchColors = expressiveSwitchColors(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    showThumbIcon: Boolean = LocalShowSwitchIcon.current,
+    showThumbIcon: Boolean = true,
 ) {
     Switch(
         checked = checked,

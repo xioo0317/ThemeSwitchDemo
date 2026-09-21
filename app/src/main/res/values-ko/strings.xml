@@ -21,7 +21,6 @@
     <string name="settings_theme">테마</string>
     <string name="settings_language">언어</string>
     <string name="settings_monet">Material You</string>
-    <string name="settings_monet_summary">시스템 동적 색상 사용</string>
     <string name="theme_system">시스템 기본값</string>
     <string name="theme_light">라이트</string>
     <string name="theme_dark">다크</string>
@@ -57,8 +56,4 @@
     <string name="card_server">서버</string>
     <string name="settings_scroll_animation">스크롤 애니메이션</string>
     <string name="settings_scroll_animation_summary">페이지 전환 애니메이션 사용</string>
-    <string name="settings_navigation_badge">탐색 모음 배지</string>
-    <string name="settings_navigation_badge_summary">백엔드가 오프라인일 때 빨간 점 표시</string>
-    <string name="settings_switch_icon">스위치 아이콘</string>
-    <string name="settings_switch_icon_summary">스위치 썸에 체크/십자 아이콘 표시</string>
 </resources>
