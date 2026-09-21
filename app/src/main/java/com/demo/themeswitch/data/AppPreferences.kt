@@ -5,7 +5,7 @@ data class AppPreferences(
     val uiMode: String = SettingsRepository.UI_MODE_MIUIX,
     val language: String = "system",
     // 取色：Monet 跟随系统 / keyColor 自定义种子色（0 表示默认） / PaletteStyle 与 ColorSpec
-    val enableMonet: Boolean = true,
+    val enableMonet: Boolean = false,
     val keyColor: Int = 0,
     val colorStyle: String = "TonalSpot",
     val colorSpec: String = "SPEC_2021",
