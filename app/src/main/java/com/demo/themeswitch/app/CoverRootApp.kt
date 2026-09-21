@@ -3,10 +3,11 @@ package com.demo.themeswitch.app
 import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.os.Build
-import com.demo.themeswitch.data.AppPreferences
+import com.demo.themeswitch.data.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 
@@ -39,7 +40,9 @@ class CoverRootApp : Application() {
 
         // KSU 同款：启动时根据偏好设置初始化预测性返回手势
         appScope.launch {
-            val enable = AppPreferences(applicationContext).enablePredictiveBack
+            val repository = SettingsRepository(applicationContext)
+            val prefs = repository.preferencesFlow.firstOrNull()
+            val enable = prefs?.enablePredictiveBack ?: true
             setEnableOnBackInvokedCallback(applicationInfo, enable)
         }
     }
