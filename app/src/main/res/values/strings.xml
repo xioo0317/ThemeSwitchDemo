@@ -91,4 +91,7 @@
     <string name="settings_scroll_animation_summary">Enable page transition animation</string>
     <string name="settings_predictive_back">Predictive back</string>
     <string name="settings_predictive_back_summary">Enable predictive back gesture animation</string>
+    <string name="settings_enable_swipe_dismiss">Swipe to dismiss</string>
+    <string name="settings_enable_swipe_dismiss_summary">Swipe from the left edge to go back between pages</string>
+    <string name="settings_theme_amoled">AMOLED</string>
 </resources>
