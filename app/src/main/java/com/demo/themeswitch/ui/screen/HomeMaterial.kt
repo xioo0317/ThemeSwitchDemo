@@ -3,17 +3,14 @@ package com.demo.themeswitch.ui.screen
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -21,7 +18,6 @@ import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.DevicesOther
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,10 +26,10 @@ import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -57,7 +53,8 @@ import com.demo.themeswitch.R
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.BackendMonitor
 import com.demo.themeswitch.data.SettingsRepository
-import top.yukonga.miuix.kmp.basic.Scaffold
+import com.demo.themeswitch.ui.component.material.SegmentedColumn
+import com.demo.themeswitch.ui.component.material.SegmentedListItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,6 +75,7 @@ fun HomeMaterialScreen() {
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeFlexibleTopAppBar(
                 title = { Text(stringResource(R.string.nav_home)) },
@@ -112,9 +110,9 @@ fun HomeMaterialScreen() {
 }
 
 /**
- * KSU 同款状态卡片：Surface + ListItem 风格
- * - 工作中：secondaryContainer 绿色底 + CheckCircle 图标
- * - 未工作：errorContainer 红底 + Warning 图标
+ * KSU 同款状态卡片：
+ * - 工作中：secondaryContainer 底（淡蓝）+ 最左 CheckCircle
+ * - 未工作：errorContainer 底 + 最左 Warning（感叹号）
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -160,7 +158,8 @@ private fun StatusCard(online: Boolean, latencyMs: Long) {
 }
 
 /**
- * KSU 同款 InfoCard：Card 包裹 ListItem 分组
+ * KSU 同款信息卡：SegmentedColumn 分段列表，行间圆角/分割感由 M3 Expressive 处理。
+ * 调用方式对齐已验证可编译的 SettingsMaterial（显式传入 onClick）。
  */
 @Composable
 private fun InfoCard(
@@ -169,40 +168,40 @@ private fun InfoCard(
     androidVersion: String,
     kernelVersion: String,
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shape = MaterialTheme.shapes.large,
-    ) {
-        Column {
-            InfoRow(Icons.Filled.Widgets, stringResource(R.string.card_app_version), appVersion)
-            InfoRow(Icons.Filled.DevicesOther, stringResource(R.string.card_device), deviceModel)
-            InfoRow(Icons.Filled.Android, stringResource(R.string.card_android), androidVersion)
-            InfoRow(Icons.Filled.Memory, stringResource(R.string.card_kernel), kernelVersion, isLast = true)
+    SegmentedColumn(modifier = Modifier.fillMaxWidth()) {
+        item {
+            InfoEntry(Icons.Filled.Widgets, stringResource(R.string.card_app_version), appVersion)
+        }
+        item {
+            InfoEntry(Icons.Filled.DevicesOther, stringResource(R.string.card_device), deviceModel)
+        }
+        item {
+            InfoEntry(Icons.Filled.Android, stringResource(R.string.card_android), androidVersion)
+        }
+        item {
+            InfoEntry(Icons.Filled.Memory, stringResource(R.string.card_kernel), kernelVersion)
         }
     }
 }
 
 @Composable
-private fun InfoRow(
+private fun InfoEntry(
     icon: ImageVector,
     label: String,
     value: String,
-    isLast: Boolean = false,
 ) {
-    ListItem(
+    SegmentedListItem(
+        onClick = { /* 信息展示项，不可点击 */ },
         leadingContent = {
             Icon(icon, contentDescription = label, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         },
         headlineContent = { Text(label, style = MaterialTheme.typography.bodyLarge) },
         supportingContent = {
-            Text(value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                value,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         },
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
     )
-    if (!isLast) {
-        Row(Modifier.padding(start = 72.dp)) {
-            Spacer(Modifier.height(1.dp).fillMaxWidth())
-        }
-    }
 }

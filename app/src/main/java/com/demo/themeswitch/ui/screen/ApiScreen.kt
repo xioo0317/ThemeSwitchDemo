@@ -25,6 +25,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.Scaffold as MaterialScaffold
+import androidx.compose.material3.TopAppBar as MaterialTopAppBar
+import androidx.compose.material3.TopAppBarDefaults as MaterialTopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -58,6 +61,7 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TextField as MiuixTextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
@@ -102,12 +106,16 @@ class ApiExecutor {
 /** 执行页（Material 风格） */
 @Composable
 fun ApiMaterialScreen() {
-    val scrollBehavior = MiuixScrollBehavior()
-    Scaffold(
+    val scrollBehavior = MaterialTopAppBarDefaults.pinnedScrollBehavior()
+    MaterialScaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
-            TopAppBar(
-                title = stringResource(R.string.nav_api),
+            MaterialTopAppBar(
+                title = { Text(stringResource(R.string.nav_api)) },
+                colors = MaterialTopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                ),
                 scrollBehavior = scrollBehavior,
             )
         },
@@ -126,22 +134,34 @@ fun ApiMaterialScreen() {
 @Composable
 fun ApiMiuixScreen() {
     val scrollBehavior = MiuixScrollBehavior()
+    val enableBlur = com.demo.themeswitch.ui.theme.LocalEnableBlur.current
+    val backdrop = com.demo.themeswitch.util.rememberBlurBackdrop(enableBlur)
+    val barColor = if (backdrop != null) androidx.compose.ui.graphics.Color.Transparent
+    else MiuixTheme.colorScheme.surface
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            TopAppBar(
-                title = stringResource(R.string.nav_api),
-                scrollBehavior = scrollBehavior,
-            )
+            com.demo.themeswitch.util.BlurredBar(backdrop) {
+                TopAppBar(
+                    title = stringResource(R.string.nav_api),
+                    color = barColor,
+                    scrollBehavior = scrollBehavior,
+                )
+            }
         },
     ) { innerPadding ->
-        ApiContent(
-            topPadding = innerPadding.calculateTopPadding(),
-            useMiuixInput = true,
-            modifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-        )
+        androidx.compose.foundation.layout.Box(
+            modifier = if (backdrop != null)
+                Modifier.layerBackdrop(backdrop) else Modifier,
+        ) {
+            ApiContent(
+                topPadding = innerPadding.calculateTopPadding(),
+                useMiuixInput = true,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+            )
+        }
     }
 }
 
@@ -202,7 +222,7 @@ private fun ApiContent(
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        // ── 服务器地址 ─────────────────────────────────────
+        // ── 服务器地址 ─────────────────────────────────────────────────────────────────────────────────────────────────
         item {
             SectionCard(title = stringResource(R.string.api_server_address), useMiuix = useMiuixInput) {
                 if (useMiuixInput) {
@@ -231,7 +251,7 @@ private fun ApiContent(
             }
         }
 
-        // ── 执行 ──────────────────────────────────────────
+        // ── 执行 ──────────────────────────────────────────────────────────────────────────────────────────────────────
         item {
             SectionCard(title = stringResource(R.string.api_action_hint), useMiuix = useMiuixInput) {
                 FlowRow(
@@ -289,7 +309,7 @@ private fun ApiContent(
             }
         }
 
-        // ── 响应流 ────────────────────────────────────────
+        // ── 响应流 ───────────────────────────────────────────────────────────────────────────────────────────────────
         item {
             SectionCard(title = stringResource(R.string.api_response), useMiuix = useMiuixInput) {
                 StatusLine(executor = executor)

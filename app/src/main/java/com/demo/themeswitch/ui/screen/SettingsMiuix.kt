@@ -23,10 +23,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.demo.themeswitch.R
 import com.demo.themeswitch.data.AppPreferences
-import com.demo.themeswitch.data.LocaleHelper
 import com.demo.themeswitch.data.SettingsRepository
+import com.demo.themeswitch.ui.LocalUiMode
 import com.demo.themeswitch.ui.UiMode
+import com.demo.themeswitch.ui.theme.LocalEnableBlur
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -50,37 +52,47 @@ fun SettingsMiuixScreen(
     val scope = rememberCoroutineScope()
     val scrollBehavior = MiuixScrollBehavior()
     val colorScheme = MiuixTheme.colorScheme
+    val enableBlur = com.demo.themeswitch.ui.theme.LocalEnableBlur.current
+    val backdrop = com.demo.themeswitch.util.rememberBlurBackdrop(enableBlur)
+    val barColor = if (backdrop != null) androidx.compose.ui.graphics.Color.Transparent
+    else colorScheme.surface
 
     val uiModeItems = listOf(
         stringResource(R.string.mode_miuix),
         stringResource(R.string.mode_material),
     )
-    val languageItems = LocaleHelper.supportedLanguages.map { it.nativeName }
-    val languageIndex = LocaleHelper.supportedLanguages
+    val languageItems = com.demo.themeswitch.data.LocaleHelper.supportedLanguages.map { it.nativeName }
+    val languageIndex = com.demo.themeswitch.data.LocaleHelper.supportedLanguages
         .indexOfFirst { it.code == preferences.language }
-        .coerceIn(0, LocaleHelper.supportedLanguages.lastIndex)
+        .coerceIn(0, com.demo.themeswitch.data.LocaleHelper.supportedLanguages.lastIndex)
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            TopAppBar(
-                title = stringResource(R.string.nav_settings),
-                scrollBehavior = scrollBehavior,
-            )
+            com.demo.themeswitch.util.BlurredBar(backdrop) {
+                TopAppBar(
+                    title = stringResource(R.string.nav_settings),
+                    color = barColor,
+                    scrollBehavior = scrollBehavior,
+                )
+            }
         },
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .scrollEndHaptic()
-                .overScrollVertical()
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .padding(horizontal = 12.dp),
-            contentPadding = PaddingValues(
-                top = innerPadding.calculateTopPadding() + 12.dp,
-                bottom = LocalScaffoldBottomPadding.current + 12.dp,
-            ),
+        androidx.compose.foundation.layout.Box(
+            modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier,
         ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .scrollEndHaptic()
+                    .overScrollVertical()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .padding(horizontal = 12.dp),
+                contentPadding = PaddingValues(
+                    top = innerPadding.calculateTopPadding() + 12.dp,
+                    bottom = LocalScaffoldBottomPadding.current + 12.dp,
+                ),
+            ) {
             // 界面卡：风格下拉 + 主题入口
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
@@ -107,10 +119,13 @@ fun SettingsMiuixScreen(
                     )
                     ArrowPreference(
                         title = stringResource(R.string.settings_theme),
-                        summary = when (preferences.themeMode) {
-                            0 -> stringResource(R.string.theme_system)
-                            1 -> stringResource(R.string.theme_light)
-                            else -> stringResource(R.string.theme_dark)
+                        summary = when (com.demo.themeswitch.ui.theme.ColorMode.fromValue(preferences.colorMode)) {
+                            com.demo.themeswitch.ui.theme.ColorMode.LIGHT,
+                            com.demo.themeswitch.ui.theme.ColorMode.MONET_LIGHT -> stringResource(R.string.theme_light)
+                            com.demo.themeswitch.ui.theme.ColorMode.DARK,
+                            com.demo.themeswitch.ui.theme.ColorMode.MONET_DARK,
+                            com.demo.themeswitch.ui.theme.ColorMode.DARK_AMOLED -> stringResource(R.string.theme_dark)
+                            else -> stringResource(R.string.theme_system)
                         },
                         startAction = {
                             Icon(
@@ -141,7 +156,7 @@ fun SettingsMiuixScreen(
                         },
                         selectedIndex = languageIndex,
                         onSelectedIndexChange = { index ->
-                            val lang = LocaleHelper.supportedLanguages.getOrNull(index)
+                            val lang = com.demo.themeswitch.data.LocaleHelper.supportedLanguages.getOrNull(index)
                             if (lang != null && lang.code != preferences.language) {
                                 scope.launch { repository.setLanguage(lang.code) }
                             }
@@ -166,6 +181,7 @@ fun SettingsMiuixScreen(
                     )
                 }
             }
+        }
         }
     }
 }

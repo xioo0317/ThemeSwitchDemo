@@ -7,4 +7,9 @@
         <!-- KSU 同款：启用预测性手势返回（Android 13+） -->
         <item name="android:enableOnBackInvokedCallback">true</item>
     </style>
+
+    <style name="Theme.ThemeSwitchDemo.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@android:color/background_light</item>
+        <item name="postSplashScreenTheme">@style/Theme.ThemeSwitchDemo</item>
+    </style>
 </resources>
