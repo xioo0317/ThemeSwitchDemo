@@ -10,18 +10,7 @@
 - **多语言支持** — 中文（简/繁）、英语、日语、韩语、法语、德语、西班牙语、俄语；语言项首项为「跟随系统」
 - **暗色模式** — 跟随系统 / 浅色 / 深色，支持 AMOLED 纯黑
 - **数据持久化** — 使用 DataStore 保存用户偏好设置
-
-## 🆕 KernelSU 移植
-
-`port-ksu-ui` 分支用于持续移植 KernelSU 管理器 UI。已完成与后续计划见：
-
-**📄 [docs/KSU_PORT_REPORT.md](docs/KSU_PORT_REPORT.md)**
-
-最近一轮（2026-09-22）：
-
-1. Material 层升级到 M3 Expressive（`MaterialExpressiveTheme` + `MotionScheme.expressive()` + `ColorScheme.animateAsState()`）
-2. M3 工作卡片未工作/工作中容器色统一按 Monet 取色，对齐 KSU `StatusCard`
-3. 语言项 `System default` 改为「跟随系统」（全语言本地化）
+- **日志查看** — 内置日志页面，读取应用私有目录 log.txt 并展示
 
 ## 🏗️ 架构设计
 
@@ -46,6 +35,7 @@ app/src/main/java/com/demo/themeswitch/
 ├── MainActivity.kt
 ├── data/
 │   ├── AppPreferences.kt
+│   ├── LogRepository.kt
 │   └── LocaleHelper.kt
 └── ui/
     ├── UiMode.kt
@@ -62,7 +52,8 @@ app/src/main/java/com/demo/themeswitch/
         ├── HomeMaterial.kt
         ├── HomeMiuix.kt
         ├── SettingsMaterial.kt
-        └── SettingsMiuix.kt
+        ├── SettingsMiuix.kt
+        └── LogScreen.kt
 docs/
 └── KSU_PORT_REPORT.md
 ```
@@ -84,12 +75,16 @@ docs/
 仓库未包含 Gradle Wrapper 脚本，请使用本地 Gradle：
 
 ```bash
-git clone -b port-ksu-ui https://github.com/xioo0317/ThemeSwitchDemo.git
+git clone https://github.com/xioo0317/ThemeSwitchDemo.git
 cd ThemeSwitchDemo
 gradle :app:assembleDebug
 ```
 
-推送到 GitHub 后会自动运行 Actions 构建（`port-ksu-ui` 与 `main` 分支均触发）。
+推送到 GitHub 后会自动运行 Actions 构建（`main` 分支触发）。
+
+## 📄 移植记录
+
+KernelSU UI 移植过程与细节记录：[docs/KSU_PORT_REPORT.md](docs/KSU_PORT_REPORT.md)
 
 ## 📄 许可证
 
