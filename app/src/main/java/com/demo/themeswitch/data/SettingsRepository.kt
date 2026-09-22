@@ -32,7 +32,6 @@ class SettingsRepository(private val context: Context) {
         val ENABLE_PREDICTIVE_BACK = booleanPreferencesKey("enable_predictive_back")
         val ENABLE_SWIPE_DISMISS = booleanPreferencesKey("enable_swipe_dismiss")
         val PAGE_SCALE = floatPreferencesKey("page_scale")
-        val SERVER_URL = stringPreferencesKey("server_url")
     }
 
     val preferencesFlow: Flow<AppPreferences> = context.dataStore.data.map { p ->
@@ -53,7 +52,6 @@ class SettingsRepository(private val context: Context) {
             enablePredictiveBack = p[Keys.ENABLE_PREDICTIVE_BACK] ?: true,
             enableSwipeDismiss = p[Keys.ENABLE_SWIPE_DISMISS] ?: true,
             pageScale = p[Keys.PAGE_SCALE] ?: 1.0f,
-            serverUrl = p[Keys.SERVER_URL] ?: "http://127.0.0.1:8080",
         )
     }
 
@@ -112,10 +110,6 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setPageScale(scale: Float) {
         context.dataStore.edit { it[Keys.PAGE_SCALE] = scale }
-    }
-
-    suspend fun setServerUrl(url: String) {
-        context.dataStore.edit { it[Keys.SERVER_URL] = url }
     }
 
     companion object {
