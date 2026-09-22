@@ -48,29 +48,32 @@ import com.demo.themeswitch.R
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.BackendMonitor
 import com.demo.themeswitch.data.SettingsRepository
+import com.demo.themeswitch.ui.navigation.LocalNavigator
+import com.demo.themeswitch.ui.navigation.Route
 import com.demo.themeswitch.ui.theme.isInDarkTheme
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
-import com.demo.themeswitch.ui.screen.LocalBlurBackdrop
-import com.demo.themeswitch.util.BlurredBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import com.demo.themeswitch.ui.screen.LocalBlurBackdrop
+import com.demo.themeswitch.util.BlurredBar
 
 @Composable
 fun HomeMiuixScreen() {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
     val repository = remember { SettingsRepository(context) }
     val preferences by repository.preferencesFlow.collectAsState(initial = AppPreferences())
     val scrollBehavior = MiuixScrollBehavior()
     val colorScheme = MiuixTheme.colorScheme
 
-    // 每次进首页探测一次后端状态，只探测一次，不循环重试
     var online by remember { mutableStateOf(false) }
     var latencyMs by remember { mutableLongStateOf(0L) }
 
@@ -112,6 +115,7 @@ fun HomeMiuixScreen() {
                     StatusCard(
                         online = online,
                         latencyMs = latencyMs,
+                        onClick = { navigator.navigate(Route.ServerAddress) },
                     )
                     InfoCard(
                         appVersion = "v" + BuildConfig.VERSION_NAME,
@@ -126,14 +130,15 @@ fun HomeMiuixScreen() {
 }
 
 /**
- * KSU 同款状态卡片：
- * - 工作中：浅绿色底色 + 右下角大对勾
- * - 未工作：纯白底色 + 左侧感叹号 + 右侧双行文字（完全复刻 KSU 未安装样式）
+ * 状态卡片，参考 KSU HomeMiuix：
+ * - 工作中：右侧大对勾 + 按压倾斜 + 点击跳转服务器地址设置
+ * - 未工作：左侧感叹号 + 右侧双行文字
  */
 @Composable
 private fun StatusCard(
     online: Boolean,
     latencyMs: Long,
+    onClick: () -> Unit,
 ) {
     val colorScheme = MiuixTheme.colorScheme
     val dark = isInDarkTheme()
@@ -147,9 +152,11 @@ private fun StatusCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.defaultColors(color = cardColor),
+        onClick = if (online) onClick else null,
+        showIndication = online,
+        pressFeedbackType = if (online) PressFeedbackType.Tilt else PressFeedbackType.None,
     ) {
         if (online) {
-            // 工作中：右下角大图标布局
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -189,7 +196,6 @@ private fun StatusCard(
                 }
             }
         } else {
-            // 未工作：完全复刻 KSU 未安装样式 - 左图标 + 右侧双行文字
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -222,9 +228,6 @@ private fun StatusCard(
     }
 }
 
-/**
- * KSU InfoCard 同款：图标 + 标题(上) + 内容(下) 两行布局
- */
 @Composable
 private fun InfoCardItem(
     icon: ImageVector,
