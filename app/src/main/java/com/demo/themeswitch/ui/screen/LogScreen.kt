@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -27,14 +28,24 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.demo.themeswitch.R
+import com.demo.themeswitch.data.LogRepository
+import com.demo.themeswitch.ui.component.material.SegmentedColumn
+import com.demo.themeswitch.ui.component.material.SegmentedListItem
 import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
@@ -45,15 +56,23 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 /**
- * 功能（日志）页。
- *
- * 原响应流（SSE / 接口执行）功能已移除，后续改为从日志文件读取运行状态，
- * 当前先提供占位页，后续在此接入日志展示。该页为底部 Tab 页，无返回键。
+ * 日志页：从 app 私有目录的 log.txt 读取内容并展示。
+ * 该页为底部 Tab 页，无返回键。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogMaterialScreen() {
+    val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+
+    var logLines by remember { mutableStateOf<List<String>>(emptyList()) }
+    var isEmpty by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        val lines = LogRepository.readLogLines(context)
+        logLines = lines
+        isEmpty = lines.isEmpty()
+    }
 
     Scaffold(
         topBar = {
@@ -71,20 +90,63 @@ fun LogMaterialScreen() {
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) { paddingValues ->
-        LogPlaceholder(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            miuix = false,
-        )
+        if (isEmpty) {
+            LogPlaceholder(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState())
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                miuix = false,
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+            ) {
+                androidx.compose.foundation.layout.Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    shape = MaterialTheme.shapes.large,
+                ) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .nestedScroll(scrollBehavior.nestedScrollConnection),
+                        contentPadding = PaddingValues(12.dp),
+                    ) {
+                        items(logLines) { line ->
+                            Text(
+                                text = line.ifEmpty { " " },
+                                style = MaterialTheme.typography.bodySmall,
+                                fontFamily = FontFamily.Monospace,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(vertical = 1.dp),
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
 @Composable
 fun LogMiuixScreen() {
+    val context = LocalContext.current
     val scrollBehavior = MiuixScrollBehavior()
+
+    var logLines by remember { mutableStateOf<List<String>>(emptyList()) }
+    var isEmpty by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        val lines = LogRepository.readLogLines(context)
+        logLines = lines
+        isEmpty = lines.isEmpty()
+    }
 
     MiuixScaffold(
         topBar = {
@@ -95,24 +157,60 @@ fun LogMiuixScreen() {
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxHeight()
-                .scrollEndHaptic()
-                .overScrollVertical()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = PaddingValues(
-                top = innerPadding.calculateTopPadding(),
-                bottom = LocalScaffoldBottomPadding.current + 12.dp,
-            ),
-        ) {
-            item {
-                LogPlaceholder(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    miuix = true,
-                )
+        if (isEmpty) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .scrollEndHaptic()
+                    .overScrollVertical()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                contentPadding = PaddingValues(
+                    top = innerPadding.calculateTopPadding(),
+                    bottom = LocalScaffoldBottomPadding.current + 12.dp,
+                ),
+            ) {
+                item {
+                    LogPlaceholder(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                        miuix = true,
+                    )
+                }
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        top = innerPadding.calculateTopPadding(),
+                        bottom = LocalScaffoldBottomPadding.current + 12.dp,
+                        start = 12.dp,
+                        end = 12.dp,
+                    ),
+            ) {
+                top.yukonga.miuix.kmp.basic.Card(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .scrollEndHaptic()
+                            .overScrollVertical()
+                            .nestedScroll(scrollBehavior.nestedScrollConnection),
+                        contentPadding = PaddingValues(12.dp),
+                    ) {
+                        items(logLines) { line ->
+                            MiuixText(
+                                text = line.ifEmpty { " " },
+                                fontSize = 12.sp,
+                                fontFamily = FontFamily.Monospace,
+                                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                                modifier = Modifier.padding(vertical = 1.dp),
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -123,8 +221,8 @@ private fun LogPlaceholder(
     modifier: Modifier = Modifier,
     miuix: Boolean,
 ) {
-    val title = stringResource(R.string.log_coming_soon)
-    val summary = stringResource(R.string.log_coming_soon_hint)
+    val title = stringResource(R.string.log_empty)
+    val summary = stringResource(R.string.log_empty_hint)
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

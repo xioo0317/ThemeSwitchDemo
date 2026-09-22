@@ -119,8 +119,8 @@ fun HomeMaterialScreen() {
 
 /**
  * 状态卡片：KSU 同款风格。
- * - 工作中：secondaryContainer 彩色大卡片
- * - 未工作：errorContainer 彩色大卡片
+ * - 工作中：secondaryContainer 彩色大卡片 + ListItem
+ * - 未工作：普通白色 surface 卡片 + 图标（非红色）
  * 整卡可点击，进入服务器地址二级页面。
  */
 @Composable
@@ -129,13 +129,6 @@ private fun StatusCard(
     latencyMs: Long,
     onClick: () -> Unit,
 ) {
-    val containerColor = if (online) {
-        MaterialTheme.colorScheme.secondaryContainer
-    } else {
-        MaterialTheme.colorScheme.errorContainer
-    }
-    val contentColor = MaterialTheme.colorScheme.contentColorFor(containerColor)
-
     val statusIcon = if (online) Icons.Rounded.CheckCircle else Icons.Rounded.ErrorOutline
     val statusTitle = stringResource(if (online) R.string.home_working else R.string.home_not_working)
     val statusSummary = if (online) {
@@ -144,41 +137,74 @@ private fun StatusCard(
         stringResource(R.string.home_not_working_hint)
     }
 
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = containerColor,
-        contentColor = contentColor,
-        shape = MaterialTheme.shapes.large,
-        onClick = onClick,
-    ) {
-        ListItem(
-            leadingContent = {
-                Icon(statusIcon, contentDescription = statusTitle)
-            },
-            overlineContent = null,
-            supportingContent = {
-                Text(
-                    text = statusSummary,
-                    style = MaterialTheme.typography.bodyMedium,
+    if (online) {
+        val containerColor = MaterialTheme.colorScheme.secondaryContainer
+        val contentColor = MaterialTheme.colorScheme.contentColorFor(containerColor)
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = containerColor,
+            contentColor = contentColor,
+            shape = MaterialTheme.shapes.large,
+            onClick = onClick,
+        ) {
+            ListItem(
+                leadingContent = {
+                    Icon(statusIcon, contentDescription = statusTitle)
+                },
+                overlineContent = null,
+                supportingContent = {
+                    Text(
+                        text = statusSummary,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                },
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                colors = ListItemDefaults.colors(
+                    containerColor = Color.Transparent,
+                    contentColor = contentColor,
+                    leadingContentColor = contentColor,
+                    trailingContentColor = contentColor,
+                    supportingContentColor = contentColor.copy(alpha = 0.7f),
+                ),
+                elevation = ListItemDefaults.elevation(),
+                content = {
+                    Text(
+                        text = statusTitle,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                },
+            )
+        }
+    } else {
+        SegmentedColumn(modifier = Modifier.fillMaxWidth()) {
+            item {
+                SegmentedListItem(
+                    onClick = onClick,
+                    leadingContent = {
+                        Icon(
+                            statusIcon,
+                            contentDescription = statusTitle,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    headlineContent = {
+                        Text(
+                            statusTitle,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    },
+                    supportingContent = {
+                        Text(
+                            statusSummary,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
                 )
-            },
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-            colors = ListItemDefaults.colors(
-                containerColor = Color.Transparent,
-                contentColor = contentColor,
-                leadingContentColor = contentColor,
-                trailingContentColor = contentColor,
-                supportingContentColor = contentColor.copy(alpha = 0.7f),
-            ),
-            elevation = ListItemDefaults.elevation(),
-            content = {
-                Text(
-                    text = statusTitle,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            },
-        )
+            }
+        }
     }
 }
 
