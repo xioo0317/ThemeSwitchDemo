@@ -32,11 +32,12 @@ fun AppTheme(
         LocalEnableBlur provides blurSupported,
         LocalEnableFloatingBottomBar provides appPreferences.enableFloatingBottomBar,
         LocalEnableFloatingBottomBarBlur provides (glassSupported && appPreferences.enableFloatingBottomBarBlur),
+        LocalMiuixMonet provides appPreferences.miuixMonet,
     ) {
         when (uiMode) {
             UiMode.Miuix -> MiuixAppTheme(
                 isDark = isDark,
-                isMonet = colorMode.isMonet,
+                miuixMonet = appPreferences.miuixMonet,
                 keyColor = settings.keyColor,
                 paletteStyle = settings.paletteStyle,
                 colorSpec = settings.colorSpec,
