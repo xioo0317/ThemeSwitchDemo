@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.layout.verticalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.DevicesOther
@@ -159,8 +159,7 @@ private fun StatusCard(online: Boolean, latencyMs: Long) {
                 containerColor = Color.Transparent,
                 contentColor = contentColor,
                 leadingContentColor = contentColor,
-                headlineColor = contentColor,
-                supportingColor = contentColor.copy(alpha = 0.7f),
+                supportingContentColor = contentColor.copy(alpha = 0.7f),
             ),
         )
     }
