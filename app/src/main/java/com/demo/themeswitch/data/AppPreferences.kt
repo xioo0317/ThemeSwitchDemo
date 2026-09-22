@@ -19,5 +19,4 @@ data class AppPreferences(
     val enablePredictiveBack: Boolean = true,
     val enableSwipeDismiss: Boolean = true,
     val pageScale: Float = 1.0f,
-    val serverUrl: String = "http://127.0.0.1:8080",
 )
