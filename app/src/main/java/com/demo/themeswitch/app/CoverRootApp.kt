@@ -3,6 +3,7 @@ package com.demo.themeswitch.app
 import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.os.Build
+import com.demo.themeswitch.data.LogRepository
 import com.demo.themeswitch.data.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +38,11 @@ class CoverRootApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+
+        // 确保后端写入目标 log.txt 提前就位（空文件，不写入任何日志内容）
+        appScope.launch {
+            LogRepository.ensureLogFileExists(applicationContext)
+        }
 
         // KSU 同款：启动时根据偏好设置初始化预测性返回手势
         appScope.launch {
