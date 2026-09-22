@@ -24,6 +24,7 @@ class SettingsRepository(private val context: Context) {
         val KEY_COLOR = intPreferencesKey("key_color")
         val COLOR_STYLE = stringPreferencesKey("color_style")
         val COLOR_SPEC = stringPreferencesKey("color_spec")
+        val MIUIX_MONET = booleanPreferencesKey("miuix_monet")
         val ENABLE_BLUR = booleanPreferencesKey("enable_blur")
         val ENABLE_FLOATING_BOTTOM_BAR = booleanPreferencesKey("enable_floating_bottom_bar")
         val ENABLE_FLOATING_BOTTOM_BAR_BLUR = booleanPreferencesKey("enable_floating_bottom_bar_blur")
@@ -44,6 +45,7 @@ class SettingsRepository(private val context: Context) {
             keyColor = p[Keys.KEY_COLOR] ?: DEFAULT_KEY_COLOR,
             colorStyle = p[Keys.COLOR_STYLE] ?: "TonalSpot",
             colorSpec = p[Keys.COLOR_SPEC] ?: "SPEC_2025",
+            miuixMonet = p[Keys.MIUIX_MONET] ?: false,
             enableBlur = p[Keys.ENABLE_BLUR] ?: false,
             enableFloatingBottomBar = p[Keys.ENABLE_FLOATING_BOTTOM_BAR] ?: false,
             enableFloatingBottomBarBlur = p[Keys.ENABLE_FLOATING_BOTTOM_BAR_BLUR] ?: false,
@@ -78,6 +80,10 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setColorSpec(spec: String) {
         context.dataStore.edit { it[Keys.COLOR_SPEC] = spec }
+    }
+
+    suspend fun setMiuixMonet(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.MIUIX_MONET] = enabled }
     }
 
     suspend fun setEnableBlur(enabled: Boolean) {
