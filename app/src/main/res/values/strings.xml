@@ -68,15 +68,10 @@
     <string name="about_github_summary">Open the project on GitHub</string>
     <string name="nav_api">Features</string>
     <string name="api_server_address">Server address</string>
-    <string name="api_action_hint">Action</string>
-    <string name="api_custom_body">Custom request body (optional, JSON)</string>
-    <string name="api_response">Response stream</string>
-    <string name="api_empty_hint">Select an action and tap Run</string>
-    <string name="api_run">Run</string>
-    <string name="api_running">Running…</string>
-    <string name="api_status_done">Stream finished ([DONE] received)</string>
-    <string name="api_status_error">Request failed</string>
-    <string name="api_invalid_url">Invalid server address</string>
+
+    <!-- 日志文件页占位（响应流已移除） -->
+    <string name="log_coming_soon">Logs coming soon</string>
+    <string name="log_coming_soon_hint">Response stream removed; logs will be loaded from the log file later.</string>
 
     <!-- KSU: home connectivity probe + new toggles -->
     <string name="home_not_working">Not working</string>
