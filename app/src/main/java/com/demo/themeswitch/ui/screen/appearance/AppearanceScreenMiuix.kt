@@ -33,6 +33,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.MenuOpen
+import androidx.compose.material.icons.rounded.AspectRatio
 import androidx.compose.material.icons.rounded.BlurOn
 import androidx.compose.material.icons.rounded.CallToAction
 import androidx.compose.material.icons.rounded.Colorize
@@ -44,8 +45,12 @@ import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,6 +67,7 @@ import androidx.compose.ui.unit.sp
 import com.demo.themeswitch.R
 import com.demo.themeswitch.data.AppPreferences
 import com.demo.themeswitch.data.SettingsRepository
+import com.demo.themeswitch.ui.component.miuix.ScaleDialog
 import com.demo.themeswitch.ui.navigation.LocalNavigator
 import com.demo.themeswitch.ui.theme.ColorMode
 import com.demo.themeswitch.ui.theme.LocalEnableBlur
@@ -69,6 +75,7 @@ import com.demo.themeswitch.ui.theme.colorNameResIds
 import com.demo.themeswitch.ui.theme.keyColorOptions
 import com.demo.themeswitch.util.BlurredBar
 import com.demo.themeswitch.util.rememberBlurBackdrop
+import com.demo.themeswitch.util.setPredictiveBackEnabled
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.rememberDynamicColorScheme
@@ -78,12 +85,15 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.Slider
+import top.yukonga.miuix.kmp.basic.SliderDefaults
 import top.yukonga.miuix.kmp.basic.TabRow
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
@@ -105,6 +115,7 @@ fun AppearanceMiuix() {
 
     val colorMode = ColorMode.fromValue(prefs.colorMode)
     val isDark = colorMode.isDark || (colorMode.isSystem && isSystemInDarkTheme())
+    val showScaleDialog = rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -150,7 +161,7 @@ fun AppearanceMiuix() {
                     ThemePreviewCardMiuix(
                         keyColor = prefs.keyColor,
                         isDark = isDark,
-                        monet = colorMode.isMonet,
+                        miuixMonet = prefs.miuixMonet,
                         enableFloatingBottomBar = prefs.enableFloatingBottomBar,
                         enableFloatingBottomBarBlur = prefs.enableFloatingBottomBarBlur,
                         paletteStyle = prefs.colorStyle,
@@ -170,7 +181,7 @@ fun AppearanceMiuix() {
                         selectedTabIndex = baseIndex.coerceIn(0, 2),
                         onTabSelected = { idx ->
                             // 保留当前 Monet 状态
-                            val value = if (colorMode.isMonet) idx + 3 else idx
+                            val value = if (prefs.miuixMonet) idx + 3 else idx
                             scope.launch { repository.setColorMode(value) }
                         },
                     )
@@ -189,14 +200,18 @@ fun AppearanceMiuix() {
                                     tint = colorScheme.onBackground,
                                 )
                             },
-                            checked = colorMode.isMonet,
+                            checked = prefs.miuixMonet,
                             onCheckedChange = { monet ->
-                                val next = if (monet) colorMode.toMonetMode()
-                                else colorMode.toNonMonetMode()
-                                scope.launch { repository.setColorMode(next) }
+                                scope.launch {
+                                    repository.setMiuixMonet(monet)
+                                    // 同步更新 colorMode：开启时转 Monet 模式，关闭时转回普通模式
+                                    val current = ColorMode.fromValue(prefs.colorMode)
+                                    val next = if (monet) current.toMonetMode() else current.toNonMonetMode()
+                                    repository.setColorMode(next)
+                                }
                             },
                         )
-                        AnimatedVisibility(visible = colorMode.isMonet) {
+                        AnimatedVisibility(visible = prefs.miuixMonet) {
                             Column {
                                 val values = listOf(0) + keyColorOptions
                                 val items = listOf(stringResource(R.string.settings_key_color_default)) +
@@ -318,7 +333,7 @@ fun AppearanceMiuix() {
                         }
                     }
 
-                    // ── 返回手势卡 ──
+                    // ── 返回手势/界面缩放卡 ──
                     Card(modifier = Modifier.padding(top = 12.dp).fillMaxWidth()) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                             SwitchPreference(
@@ -333,8 +348,11 @@ fun AppearanceMiuix() {
                                     )
                                 },
                                 checked = prefs.enablePredictiveBack,
-                                onCheckedChange = {
-                                    scope.launch { repository.setEnablePredictiveBack(it) }
+                                onCheckedChange = { enabled ->
+                                    scope.launch {
+                                        repository.setEnablePredictiveBack(enabled)
+                                        setPredictiveBackEnabled(context, enabled)
+                                    }
                                 },
                             )
                         }
@@ -352,6 +370,49 @@ fun AppearanceMiuix() {
                             checked = prefs.enableSwipeDismiss,
                             onCheckedChange = {
                                 scope.launch { repository.setEnableSwipeDismiss(it) }
+                            },
+                        )
+                        var sliderValue by remember(prefs.pageScale) { mutableFloatStateOf(prefs.pageScale) }
+                        ArrowPreference(
+                            title = stringResource(R.string.settings_page_scale),
+                            summary = stringResource(R.string.settings_page_scale_summary),
+                            startAction = {
+                                Icon(
+                                    Icons.Rounded.AspectRatio,
+                                    modifier = Modifier.padding(end = 6.dp),
+                                    contentDescription = stringResource(R.string.settings_page_scale),
+                                    tint = colorScheme.onBackground,
+                                )
+                            },
+                            endActions = {
+                                Text(
+                                    text = "${(sliderValue * 100).toInt()}%",
+                                    color = colorScheme.onSurfaceVariantActions,
+                                )
+                            },
+                            onClick = { showScaleDialog.value = !showScaleDialog.value },
+                            holdDownState = showScaleDialog.value,
+                            bottomAction = {
+                                Slider(
+                                    value = sliderValue,
+                                    onValueChange = { sliderValue = it },
+                                    onValueChangeFinished = {
+                                        scope.launch { repository.setPageScale(sliderValue) }
+                                    },
+                                    valueRange = 0.8f..1.1f,
+                                    showKeyPoints = true,
+                                    keyPoints = listOf(0.8f, 0.9f, 1f, 1.1f),
+                                    magnetThreshold = 0.01f,
+                                    hapticEffect = SliderDefaults.SliderHapticEffect.Step,
+                                )
+                            },
+                        )
+                        ScaleDialog(
+                            show = showScaleDialog.value,
+                            onDismissRequest = { showScaleDialog.value = false },
+                            scaleState = { prefs.pageScale },
+                            onScaleChange = {
+                                scope.launch { repository.setPageScale(it) }
                             },
                         )
                     }
@@ -374,7 +435,7 @@ fun AppearanceMiuix() {
 private fun ThemePreviewCardMiuix(
     keyColor: Int,
     isDark: Boolean,
-    monet: Boolean,
+    miuixMonet: Boolean,
     enableFloatingBottomBar: Boolean = false,
     enableFloatingBottomBarBlur: Boolean = false,
     paletteStyle: String = "TonalSpot",
@@ -397,16 +458,16 @@ private fun ThemePreviewCardMiuix(
         specVersion = effectiveSpec,
     )
 
-    val bgColor = if (monet) dynamicCs.background else colorScheme.surface
-    val textColor = if (monet) dynamicCs.onSurface else colorScheme.onBackground
+    val bgColor = if (miuixMonet) dynamicCs.background else colorScheme.surface
+    val textColor = if (miuixMonet) dynamicCs.onSurface else colorScheme.onBackground
     val accentCardColor = when {
-        monet -> dynamicCs.secondaryContainer
+        miuixMonet -> dynamicCs.secondaryContainer
         isDark -> Color(0xFF1A3825)
         else -> Color(0xFFDFFAE4)
     }
-    val cardColor = if (monet) dynamicCs.surfaceContainerHighest else colorScheme.surfaceVariant
-    val navBarColor = if (monet) dynamicCs.surfaceContainer else colorScheme.surface
-    val iconColor = if (monet) dynamicCs.primary else colorScheme.primary
+    val cardColor = if (miuixMonet) dynamicCs.surfaceContainerHighest else colorScheme.surfaceVariant
+    val navBarColor = if (miuixMonet) dynamicCs.surfaceContainer else colorScheme.surface
+    val iconColor = if (miuixMonet) dynamicCs.primary else colorScheme.primary
     val navSelected = colorScheme.onSurfaceContainer
     val navUnselected = colorScheme.onSurfaceContainer.copy(alpha = 0.5f)
 
