@@ -5,9 +5,9 @@ data class AppPreferences(
     val colorMode: Int = 0,
     // 默认 UI：miui 开头（MiuiX）
     val uiMode: String = "miuix",
-    val language: string = "system",
-    // KSU 品牌绿（Teal #009688）作为默认种子色；0 才走壁纸取色
-    val keyColor: Int = 0xFF009688.toInt(),
+    val language: String = "system",
+    // 默认 keyColor=0 → 走壁纸 Monet 取色（与 KernelSU 默认一致）；非 0 才用固定种子色
+    val keyColor: Int = 0,
     val colorStyle: String = "TonalSpot",
     val colorSpec: String = "SPEC_2025",
     val enableBlur: Boolean = false,

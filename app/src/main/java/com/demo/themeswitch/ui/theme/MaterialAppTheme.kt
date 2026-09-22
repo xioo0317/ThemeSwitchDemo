@@ -1,13 +1,10 @@
 package com.demo.themeswitch.ui.theme
 
 import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
@@ -16,18 +13,6 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.rememberDynamicColorScheme
-
-private val LightFallback = lightColorScheme(
-    primary = Color(0xFF3A6AE0),
-    secondary = Color(0xFF575E71),
-    tertiary = Color(0xFF755165),
-)
-
-private val DarkFallback = darkColorScheme(
-    primary = Color(0xFFB3C5FF),
-    secondary = Color(0xFFBFC6DC),
-    tertiary = Color(0xFFE3BACC),
-)
 
 /** AMOLED 纯黑：把所有 surface/background/container 替换为黑色。 */
 private fun amoled(
@@ -56,17 +41,21 @@ fun MaterialAppTheme(
 ) {
     val context = LocalContext.current
 
-    val base = when {
-        keyColor != 0 -> rememberDynamicColorScheme(
-            seedColor = Color(keyColor),
-            isDark = isDark,
-            style = paletteStyle,
-            specVersion = colorSpec,
-        )
-        isMonet && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
-            if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        else -> if (isDark) DarkFallback else LightFallback
+    // 对齐 KernelSU rememberKernelSUColorScheme：
+    // keyColor==0 → 取系统壁纸 Monet 动态主题的 primary 作为种子色，再统一经 materialkolor 生成，
+    // 让"壁纸取色"与"自定义种子"走同一套 HCT 调色板（paletteStyle + colorSpec + effectiveFor），
+    // 消除 M3 与 KSU 之间的取色差异，并保持与 Miuix 主题取色一致。
+    val seed = if (keyColor != 0) {
+        Color(keyColor)
+    } else {
+        (if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)).primary
     }
+    val base = rememberDynamicColorScheme(
+        seedColor = seed,
+        isDark = isDark,
+        style = paletteStyle,
+        specVersion = colorSpec.effectiveFor(paletteStyle),
+    )
 
     val colorScheme = if (isDark && isAmoled) amoled(base) else base
 

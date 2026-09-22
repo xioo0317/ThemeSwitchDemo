@@ -116,7 +116,7 @@ class SettingsRepository(private val context: Context) {
         const val UI_MODE_MATERIAL = "material"
         const val UI_MODE_MIUIX = "miuix"
 
-        // KSU 品牌绿 Teal #009688，作为默认种子色（0 才走壁纸 Monet 取色）
-        const val DEFAULT_KEY_COLOR = 0xFF009688.toInt()
+        // 默认 0 → 走壁纸 Monet 取色（对齐 KSU）；非 0 用固定种子色（如品牌 Teal #009688）
+        const val DEFAULT_KEY_COLOR = 0
     }
 }
