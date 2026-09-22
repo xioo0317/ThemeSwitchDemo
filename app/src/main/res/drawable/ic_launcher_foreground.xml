@@ -3,10 +3,17 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- 图形控制在自适应图标安全区（中心约 66dp）内，避免被圆形/圆角遮罩裁切 -->
+    <!-- 电源符号：贴合 coverRoot 语义，白色在橙色底上清晰醒目 -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M54,30 a24,24 0 0 1 0,48 a12,12 0 0 1 0,-24 a12,12 0 0 0 0,-24 z" />
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="0"
+        android:pathData="M53,32 L53,54 A3,3 0 0 0 59,54 L59,32 A3,3 0 0 0 53,32 Z" />
     <path
-        android:fillColor="#B3FFFFFF"
-        android:pathData="M54,30 a12,12 0 0 0 0,24 a12,12 0 0 1 0,24 a24,24 0 0 1 0,-48 z" />
+        android:fillColor="#FFFFFFFF"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="6.5"
+        android:strokeLineCap="round"
+        android:pathData="M38,48 A22,22 0 1 0 70,48" />
 </vector>

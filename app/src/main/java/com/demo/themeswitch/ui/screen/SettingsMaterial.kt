@@ -53,7 +53,9 @@ fun SettingsMaterialScreen(
         stringResource(R.string.mode_miuix),
         stringResource(R.string.mode_material),
     )
-    val languageOptions = LocaleHelper.supportedLanguages.map { it.nativeName }
+    val languageOptions = LocaleHelper.supportedLanguages.map {
+        if (it.code == "system") stringResource(R.string.lang_system) else it.nativeName
+    }
 
     // KSU 同款：原生 M3 Expressive Scaffold + 大标题顶栏 + SegmentedColumn 分组列表
     ExpressiveScaffold(

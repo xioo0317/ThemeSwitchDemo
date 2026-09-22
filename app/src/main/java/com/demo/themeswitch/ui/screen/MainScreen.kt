@@ -53,6 +53,7 @@ import com.demo.themeswitch.ui.component.bottombar.rememberMainPagerState
 import com.demo.themeswitch.ui.navigation.LocalNavigator
 import com.demo.themeswitch.ui.navigation.Navigator
 import com.demo.themeswitch.ui.navigation.Route
+import com.demo.themeswitch.ui.theme.LocalEnableBlur
 import com.demo.themeswitch.ui.theme.LocalEnableFloatingBottomBar
 import com.demo.themeswitch.ui.theme.LocalEnableFloatingBottomBarBlur
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -89,7 +90,6 @@ fun MainScreen() {
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { TABS.size })
     val mainPagerState = rememberMainPagerState(pagerState = pagerState)
 
-    // 主页预测性返回：非首页时滑回第 0 页；默认开启（KSU 同款）
     val pagerBackEnabled = mainPagerState.selectedPage != 0
     val navEventState = rememberNavigationEventState(NavigationEventInfo.None)
     NavigationBackHandler(
@@ -98,8 +98,7 @@ fun MainScreen() {
         onBackCompleted = { mainPagerState.animateToPage(0) },
     )
 
-    // Miuix 毛玻璃取景层
-    val blurBackdrop = rememberBlurBackdrop(enableBlur = com.demo.themeswitch.ui.theme.LocalEnableBlur.current)
+    val blurBackdrop = rememberBlurBackdrop(enableBlur = LocalEnableBlur.current)
     val lensBackdrop = rememberLayerBackdrop { drawContent() }
     val useLensLayer = enableFloating && enableFloatingBlur
 
@@ -127,7 +126,6 @@ fun MainScreen() {
                         .then(if (!isMaterial) Modifier.background(MiuixTheme.colorScheme.surface) else Modifier)
                         .then(if (useLensLayer) Modifier.layerBackdrop(lensBackdrop) else Modifier),
                 ) {
-                    // 默认使用可滑动 Pager（KSU 同款手势切页）
                     HorizontalPager(
                         state = mainPagerState.pagerState,
                         modifier = Modifier
@@ -138,10 +136,6 @@ fun MainScreen() {
                             ),
                         beyondViewportPageCount = TABS.size - 1,
                         overscrollEffect = null,
-                        // CrossAxisInterceptor 模式必须关闭 Pager 原生手势，横向翻页由
-                        // pagerGestureOverride 拦截器 + PagerGestureNestedScrollConnection 接管。
-                        // 若置为 true，Pager 原生拖拽检测会与 miuix 拦截器竞争同一指针序列，
-                        // 取消页内子项的 tap，导致「界面风格 / 关于 / 语言」点击无反应。
                         userScrollEnabled = false,
                         pageNestedScrollConnection = PagerGestureNestedScrollConnection,
                     ) { page ->
@@ -163,7 +157,7 @@ fun MainScreen() {
 private fun MainPage(page: Int, navigator: Navigator) {
     when (page) {
         0 -> if (LocalUiMode.current == UiMode.Material) HomeMaterialScreen() else HomeMiuixScreen()
-        1 -> if (LocalUiMode.current == UiMode.Material) ApiMaterialScreen() else ApiMiuixScreen()
+        1 -> if (LocalUiMode.current == UiMode.Material) LogMaterialScreen() else LogMiuixScreen()
         2 -> if (LocalUiMode.current == UiMode.Material) {
             SettingsMaterialScreen(
                 onOpenAppearance = { navigator.push(Route.Appearance) },
@@ -243,8 +237,11 @@ private fun MainBottomBar(
                 }
             }
         } else {
+            // 修复：模糊开启时底栏透明透出 BlurredBar 的模糊效果；
+            //       模糊关闭时底栏使用 surface 色，避免完全透明。
+            val enableBlur = LocalEnableBlur.current && blurBackdrop != null
             BlurredBar(backdrop = blurBackdrop, modifier = Modifier.align(Alignment.BottomCenter)) {
-                NavigationBar(color = Color.Transparent) {
+                NavigationBar(color = if (enableBlur) Color.Transparent else MiuixTheme.colorScheme.surface) {
                     TABS.forEachIndexed { index, tab ->
                         NavigationBarItem(
                             selected = state.selectedPage == index,

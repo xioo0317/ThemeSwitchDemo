@@ -36,10 +36,12 @@ import com.demo.themeswitch.ui.navigation.Navigator
 import com.demo.themeswitch.ui.navigation.Route
 import com.demo.themeswitch.ui.navigation.rememberNavigator
 import com.demo.themeswitch.ui.screen.MainScreen
+import com.demo.themeswitch.ui.screen.ServerAddressScreen
 import com.demo.themeswitch.ui.screen.appearance.AppearanceScreen
 import com.demo.themeswitch.ui.screen.about.AboutScreen
 import com.demo.themeswitch.ui.theme.AppTheme
 import com.demo.themeswitch.ui.theme.ColorMode
+import com.demo.themeswitch.util.setPredictiveBackEnabled
 
 class MainActivity : ComponentActivity() {
 
@@ -79,6 +81,11 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
+            // 应用启动时根据设置应用预测性返回状态
+            SideEffect {
+                setPredictiveBackEnabled(applicationContext, prefs.enablePredictiveBack)
+            }
+
             val navigator = rememberNavigator(Route.Main)
 
             CompositionLocalProvider(
@@ -108,6 +115,9 @@ class MainActivity : ComponentActivity() {
                                 AppearanceScreen()
                             }
                             entry<Route.About>(swipeDismiss = swipeDismiss) { AboutScreen() }
+                            entry<Route.ServerAddress>(swipeDismiss = swipeDismiss) {
+                                ServerAddressScreen()
+                            }
                         }
                     }
 

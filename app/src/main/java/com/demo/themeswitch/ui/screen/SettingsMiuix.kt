@@ -61,7 +61,9 @@ fun SettingsMiuixScreen(
         stringResource(R.string.mode_miuix),
         stringResource(R.string.mode_material),
     )
-    val languageItems = com.demo.themeswitch.data.LocaleHelper.supportedLanguages.map { it.nativeName }
+    val languageItems = com.demo.themeswitch.data.LocaleHelper.supportedLanguages.map {
+        if (it.code == "system") stringResource(R.string.lang_system) else it.nativeName
+    }
     val languageIndex = com.demo.themeswitch.data.LocaleHelper.supportedLanguages
         .indexOfFirst { it.code == preferences.language }
         .coerceIn(0, com.demo.themeswitch.data.LocaleHelper.supportedLanguages.lastIndex)

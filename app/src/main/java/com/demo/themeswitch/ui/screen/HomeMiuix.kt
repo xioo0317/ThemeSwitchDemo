@@ -2,28 +2,24 @@ package com.demo.themeswitch.ui.screen
 
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.DevicesOther
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material.icons.rounded.CheckCircleOutline
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,37 +41,41 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.demo.themeswitch.BuildConfig
 import com.demo.themeswitch.R
-import com.demo.themeswitch.data.AppPreferences
+import com.demo.themeswitch.data.AppConfig
 import com.demo.themeswitch.data.BackendMonitor
-import com.demo.themeswitch.data.SettingsRepository
-import com.demo.themeswitch.ui.theme.isInDarkTheme
+import com.demo.themeswitch.data.ConfigRepository
+import com.demo.themeswitch.ui.navigation.LocalNavigator
+import com.demo.themeswitch.ui.navigation.Route
+import com.demo.themeswitch.util.BlurredBar
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
-import com.demo.themeswitch.ui.screen.LocalBlurBackdrop
-import com.demo.themeswitch.util.BlurredBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import com.demo.themeswitch.ui.screen.LocalBlurBackdrop
+
+/** 工作中状态色：绿色（亮深主题通用） */
+private val StatusOnlineColor = Color(0xFF2E9E4F)
 
 @Composable
 fun HomeMiuixScreen() {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
-    val repository = remember { SettingsRepository(context) }
-    val preferences by repository.preferencesFlow.collectAsState(initial = AppPreferences())
+    val configRepository = remember { ConfigRepository(context) }
+    val config by configRepository.configFlow.collectAsState(initial = AppConfig())
     val scrollBehavior = MiuixScrollBehavior()
-    val colorScheme = MiuixTheme.colorScheme
 
-    // 每次进首页探测一次后端状态，只探测一次，不循环重试
     var online by remember { mutableStateOf(false) }
     var latencyMs by remember { mutableLongStateOf(0L) }
 
-    LaunchedEffect(preferences.serverUrl) {
-        val result = BackendMonitor.refresh(preferences.serverUrl)
+    LaunchedEffect(config.backendUrl) {
+        val result = BackendMonitor.refresh(config.backendUrl)
         online = result.online
         latencyMs = result.latencyMs
     }
@@ -112,6 +112,7 @@ fun HomeMiuixScreen() {
                     StatusCard(
                         online = online,
                         latencyMs = latencyMs,
+                        onClick = { navigator.push(Route.ServerAddress) },
                     )
                     InfoCard(
                         appVersion = "v" + BuildConfig.VERSION_NAME,
@@ -126,105 +127,72 @@ fun HomeMiuixScreen() {
 }
 
 /**
- * KSU 同款状态卡片：
- * - 工作中：浅绿色底色 + 右下角大对勾
- * - 未工作：纯白底色 + 左侧感叹号 + 右侧双行文字（完全复刻 KSU 未安装样式）
+ * 状态卡片：白色圆角卡片，与下方「应用版本」信息卡同一视觉体系。
+ * - 工作中：绿色 CheckCircle
+ * - 未工作：红色 ErrorOutline
+ * 任意状态整卡可点，进入服务器地址二级页面；右侧箭头给出跳转暗示。
  */
 @Composable
 private fun StatusCard(
     online: Boolean,
     latencyMs: Long,
+    onClick: () -> Unit,
 ) {
     val colorScheme = MiuixTheme.colorScheme
-    val dark = isInDarkTheme()
-
-    val cardColor = if (online) {
-        if (dark) Color(0xFF1A3825) else Color(0xFFDFFAE4)
+    val accentColor = if (online) StatusOnlineColor else colorScheme.error
+    val statusIcon = if (online) Icons.Rounded.CheckCircle else Icons.Rounded.ErrorOutline
+    val statusTitle = stringResource(if (online) R.string.home_working else R.string.home_not_working)
+    val statusSummary = if (online) {
+        stringResource(R.string.home_latency_ms, latencyMs)
     } else {
-        colorScheme.surfaceContainer
+        stringResource(R.string.home_not_working_hint)
     }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.defaultColors(color = cardColor),
+        colors = CardDefaults.defaultColors(color = colorScheme.surfaceContainer),
+        onClick = onClick,
+        showIndication = true,
+        pressFeedbackType = PressFeedbackType.Tilt,
     ) {
-        if (online) {
-            // 工作中：右下角大图标布局
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .offset(27.dp, 31.dp),
-                    contentAlignment = Alignment.BottomEnd,
-                ) {
-                    Icon(
-                        modifier = Modifier.size(110.dp),
-                        imageVector = Icons.Rounded.CheckCircleOutline,
-                        tint = Color(0xFF36D167),
-                        contentDescription = null,
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp, 14.dp),
-                    contentAlignment = Alignment.TopStart,
-                ) {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.home_working),
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Spacer(Modifier.height(1.dp))
-                        Text(
-                            text = stringResource(R.string.home_latency_ms, latencyMs),
-                            fontSize = 15.sp,
-                        )
-                    }
-                }
-            }
-        } else {
-            // 未工作：完全复刻 KSU 未安装样式 - 左图标 + 右侧双行文字
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.ErrorOutline,
-                    contentDescription = null,
-                    tint = colorScheme.onSurface,
-                    modifier = Modifier.size(24.dp),
+        androidx.compose.foundation.layout.Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = statusIcon,
+                contentDescription = statusTitle,
+                tint = accentColor,
+                modifier = Modifier.size(28.dp),
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = statusTitle,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorScheme.onSurface,
                 )
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = stringResource(R.string.home_not_working),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = colorScheme.onSurface,
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    Text(
-                        text = stringResource(R.string.home_not_working_hint),
-                        fontSize = 14.sp,
-                        color = colorScheme.onSurfaceVariantSummary,
-                    )
-                }
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = statusSummary,
+                    fontSize = 14.sp,
+                    color = colorScheme.onSurfaceVariantSummary,
+                )
             }
+            Spacer(Modifier.width(8.dp))
+            Icon(
+                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                contentDescription = null,
+                tint = colorScheme.onSurfaceVariantSummary,
+                modifier = Modifier.size(22.dp),
+            )
         }
     }
 }
 
-/**
- * KSU InfoCard 同款：图标 + 标题(上) + 内容(下) 两行布局
- */
 @Composable
 private fun InfoCardItem(
     icon: ImageVector,
@@ -233,7 +201,7 @@ private fun InfoCardItem(
     bottomPadding: androidx.compose.ui.unit.Dp = 24.dp,
 ) {
     val colorScheme = MiuixTheme.colorScheme
-    Row(
+    androidx.compose.foundation.layout.Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = bottomPadding),

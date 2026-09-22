@@ -17,23 +17,24 @@ data class ProbeResult(
 )
 
 /**
- * C++ 本地后端探活：POST /api/v1/execute（空 body）。
- * 只要拿到 HTTP 响应（200~599）即视为在线——400 同样证明服务器活着并明确拒绝空请求；
+ * C++ 本地后端探活：GET /。
+ * 只要拿到 HTTP 响应（200~599）即视为在线——即使返回 404 也证明 HTTP 服务已监听；
  * 连接超时 / 连接拒绝 / DNS 失败等 IOException 才判离线。
+ *
+ * 响应流（POST /api/v1/execute、SSE）已移除，后续状态通过日志文件获取，
+ * 因此探活不再依赖任何业务接口。
  */
 suspend fun probeBackend(serverUrl: String): ProbeResult = withContext(Dispatchers.IO) {
     val normalized = serverUrl.trim().trimEnd('/')
     val start = SystemClock.elapsedRealtime()
     var connection: HttpURLConnection? = null
     try {
-        connection = (URL("$normalized/api/v1/execute").openConnection() as HttpURLConnection).apply {
-            requestMethod = "POST"
+        connection = (URL(normalized).openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
             connectTimeout = 2500
             readTimeout = 2500
-            setRequestProperty("Content-Type", "application/json")
-            doOutput = true
+            instanceFollowRedirects = false
         }
-        connection.outputStream.use { it.write(ByteArray(0)) }
         val code = connection.responseCode
         ProbeResult(online = code in 200..599, latencyMs = SystemClock.elapsedRealtime() - start)
     } catch (e: IOException) {

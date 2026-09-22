@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -33,6 +32,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -45,23 +45,24 @@ import androidx.compose.material.icons.filled.Brightness3
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.rounded.BlurOn
+import androidx.compose.material.icons.rounded.AspectRatio
 import androidx.compose.material.icons.rounded.CallToAction
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DesignServices
 import androidx.compose.material.icons.rounded.Style
 import androidx.compose.material.icons.rounded.Swipe
-import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.ToggleButtonShapes
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -97,6 +98,7 @@ import com.demo.themeswitch.ui.component.material.SegmentedSwitchItem
 import com.demo.themeswitch.ui.component.material.TonalCard
 import com.demo.themeswitch.ui.component.material.TopBarBackButton
 import com.demo.themeswitch.ui.component.material.expressiveTopAppBarColors
+import com.demo.themeswitch.util.setPredictiveBackEnabled
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.rememberDynamicColorScheme
@@ -266,34 +268,12 @@ fun AppearanceMaterial() {
                     content = listOf(
                         {
                             SegmentedSwitchItem(
-                                icon = Icons.Rounded.BlurOn,
-                                title = stringResource(R.string.settings_enable_blur),
-                                summary = stringResource(R.string.settings_enable_blur_summary),
-                                checked = prefs.enableBlur,
-                                onCheckedChange = { scope.launch { repository.setEnableBlur(it) } },
-                            )
-                        },
-                        {
-                            SegmentedSwitchItem(
                                 icon = Icons.Rounded.CallToAction,
                                 title = stringResource(R.string.settings_floating_bottom_bar),
                                 summary = stringResource(R.string.settings_floating_bottom_bar_summary),
                                 checked = prefs.enableFloatingBottomBar,
                                 onCheckedChange = {
                                     scope.launch { repository.setEnableFloatingBottomBar(it) }
-                                },
-                            )
-                        },
-                        {
-                            SegmentedSwitchItem(
-                                icon = Icons.Rounded.WaterDrop,
-                                title = stringResource(R.string.settings_enable_glass),
-                                summary = stringResource(R.string.settings_enable_glass_summary),
-                                checked = prefs.enableFloatingBottomBarBlur,
-                                enabled = prefs.enableFloatingBottomBar &&
-                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
-                                onCheckedChange = {
-                                    scope.launch { repository.setEnableFloatingBottomBarBlur(it) }
                                 },
                             )
                         },
@@ -304,20 +284,24 @@ fun AppearanceMaterial() {
             item {
                 SegmentedColumn(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    content = listOf(
-                        {
-                            SegmentedSwitchItem(
-                                icon = Icons.AutoMirrored.Rounded.MenuOpen,
-                                title = stringResource(R.string.settings_predictive_back),
-                                summary = stringResource(R.string.settings_predictive_back_summary),
-                                checked = prefs.enablePredictiveBack,
-                                enabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
-                                onCheckedChange = {
-                                    scope.launch { repository.setEnablePredictiveBack(it) }
-                                },
-                            )
-                        },
-                        {
+                    content = buildList {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                            add({
+                                SegmentedSwitchItem(
+                                    icon = Icons.AutoMirrored.Rounded.MenuOpen,
+                                    title = stringResource(R.string.settings_predictive_back),
+                                    summary = stringResource(R.string.settings_predictive_back_summary),
+                                    checked = prefs.enablePredictiveBack,
+                                    onCheckedChange = { enabled ->
+                                        scope.launch {
+                                            repository.setEnablePredictiveBack(enabled)
+                                            setPredictiveBackEnabled(context, enabled)
+                                        }
+                                    },
+                                )
+                            })
+                        }
+                        add({
                             SegmentedSwitchItem(
                                 icon = Icons.Rounded.Swipe,
                                 title = stringResource(R.string.settings_enable_swipe_dismiss),
@@ -327,9 +311,58 @@ fun AppearanceMaterial() {
                                     scope.launch { repository.setEnableSwipeDismiss(it) }
                                 },
                             )
-                        },
-                    ),
+                        })
+                    },
                 )
+            }
+
+            item {
+                TonalCard(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    val sliderState = rememberSliderState(
+                        value = prefs.pageScale,
+                        trackRange = 0.8f..1.1f
+                    )
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Rounded.AspectRatio,
+                                contentDescription = stringResource(R.string.settings_page_scale),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.settings_page_scale),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = stringResource(R.string.settings_page_scale_summary),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Text(
+                                text = "${(sliderState.value * 100).toInt()}%",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Slider(
+                            state = sliderState,
+                            onValueChangeFinished = {
+                                scope.launch { repository.setPageScale(sliderState.value) }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
             }
 
             item {

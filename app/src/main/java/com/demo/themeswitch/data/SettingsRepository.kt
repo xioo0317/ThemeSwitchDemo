@@ -24,6 +24,7 @@ class SettingsRepository(private val context: Context) {
         val KEY_COLOR = intPreferencesKey("key_color")
         val COLOR_STYLE = stringPreferencesKey("color_style")
         val COLOR_SPEC = stringPreferencesKey("color_spec")
+        val MIUIX_MONET = booleanPreferencesKey("miuix_monet")
         val ENABLE_BLUR = booleanPreferencesKey("enable_blur")
         val ENABLE_FLOATING_BOTTOM_BAR = booleanPreferencesKey("enable_floating_bottom_bar")
         val ENABLE_FLOATING_BOTTOM_BAR_BLUR = booleanPreferencesKey("enable_floating_bottom_bar_blur")
@@ -31,7 +32,6 @@ class SettingsRepository(private val context: Context) {
         val ENABLE_PREDICTIVE_BACK = booleanPreferencesKey("enable_predictive_back")
         val ENABLE_SWIPE_DISMISS = booleanPreferencesKey("enable_swipe_dismiss")
         val PAGE_SCALE = floatPreferencesKey("page_scale")
-        val SERVER_URL = stringPreferencesKey("server_url")
     }
 
     val preferencesFlow: Flow<AppPreferences> = context.dataStore.data.map { p ->
@@ -39,11 +39,12 @@ class SettingsRepository(private val context: Context) {
         val colorMode = p[Keys.COLOR_MODE] ?: p[Keys.THEME_MODE] ?: 0
         AppPreferences(
             colorMode = colorMode,
-            uiMode = p[Keys.UI_MODE] ?: UI_MODE_MATERIAL,
+            uiMode = p[Keys.UI_MODE] ?: UI_MODE_MIUIX,
             language = p[Keys.LANGUAGE] ?: "system",
-            keyColor = p[Keys.KEY_COLOR] ?: 0,
+            keyColor = p[Keys.KEY_COLOR] ?: DEFAULT_KEY_COLOR,
             colorStyle = p[Keys.COLOR_STYLE] ?: "TonalSpot",
             colorSpec = p[Keys.COLOR_SPEC] ?: "SPEC_2025",
+            miuixMonet = p[Keys.MIUIX_MONET] ?: false,
             enableBlur = p[Keys.ENABLE_BLUR] ?: false,
             enableFloatingBottomBar = p[Keys.ENABLE_FLOATING_BOTTOM_BAR] ?: false,
             enableFloatingBottomBarBlur = p[Keys.ENABLE_FLOATING_BOTTOM_BAR_BLUR] ?: false,
@@ -51,7 +52,6 @@ class SettingsRepository(private val context: Context) {
             enablePredictiveBack = p[Keys.ENABLE_PREDICTIVE_BACK] ?: true,
             enableSwipeDismiss = p[Keys.ENABLE_SWIPE_DISMISS] ?: true,
             pageScale = p[Keys.PAGE_SCALE] ?: 1.0f,
-            serverUrl = p[Keys.SERVER_URL] ?: "http://127.0.0.1:8080",
         )
     }
 
@@ -78,6 +78,10 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setColorSpec(spec: String) {
         context.dataStore.edit { it[Keys.COLOR_SPEC] = spec }
+    }
+
+    suspend fun setMiuixMonet(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.MIUIX_MONET] = enabled }
     }
 
     suspend fun setEnableBlur(enabled: Boolean) {
@@ -108,12 +112,11 @@ class SettingsRepository(private val context: Context) {
         context.dataStore.edit { it[Keys.PAGE_SCALE] = scale }
     }
 
-    suspend fun setServerUrl(url: String) {
-        context.dataStore.edit { it[Keys.SERVER_URL] = url }
-    }
-
     companion object {
         const val UI_MODE_MATERIAL = "material"
         const val UI_MODE_MIUIX = "miuix"
+
+        // 默认 0 → 走壁纸 Monet 取色（对齐 KSU）；非 0 用固定种子色（如品牌 Teal #009688）
+        const val DEFAULT_KEY_COLOR = 0
     }
 }

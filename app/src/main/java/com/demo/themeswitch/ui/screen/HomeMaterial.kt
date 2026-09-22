@@ -14,23 +14,20 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.DevicesOther
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,35 +37,40 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.demo.themeswitch.BuildConfig
 import com.demo.themeswitch.R
-import com.demo.themeswitch.data.AppPreferences
+import com.demo.themeswitch.data.AppConfig
 import com.demo.themeswitch.data.BackendMonitor
-import com.demo.themeswitch.data.SettingsRepository
+import com.demo.themeswitch.data.ConfigRepository
 import com.demo.themeswitch.ui.component.material.SegmentedColumn
 import com.demo.themeswitch.ui.component.material.SegmentedListItem
+import com.demo.themeswitch.ui.navigation.LocalNavigator
+import com.demo.themeswitch.ui.navigation.Route
+
+/** 工作中状态色：M3 风格绿色（亮/深主题通用，保证在白色卡片上可读） */
+private val StatusOnlineColor = androidx.compose.ui.graphics.Color(0xFF2E7D32)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeMaterialScreen() {
+    val navigator = LocalNavigator.current
     val context = LocalContext.current
-    val repository = remember { SettingsRepository(context) }
-    val preferences by repository.preferencesFlow.collectAsState(initial = AppPreferences())
+    val configRepository = remember { ConfigRepository(context) }
+    val config by configRepository.configFlow.collectAsState(initial = AppConfig())
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     var online by remember { mutableStateOf(false) }
     var latencyMs by remember { mutableLongStateOf(0L) }
 
-    LaunchedEffect(preferences.serverUrl) {
-        val result = BackendMonitor.refresh(preferences.serverUrl)
+    LaunchedEffect(config.backendUrl) {
+        val result = BackendMonitor.refresh(config.backendUrl)
         online = result.online
         latencyMs = result.latencyMs
     }
@@ -97,7 +99,11 @@ fun HomeMaterialScreen() {
             verticalArrangement = Arrangement.spacedBy(13.dp),
         ) {
             Spacer(Modifier.height(4.dp))
-            StatusCard(online = online, latencyMs = latencyMs)
+            StatusCard(
+                online = online,
+                latencyMs = latencyMs,
+                onClick = { navigator.push(Route.ServerAddress) },
+            )
             InfoCard(
                 appVersion = "v" + BuildConfig.VERSION_NAME,
                 deviceModel = Build.MODEL,
@@ -110,20 +116,19 @@ fun HomeMaterialScreen() {
 }
 
 /**
- * KSU 同款状态卡片：
- * - 工作中：secondaryContainer 底（淡蓝）+ 最左 CheckCircle
- * - 未工作：errorContainer 底 + 最左 Warning（感叹号）
+ * M3 状态卡片：白色分组卡片（surfaceBright），与「应用版本」卡片同一视觉体系。
+ * - 工作中：绿色 CheckCircle
+ * - 未工作：红色 ErrorOutline
+ * 任意状态下整卡可点击，进入服务器地址二级页面；右侧箭头给出明确的跳转暗示。
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun StatusCard(online: Boolean, latencyMs: Long) {
-    val containerColor = if (online) {
-        MaterialTheme.colorScheme.secondaryContainer
-    } else {
-        MaterialTheme.colorScheme.errorContainer
-    }
-    val contentColor = MaterialTheme.colorScheme.contentColorFor(containerColor)
-    val statusIcon = if (online) Icons.Rounded.CheckCircle else Icons.Rounded.Warning
+private fun StatusCard(
+    online: Boolean,
+    latencyMs: Long,
+    onClick: () -> Unit,
+) {
+    val accentColor = if (online) StatusOnlineColor else MaterialTheme.colorScheme.error
+    val statusIcon = if (online) Icons.Rounded.CheckCircle else Icons.Rounded.ErrorOutline
     val statusTitle = stringResource(if (online) R.string.home_working else R.string.home_not_working)
     val statusSummary = if (online) {
         stringResource(R.string.home_latency_ms, latencyMs)
@@ -131,36 +136,35 @@ private fun StatusCard(online: Boolean, latencyMs: Long) {
         stringResource(R.string.home_not_working_hint)
     }
 
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = containerColor,
-        contentColor = contentColor,
-        shape = MaterialTheme.shapes.large,
-    ) {
-        ListItem(
-            leadingContent = {
-                Icon(statusIcon, contentDescription = statusTitle)
-            },
-            headlineContent = {
-                Text(statusTitle, style = MaterialTheme.typography.titleMedium)
-            },
-            supportingContent = {
-                Text(statusSummary, style = MaterialTheme.typography.bodyMedium)
-            },
-            colors = ListItemDefaults.colors(
-                containerColor = Color.Transparent,
-                contentColor = contentColor,
-                leadingContentColor = contentColor,
-                supportingContentColor = contentColor.copy(alpha = 0.7f),
-            ),
-        )
+    SegmentedColumn(modifier = Modifier.fillMaxWidth()) {
+        item {
+            SegmentedListItem(
+                onClick = onClick,
+                leadingContent = {
+                    Icon(statusIcon, contentDescription = statusTitle, tint = accentColor)
+                },
+                headlineContent = {
+                    Text(statusTitle, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                },
+                supportingContent = {
+                    Text(
+                        statusSummary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+            )
+        }
     }
 }
 
-/**
- * KSU 同款信息卡：SegmentedColumn 分段列表，行间圆角/分割感由 M3 Expressive 处理。
- * 调用方式对齐已验证可编译的 SettingsMaterial（显式传入 onClick）。
- */
 @Composable
 private fun InfoCard(
     appVersion: String,
@@ -191,7 +195,7 @@ private fun InfoEntry(
     value: String,
 ) {
     SegmentedListItem(
-        onClick = { /* 信息展示项，不可点击 */ },
+        onClick = { },
         leadingContent = {
             Icon(icon, contentDescription = label, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         },
