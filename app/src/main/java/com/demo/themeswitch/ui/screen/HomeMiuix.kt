@@ -115,7 +115,7 @@ fun HomeMiuixScreen() {
                     StatusCard(
                         online = online,
                         latencyMs = latencyMs,
-                        onClick = { navigator.navigate(Route.ServerAddress) },
+                        onClick = { navigator.push(Route.ServerAddress) },
                     )
                     InfoCard(
                         appVersion = "v" + BuildConfig.VERSION_NAME,
