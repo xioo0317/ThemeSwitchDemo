@@ -39,9 +39,9 @@ class SettingsRepository(private val context: Context) {
         val colorMode = p[Keys.COLOR_MODE] ?: p[Keys.THEME_MODE] ?: 0
         AppPreferences(
             colorMode = colorMode,
-            uiMode = p[Keys.UI_MODE] ?: UI_MODE_MATERIAL,
+            uiMode = p[Keys.UI_MODE] ?: UI_MODE_MIUIX,
             language = p[Keys.LANGUAGE] ?: "system",
-            keyColor = p[Keys.KEY_COLOR] ?: 0,
+            keyColor = p[Keys.KEY_COLOR] ?: DEFAULT_KEY_COLOR,
             colorStyle = p[Keys.COLOR_STYLE] ?: "TonalSpot",
             colorSpec = p[Keys.COLOR_SPEC] ?: "SPEC_2025",
             enableBlur = p[Keys.ENABLE_BLUR] ?: false,
@@ -115,5 +115,8 @@ class SettingsRepository(private val context: Context) {
     companion object {
         const val UI_MODE_MATERIAL = "material"
         const val UI_MODE_MIUIX = "miuix"
+
+        // KSU 品牌绿 Teal #009688，作为默认种子色（0 才走壁纸 Monet 取色）
+        const val DEFAULT_KEY_COLOR = 0xFF009688.toInt()
     }
 }
