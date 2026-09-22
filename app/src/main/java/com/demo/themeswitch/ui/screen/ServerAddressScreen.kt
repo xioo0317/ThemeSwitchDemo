@@ -38,8 +38,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.demo.themeswitch.R
-import com.demo.themeswitch.data.AppPreferences
-import com.demo.themeswitch.data.SettingsRepository
+import com.demo.themeswitch.data.AppConfig
+import com.demo.themeswitch.data.ConfigRepository
 import com.demo.themeswitch.ui.LocalUiMode
 import com.demo.themeswitch.ui.UiMode
 import com.demo.themeswitch.ui.component.material.SegmentedColumn
@@ -159,20 +159,25 @@ private fun ServerAddressMiuix() {
     }
 }
 
+/**
+ * 服务器地址编辑区。
+ * 输入内容写入 JSON 配置文件（files/config.json），供 C++ 后端启动时读取。
+ * 失焦或点击键盘 Done 时保存。
+ */
 @Composable
 private fun ServerAddressContent(useMiuix: Boolean) {
     val context = LocalContext.current
-    val repository = remember { SettingsRepository(context) }
-    val prefs by repository.preferencesFlow.collectAsState(initial = AppPreferences())
+    val configRepository = remember { ConfigRepository(context) }
+    val config by configRepository.configFlow.collectAsState(initial = AppConfig())
     val scope = rememberCoroutineScope()
 
-    var serverUrl by remember(prefs.serverUrl) { mutableStateOf(prefs.serverUrl) }
+    var backendUrl by remember(config.backendUrl) { mutableStateOf(config.backendUrl) }
 
     val save: () -> Unit = {
-        val trimmed = serverUrl.trim().trimEnd('/')
-        if (trimmed.isNotEmpty() && trimmed != prefs.serverUrl) {
-            serverUrl = trimmed
-            scope.launch { repository.setServerUrl(trimmed) }
+        val trimmed = backendUrl.trim().trimEnd('/')
+        if (trimmed.isNotEmpty() && trimmed != config.backendUrl) {
+            backendUrl = trimmed
+            scope.launch { configRepository.setBackendUrl(trimmed) }
         }
     }
 
@@ -186,8 +191,8 @@ private fun ServerAddressContent(useMiuix: Boolean) {
                 )
                 androidx.compose.foundation.layout.Spacer(Modifier.padding(top = 8.dp))
                 MiuixTextField(
-                    value = serverUrl,
-                    onValueChange = { serverUrl = it },
+                    value = backendUrl,
+                    onValueChange = { backendUrl = it },
                     modifier = Modifier
                         .fillMaxWidth()
                         .onFocusChanged { if (!it.isFocused) save() },
@@ -211,8 +216,8 @@ private fun ServerAddressContent(useMiuix: Boolean) {
                     },
                     headlineContent = {
                         OutlinedTextField(
-                            value = serverUrl,
-                            onValueChange = { serverUrl = it },
+                            value = backendUrl,
+                            onValueChange = { backendUrl = it },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .onFocusChanged { if (!it.isFocused) save() },
