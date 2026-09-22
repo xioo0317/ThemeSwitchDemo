@@ -14,20 +14,24 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.DevicesOther
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Widgets
+import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +42,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -53,9 +58,6 @@ import com.demo.themeswitch.ui.component.material.SegmentedColumn
 import com.demo.themeswitch.ui.component.material.SegmentedListItem
 import com.demo.themeswitch.ui.navigation.LocalNavigator
 import com.demo.themeswitch.ui.navigation.Route
-
-/** 工作中状态色：M3 风格绿色（亮/深主题通用，保证在白色卡片上可读） */
-private val StatusOnlineColor = androidx.compose.ui.graphics.Color(0xFF2E7D32)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -116,10 +118,10 @@ fun HomeMaterialScreen() {
 }
 
 /**
- * M3 状态卡片：白色分组卡片（surfaceBright），与「应用版本」卡片同一视觉体系。
- * - 工作中：绿色 CheckCircle
- * - 未工作：红色 ErrorOutline
- * 任意状态下整卡可点击，进入服务器地址二级页面；右侧箭头给出明确的跳转暗示。
+ * 状态卡片：KSU 同款风格。
+ * - 工作中：secondaryContainer 彩色大卡片 + ListItem
+ * - 未工作：普通白色 surface 卡片 + 图标（非红色）
+ * 整卡可点击，进入服务器地址二级页面。
  */
 @Composable
 private fun StatusCard(
@@ -127,7 +129,6 @@ private fun StatusCard(
     latencyMs: Long,
     onClick: () -> Unit,
 ) {
-    val accentColor = if (online) StatusOnlineColor else MaterialTheme.colorScheme.error
     val statusIcon = if (online) Icons.Rounded.CheckCircle else Icons.Rounded.ErrorOutline
     val statusTitle = stringResource(if (online) R.string.home_working else R.string.home_not_working)
     val statusSummary = if (online) {
@@ -136,31 +137,73 @@ private fun StatusCard(
         stringResource(R.string.home_not_working_hint)
     }
 
-    SegmentedColumn(modifier = Modifier.fillMaxWidth()) {
-        item {
-            SegmentedListItem(
-                onClick = onClick,
+    if (online) {
+        val containerColor = MaterialTheme.colorScheme.secondaryContainer
+        val contentColor = MaterialTheme.colorScheme.contentColorFor(containerColor)
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = containerColor,
+            contentColor = contentColor,
+            shape = MaterialTheme.shapes.large,
+            onClick = onClick,
+        ) {
+            ListItem(
                 leadingContent = {
-                    Icon(statusIcon, contentDescription = statusTitle, tint = accentColor)
+                    Icon(statusIcon, contentDescription = statusTitle)
                 },
-                headlineContent = {
-                    Text(statusTitle, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                },
+                overlineContent = null,
                 supportingContent = {
                     Text(
-                        statusSummary,
+                        text = statusSummary,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                colors = ListItemDefaults.colors(
+                    containerColor = Color.Transparent,
+                    contentColor = contentColor,
+                    leadingContentColor = contentColor,
+                    trailingContentColor = contentColor,
+                    supportingContentColor = contentColor.copy(alpha = 0.7f),
+                ),
+                elevation = ListItemDefaults.elevation(),
+                content = {
+                    Text(
+                        text = statusTitle,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
                     )
                 },
             )
+        }
+    } else {
+        SegmentedColumn(modifier = Modifier.fillMaxWidth()) {
+            item {
+                SegmentedListItem(
+                    onClick = onClick,
+                    leadingContent = {
+                        Icon(
+                            statusIcon,
+                            contentDescription = statusTitle,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    headlineContent = {
+                        Text(
+                            statusTitle,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    },
+                    supportingContent = {
+                        Text(
+                            statusSummary,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                )
+            }
         }
     }
 }

@@ -25,8 +25,8 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon as MaterialIcon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ShortNavigationBar as MaterialShortNavigationBar
-import androidx.compose.material3.ShortNavigationBarItem as MaterialShortNavigationBarItem
+import androidx.compose.material3.NavigationBar as MaterialNavigationBar
+import androidx.compose.material3.NavigationBarItem as MaterialNavigationBarItem
 import androidx.compose.material3.Text as MaterialText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -100,7 +100,9 @@ fun MainScreen() {
 
     val blurBackdrop = rememberBlurBackdrop(enableBlur = LocalEnableBlur.current)
     val lensBackdrop = rememberLayerBackdrop { drawContent() }
-    val useLensLayer = enableFloating && enableFloatingBlur
+    // M3 不使用悬浮底栏；只有 Miuix 模式 + 开启悬浮时才用
+    val useFloating = !isMaterial && enableFloating
+    val useLensLayer = useFloating && enableFloatingBlur
 
     CompositionLocalProvider(LocalMainPagerState provides mainPagerState) {
         Scaffold(
@@ -109,7 +111,7 @@ fun MainScreen() {
             bottomBar = {
                 MainBottomBar(
                     isMaterial = isMaterial,
-                    enableFloating = enableFloating,
+                    enableFloating = useFloating,
                     lensBackdrop = lensBackdrop,
                     blurBackdrop = blurBackdrop,
                 )
@@ -217,13 +219,13 @@ private fun MainBottomBar(
                 }
             }
         } else if (isMaterial) {
-            MaterialShortNavigationBar(
+            MaterialNavigationBar(
                 modifier = Modifier.align(Alignment.BottomCenter),
                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
             ) {
                 TABS.forEachIndexed { index, tab ->
                     val selected = state.selectedPage == index
-                    MaterialShortNavigationBarItem(
+                    MaterialNavigationBarItem(
                         selected = selected,
                         onClick = { if (!selected) state.animateToPage(index) },
                         icon = {
@@ -237,8 +239,7 @@ private fun MainBottomBar(
                 }
             }
         } else {
-            // 修复：模糊开启时底栏透明透出 BlurredBar 的模糊效果；
-            //       模糊关闭时底栏使用 surface 色，避免完全透明。
+            // Miuix 普通底栏：模糊开启时透明透出 BlurredBar 模糊效果；模糊关闭时用 surface 色
             val enableBlur = LocalEnableBlur.current && blurBackdrop != null
             BlurredBar(backdrop = blurBackdrop, modifier = Modifier.align(Alignment.BottomCenter)) {
                 NavigationBar(color = if (enableBlur) Color.Transparent else MiuixTheme.colorScheme.surface) {
