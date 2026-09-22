@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -51,7 +52,7 @@ import com.demo.themeswitch.ui.theme.LocalEnableBlur
 import com.demo.themeswitch.util.BlurredBar
 import com.demo.themeswitch.util.rememberBlurBackdrop
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
@@ -122,7 +123,7 @@ private fun ServerAddressMiuix() {
                     title = stringResource(R.string.api_server_address),
                     navigationIcon = {
                         IconButton(onClick = { navigator.pop() }) {
-                            Icon(
+                            MiuixIcon(
                                 imageVector = MiuixIcons.Back,
                                 contentDescription = null,
                                 tint = MiuixTheme.colorScheme.onBackground,
