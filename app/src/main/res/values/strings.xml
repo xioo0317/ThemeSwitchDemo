@@ -61,7 +61,7 @@
     <string name="dialog_confirm">Confirm</string>
     <string name="about_desc">A demo app showcasing dual theme architecture with Material and Miuix switching, plus multi-language support.</string>
     <string name="about_arch_title">Architecture</string>
-    <string name="about_arch_desc">This app uses UiMode enum with CompositionLocal to switch between Material 3 (card-based) and MIUI style UIs at runtime. Inspired by KernelSU\'s dual theme architecture.</string>
+    <string name="about_arch_desc">This app uses UiMode enum with CompositionLocal to switch between Material 3 (card-based) and MIUI style UIs at runtime. Inspired by KernelSU's dual theme architecture.</string>
     <string name="home_working">Working</string>
     <string name="home_working_version">Version %1$s</string>
     <string name="about_github">GitHub Repository</string>
@@ -69,9 +69,9 @@
     <string name="nav_api">Features</string>
     <string name="api_server_address">Server address</string>
 
-    <!-- 日志文件页占位（响应流已移除） -->
-    <string name="log_coming_soon">Logs coming soon</string>
-    <string name="log_coming_soon_hint">Response stream removed; logs will be loaded from the log file later.</string>
+    <!-- 日志文件页 -->
+    <string name="log_empty">No logs yet</string>
+    <string name="log_empty_hint">Logs will appear here once the service is running.</string>
 
     <!-- KSU: home connectivity probe + new toggles -->
     <string name="home_not_working">Not working</string>
