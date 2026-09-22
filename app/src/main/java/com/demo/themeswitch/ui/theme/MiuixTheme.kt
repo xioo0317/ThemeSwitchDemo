@@ -20,7 +20,7 @@ import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
 @Composable
 fun MiuixAppTheme(
     isDark: Boolean,
-    isMonet: Boolean = true,
+    miuixMonet: Boolean = false,
     keyColor: Int = 0,
     paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     colorSpec: ColorSpec.SpecVersion = ColorSpec.SpecVersion.SPEC_2025,
@@ -39,9 +39,11 @@ fun MiuixAppTheme(
         ThemeColorSpec.Spec2021
     }
 
+    // miuixMonet 是总开关：关闭时不管 keyColor 是什么都不用动态配色
     val resolvedKeyColor: Color? = when {
+        !miuixMonet -> null
         keyColor != 0 -> Color(keyColor)
-        isMonet && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
             if (isDark) dynamicDarkColorScheme(context).primary
             else dynamicLightColorScheme(context).primary
         else -> null
