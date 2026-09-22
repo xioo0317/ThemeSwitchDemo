@@ -10,11 +10,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.ErrorOutline
@@ -24,8 +21,8 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.material3.Scaffold as MaterialScaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar as MaterialTopAppBar
 import androidx.compose.material3.TopAppBarDefaults as MaterialTopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -39,13 +36,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.demo.themeswitch.R
@@ -72,7 +67,6 @@ private val API_ACTIONS = listOf("list_items", "create_item", "update_item", "de
 class ApiExecutor {
     enum class Status { IDLE, RUNNING, DONE, ERROR }
 
-    /** 已收到的 SSE 帧载荷（已去 "data: " 前缀，含 [DONE]） */
     val frames = mutableStateListOf<String>()
 
     var status by mutableStateOf(Status.IDLE)
@@ -103,7 +97,6 @@ class ApiExecutor {
     }
 }
 
-/** 执行页（Material 风格） */
 @Composable
 fun ApiMaterialScreen() {
     val scrollBehavior = MaterialTopAppBarDefaults.pinnedScrollBehavior()
@@ -130,7 +123,6 @@ fun ApiMaterialScreen() {
     }
 }
 
-/** 执行页（MIUI 风格） */
 @Composable
 fun ApiMiuixScreen() {
     val scrollBehavior = MiuixScrollBehavior()
@@ -178,23 +170,14 @@ private fun ApiContent(
     val scope = rememberCoroutineScope()
     val executor = remember { ApiExecutor() }
 
-    var serverUrl by remember(prefs.serverUrl) { mutableStateOf(prefs.serverUrl) }
     var selectedAction by remember { mutableStateOf(API_ACTIONS.first()) }
     var customBody by remember { mutableStateOf("") }
 
     val invalidUrlMsg = stringResource(R.string.api_invalid_url)
     val running = executor.status == ApiExecutor.Status.RUNNING
 
-    val saveServerUrl: () -> Unit = {
-        val trimmed = serverUrl.trim().trimEnd('/')
-        if (trimmed.isNotEmpty() && trimmed != prefs.serverUrl) {
-            serverUrl = trimmed
-            scope.launch { repository.setServerUrl(trimmed) }
-        }
-    }
-
     val onRun: () -> Unit = {
-        val url = serverUrl.trim().trimEnd('/')
+        val url = prefs.serverUrl.trim().trimEnd('/')
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
             executor.failLocal(invalidUrlMsg)
         } else {
@@ -222,36 +205,9 @@ private fun ApiContent(
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        // ── 服务器地址 ─────────────────────────────────────────────────────────────────────────────────────────────────
-        item {
-            SectionCard(title = stringResource(R.string.api_server_address), useMiuix = useMiuixInput) {
-                if (useMiuixInput) {
-                    MiuixTextField(
-                        value = serverUrl,
-                        onValueChange = { serverUrl = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusChanged { if (!it.isFocused) saveServerUrl() },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(onDone = { saveServerUrl() }),
-                    )
-                } else {
-                    OutlinedTextField(
-                        value = serverUrl,
-                        onValueChange = { serverUrl = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusChanged { if (!it.isFocused) saveServerUrl() },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(onDone = { saveServerUrl() }),
-                    )
-                }
-            }
-        }
+        // 服务器地址已移至首页工作卡片点击进入的二级页面
 
-        // ── 执行 ──────────────────────────────────────────────────────────────────────────────────────────────────────
+        // ── 执行 ──
         item {
             SectionCard(title = stringResource(R.string.api_action_hint), useMiuix = useMiuixInput) {
                 FlowRow(
@@ -309,7 +265,7 @@ private fun ApiContent(
             }
         }
 
-        // ── 响应流 ───────────────────────────────────────────────────────────────────────────────────────────────────
+        // ── 响应流 ──
         item {
             SectionCard(title = stringResource(R.string.api_response), useMiuix = useMiuixInput) {
                 StatusLine(executor = executor)
