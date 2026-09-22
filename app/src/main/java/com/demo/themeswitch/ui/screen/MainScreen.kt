@@ -157,7 +157,7 @@ fun MainScreen() {
 private fun MainPage(page: Int, navigator: Navigator) {
     when (page) {
         0 -> if (LocalUiMode.current == UiMode.Material) HomeMaterialScreen() else HomeMiuixScreen()
-        1 -> if (LocalUiMode.current == UiMode.Material) ApiMaterialScreen() else ApiMiuixScreen()
+        1 -> if (LocalUiMode.current == UiMode.Material) LogMaterialScreen() else LogMiuixScreen()
         2 -> if (LocalUiMode.current == UiMode.Material) {
             SettingsMaterialScreen(
                 onOpenAppearance = { navigator.push(Route.Appearance) },
