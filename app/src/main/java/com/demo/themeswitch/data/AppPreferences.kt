@@ -10,6 +10,8 @@ data class AppPreferences(
     val keyColor: Int = 0,
     val colorStyle: String = "TonalSpot",
     val colorSpec: String = "SPEC_2025",
+    // Miuix 是否启用 Monet 动态取色（独立于 keyColor）
+    val miuixMonet: Boolean = false,
     val enableBlur: Boolean = false,
     val enableFloatingBottomBar: Boolean = false,
     val enableFloatingBottomBarBlur: Boolean = false,
