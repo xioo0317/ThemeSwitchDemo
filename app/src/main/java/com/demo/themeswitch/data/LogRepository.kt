@@ -9,12 +9,12 @@ import java.io.File
  * 日志读取仓库（前端只读）。
  *
  * 日志由后端直接写入应用私有目录：
- *   /data/user/0/com.demo.themeswitch/files/log.txt
- * 即 context.filesDir/log.txt。App 只保证文件存在并负责读取展示，不写入任何日志内容，
+ *   /data/user/0/com.demo.themeswitch/files/api.log
+ * 即 context.filesDir/api.log。App 只保证文件存在并负责读取展示，不写入任何日志内容，
  * 也不清空；后端只需向该路径逐行追加（每行一条，以 \n 结尾）。
  */
 object LogRepository {
-    private const val LOG_FILE_NAME = "log.txt"
+    private const val LOG_FILE_NAME = "api.log"
 
     /** 日志文件（后端写入目标） */
     fun getLogFile(context: Context): File = File(context.filesDir, LOG_FILE_NAME)
