@@ -19,7 +19,7 @@ import androidx.compose.material.icons.filled.DevicesOther
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
@@ -109,13 +109,11 @@ fun HomeMaterialScreen() {
 }
 
 /**
- * KSU 同款状态卡片（HomeMaterial.kt#StatusCard）：
- * 无论"工作中"还是"未工作"，容器色都不写死，全部取自当前 colorScheme——
- * 而 Material 模式的 colorScheme 由系统壁纸 Monet primary（或自定义种子色）经
- * materialkolor 同一路径派生（见 MaterialAppTheme），因此卡片配色随壁纸/种子联动。
- *
+ * M3 状态卡片：
  * - 工作中：secondaryContainer 底 + CheckCircle
- * - 未工作：errorContainer 底（同为 HCT/Monet 派生，非固定死红）+ Warning
+ * - 未工作：tertiaryContainer 底 + ErrorOutline（感叹号图标，与 MIUI 风格对齐）
+ *   使用 tertiaryContainer 而不是 errorContainer，避免与 secondaryContainer 同为 Monet
+ *   红色系造成视觉上"像一个颜色"的问题，同时保持信息性而非错误语义。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -123,10 +121,10 @@ private fun StatusCard(online: Boolean, latencyMs: Long) {
     val containerColor = if (online) {
         MaterialTheme.colorScheme.secondaryContainer
     } else {
-        MaterialTheme.colorScheme.errorContainer
+        MaterialTheme.colorScheme.tertiaryContainer
     }
     val contentColor = MaterialTheme.colorScheme.contentColorFor(containerColor)
-    val statusIcon = if (online) Icons.Rounded.CheckCircle else Icons.Rounded.Warning
+    val statusIcon = if (online) Icons.Rounded.CheckCircle else Icons.Rounded.ErrorOutline
     val statusTitle = stringResource(if (online) R.string.home_working else R.string.home_not_working)
     val statusSummary = if (online) {
         stringResource(R.string.home_latency_ms, latencyMs)
@@ -154,8 +152,6 @@ private fun StatusCard(online: Boolean, latencyMs: Long) {
                     color = contentColor.copy(alpha = 0.7f),
                 )
             },
-            // material3 1.5.0-alpha28 的 ListItemDefaults.colors 新签名：
-            // contentColor/leadingContentColor/supportingContentColor（无 headlineColor/supportingColor）
             colors = ListItemDefaults.colors(
                 containerColor = Color.Transparent,
                 contentColor = contentColor,
@@ -168,7 +164,6 @@ private fun StatusCard(online: Boolean, latencyMs: Long) {
 
 /**
  * KSU 同款信息卡：SegmentedColumn 分段列表，行间圆角/分割感由 M3 Expressive 处理。
- * 调用方式对齐已验证可编译的 SettingsMaterial（显式传入 onClick）。
  */
 @Composable
 private fun InfoCard(
