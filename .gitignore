@@ -8,3 +8,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+# build & local tooling
+/app/build
+/buildlogs
+/.kotlin
+*.salive

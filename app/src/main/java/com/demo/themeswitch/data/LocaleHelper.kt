@@ -15,7 +15,9 @@ object LocaleHelper {
     )
 
     val supportedLanguages = listOf(
-        Language("system", "System default", "System default"),
+        // system 项的展示名在 UI 层映射为 R.string.lang_system（"跟随系统"/"Follow System"…），
+        // 这里保留空占位，避免硬编码英文 "System default" 破坏多语言。
+        Language("system", "", ""),
         Language("en", "English", "English"),
         Language("zh-CN", "简体中文", "Chinese (Simplified)"),
         Language("zh-TW", "繁體中文", "Chinese (Traditional)"),

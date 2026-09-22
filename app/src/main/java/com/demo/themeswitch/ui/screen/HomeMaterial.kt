@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.DevicesOther
@@ -110,9 +110,13 @@ fun HomeMaterialScreen() {
 }
 
 /**
- * KSU 同款状态卡片：
- * - 工作中：secondaryContainer 底（淡蓝）+ 最左 CheckCircle
- * - 未工作：errorContainer 底 + 最左 Warning（感叹号）
+ * KSU 同款状态卡片（HomeMaterial.kt#StatusCard）：
+ * 无论"工作中"还是"未工作"，容器色都不写死，全部取自当前 colorScheme——
+ * 而 Material 模式的 colorScheme 由系统壁纸 Monet primary（或自定义种子色）经
+ * materialkolor 同一路径派生（见 MaterialAppTheme），因此卡片配色随壁纸/种子联动。
+ *
+ * - 工作中：secondaryContainer 底 + CheckCircle
+ * - 未工作：errorContainer 底（同为 HCT/Monet 派生，非固定死红）+ Warning
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -142,16 +146,21 @@ private fun StatusCard(online: Boolean, latencyMs: Long) {
                 Icon(statusIcon, contentDescription = statusTitle)
             },
             headlineContent = {
-                Text(statusTitle, style = MaterialTheme.typography.titleMedium)
+                Text(statusTitle, style = MaterialTheme.typography.titleMediumEmphasized)
             },
             supportingContent = {
-                Text(statusSummary, style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    statusSummary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = contentColor.copy(alpha = 0.7f),
+                )
             },
             colors = ListItemDefaults.colors(
                 containerColor = Color.Transparent,
                 contentColor = contentColor,
                 leadingContentColor = contentColor,
-                supportingContentColor = contentColor.copy(alpha = 0.7f),
+                headlineColor = contentColor,
+                supportingColor = contentColor.copy(alpha = 0.7f),
             ),
         )
     }

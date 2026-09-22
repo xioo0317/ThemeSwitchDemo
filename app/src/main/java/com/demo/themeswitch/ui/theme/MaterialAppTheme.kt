@@ -2,7 +2,8 @@ package com.demo.themeswitch.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
@@ -32,7 +33,7 @@ private fun amoled(
 @Composable
 fun MaterialAppTheme(
     isDark: Boolean = isSystemInDarkTheme(),
-    isMonet: Boolean = true,
+    @Suppress("unused") isMonet: Boolean = true,
     keyColor: Int = 0,
     paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     colorSpec: ColorSpec.SpecVersion = ColorSpec.SpecVersion.SPEC_2025,
@@ -67,5 +68,13 @@ fun MaterialAppTheme(
         }
     }
 
-    MaterialTheme(colorScheme = colorScheme, content = content)
+    // M3 Expressive（对齐 KernelSU MaterialKernelSUTheme）：
+    // expressive 动效方案 + 配色切换时逐颜色 spring 过渡。
+    val animatedColorScheme = colorScheme.animateAsState()
+
+    MaterialExpressiveTheme(
+        colorScheme = animatedColorScheme,
+        motionScheme = MotionScheme.expressive(),
+        content = content,
+    )
 }
