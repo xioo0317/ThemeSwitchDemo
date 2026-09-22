@@ -13,7 +13,7 @@ import java.io.File
  * 即 context.filesDir/log.txt。App 端只负责读取并展示，不做任何写入或清空，
  * 文件不存在时日志页展示空状态。后端只需向该路径逐行追加内容（每行一条，以 \n 结尾）。
  */
-oject LogRepository {
+object LogRepository {
     private const val LOG_FILE_NAME = "log.txt"
 
     /** 日志文件（后端写入目标，App 只读），文件可能尚不存在 */
