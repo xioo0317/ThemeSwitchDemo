@@ -3,8 +3,8 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- 白色胶囊条：两端全圆角，整体控制在自适应图标安全区（中心约 66dp）内，圆形/圆角遮罩均不裁切 -->
+    <!-- 白色胶囊条：两端全圆角，缩短至宽 56；控制在自适应图标安全区内，圆形/圆角遮罩均不裁切 -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M29,47 H79 A7,7 0 0 1 86,54 A7,7 0 0 1 79,61 H29 A7,7 0 0 1 22,54 A7,7 0 0 1 29,47 Z" />
+        android:pathData="M33,47 H75 A7,7 0 0 1 82,54 A7,7 0 0 1 75,61 H33 A7,7 0 0 1 26,54 A7,7 0 0 1 33,47 Z" />
 </vector>
