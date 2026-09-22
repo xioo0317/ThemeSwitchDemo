@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.demo.themeswitch.BuildConfig
 import com.demo.themeswitch.R
@@ -143,7 +144,7 @@ private fun StatusCard(online: Boolean, latencyMs: Long) {
                 Icon(statusIcon, contentDescription = statusTitle)
             },
             headlineContent = {
-                Text(statusTitle, style = MaterialTheme.typography.titleMediumEmphasized)
+                Text(statusTitle, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             },
             supportingContent = {
                 Text(
@@ -162,9 +163,6 @@ private fun StatusCard(online: Boolean, latencyMs: Long) {
     }
 }
 
-/**
- * KSU 同款信息卡：SegmentedColumn 分段列表，行间圆角/分割感由 M3 Expressive 处理。
- */
 @Composable
 private fun InfoCard(
     appVersion: String,
