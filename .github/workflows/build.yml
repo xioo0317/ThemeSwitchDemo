@@ -1,7 +1,10 @@
 name: Android CI
 
 on:
-
+  push:
+    branches: [ "main", "port-ksu-ui" ]
+  pull_request:
+    branches: [ "main", "port-ksu-ui" ]
   workflow_dispatch:
 
 jobs:
